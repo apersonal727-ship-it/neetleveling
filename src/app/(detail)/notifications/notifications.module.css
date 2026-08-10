@@ -1,0 +1,110 @@
+.secLabel {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--slate);
+  text-transform: uppercase;
+  margin: 0 0 var(--sp-3);
+  display: block;
+}
+.secLabel:not(:first-child) {
+  margin-top: var(--sp-6);
+}
+
+.nList {
+  display: flex;
+  flex-direction: column;
+}
+.nItem {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  cursor: pointer;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+.nItem:last-child {
+  border-bottom: none;
+}
+.nItemUnread {
+  background: rgba(79, 157, 255, 0.04);
+}
+.nIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nIcon svg {
+  width: 17px;
+  height: 17px;
+}
+.nIconQuest,
+.nIconSystem {
+  background: rgba(79, 157, 255, 0.12);
+  border: 1px solid var(--border-strong);
+  color: var(--blue-2);
+}
+.nIconStreak {
+  background: rgba(255, 184, 79, 0.12);
+  border: 1px solid rgba(255, 184, 79, 0.4);
+  color: var(--amber);
+}
+.nIconPenalty {
+  background: rgba(255, 77, 94, 0.12);
+  border: 1px solid rgba(255, 77, 94, 0.4);
+  color: var(--red);
+}
+.nIconWallet {
+  background: rgba(61, 220, 132, 0.12);
+  border: 1px solid rgba(61, 220, 132, 0.4);
+  color: var(--green);
+}
+.nBody {
+  flex: 1;
+  min-width: 0;
+}
+.nTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.nMsg {
+  font-size: 12.5px;
+  color: var(--slate);
+  margin-top: 3px;
+  line-height: 1.5;
+}
+.nTime {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  color: #4a5476;
+  margin-top: 6px;
+}
+.nDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blue-2);
+  box-shadow: 0 0 6px var(--blue-2);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--sp-7) var(--sp-5);
+  color: var(--slate);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+}

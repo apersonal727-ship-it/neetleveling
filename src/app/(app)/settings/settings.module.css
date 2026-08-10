@@ -1,0 +1,130 @@
+.fieldCard {
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.fieldLabel {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.fieldRow {
+  display: flex;
+  gap: var(--sp-2);
+}
+.fieldInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 14px;
+  color: var(--ice);
+}
+.fieldBtn {
+  padding: 0 18px;
+  border-radius: 10px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  background: linear-gradient(135deg, var(--blue), #2f6fe0);
+  color: #04070f;
+  border: none;
+  cursor: pointer;
+}
+.fieldBtn:disabled {
+  opacity: 0.6;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+}
+.toggleRow:last-child {
+  border-bottom: none;
+}
+.toggleLabel {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.toggleSub {
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 2px;
+}
+.switch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-strong);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.switchOn {
+  background: rgba(79, 157, 255, 0.5);
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.18s ease;
+}
+.switchOn::after {
+  transform: translateX(18px);
+  background: var(--blue-2);
+  box-shadow: 0 0 6px rgba(143, 214, 255, 0.8);
+}
+
+.rowLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+}
+.rowLink:last-child {
+  border-bottom: none;
+}
+.rlTitle {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.rlSub {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 3px;
+}
+.rlArrow {
+  color: #4a5476;
+}
+.rlArrow svg {
+  width: 16px;
+  height: 16px;
+}
+.rlDanger .rlTitle {
+  color: var(--red);
+}
+.planBadge {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--green);
+  background: rgba(61, 220, 132, 0.1);
+  border: 1px solid rgba(61, 220, 132, 0.35);
+  border-radius: 6px;
+  padding: 3px 8px;
+}

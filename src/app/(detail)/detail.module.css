@@ -1,0 +1,108 @@
+.app {
+  --gutter: 20px;
+  --app-max: 480px;
+  max-width: var(--app-max);
+  margin-inline: auto;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--gutter);
+}
+
+.header {
+  padding: var(--sp-4) 0;
+  padding-top: max(var(--sp-4), env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.backBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  flex-shrink: 0;
+}
+.backBtn svg {
+  width: 16px;
+  height: 16px;
+}
+.header h1 {
+  font-size: 18px;
+  flex: 1;
+}
+.headerAction {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--blue-2);
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.main {
+  flex: 1;
+  padding: var(--sp-4) 0 var(--sp-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.secLabel {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--blue);
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+  display: block;
+}
+
+.rowLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+}
+.rowLink:last-child {
+  border-bottom: none;
+}
+.rlTitle {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.rlSub {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 3px;
+}
+.rlArrow {
+  color: #4a5476;
+}
+.rlArrow svg {
+  width: 16px;
+  height: 16px;
+}
+.rlDanger .rlTitle {
+  color: var(--red);
+}
+.planBadge {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--green);
+  background: rgba(61, 220, 132, 0.1);
+  border: 1px solid rgba(61, 220, 132, 0.35);
+  border-radius: 6px;
+  padding: 3px 8px;
+}

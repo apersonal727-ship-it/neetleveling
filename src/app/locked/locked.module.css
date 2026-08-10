@@ -1,0 +1,307 @@
+.bgGrid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 77, 94, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 77, 94, 0.035) 1px, transparent 1px);
+  background-size: 38px 38px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 55% at 50% 30%,
+    black 10%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(ellipse 70% 55% at 50% 30%, black 10%, transparent 70%);
+}
+
+.app {
+  --gutter: 20px;
+  --app-max: 480px;
+  max-width: var(--app-max);
+  margin-inline: auto;
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: none;
+}
+
+.header {
+  padding: var(--sp-4) var(--gutter);
+  padding-top: max(var(--sp-4), env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lockPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--red-2);
+  text-transform: uppercase;
+  border: 1px solid var(--red-border);
+  padding: 7px 14px;
+  border-radius: 100px;
+  background: rgba(255, 77, 94, 0.08);
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: pulse 1.4s infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.main {
+  flex: 1;
+  padding: var(--sp-5) var(--gutter) var(--sp-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+.lockBadgeWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--sp-3);
+  padding-top: var(--sp-4);
+}
+.lockRings {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lockRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--red-border);
+  opacity: 0;
+  animation: ringOut 2s ease-out infinite;
+}
+.lockRing:nth-child(2) {
+  animation-delay: 0.65s;
+}
+.lockRing:nth-child(3) {
+  animation-delay: 1.3s;
+}
+@keyframes ringOut {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+.lockBadge {
+  position: relative;
+  z-index: 2;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(255, 77, 94, 0.16), rgba(255, 77, 94, 0.04));
+  border: 1.5px solid var(--red-2);
+  box-shadow:
+    0 0 36px -6px var(--red),
+    inset 0 0 20px rgba(255, 77, 94, 0.12);
+}
+.lockBadge svg {
+  width: 30px;
+  height: 30px;
+  color: var(--red-2);
+}
+.lockTitle {
+  font-size: 22px;
+  margin-top: var(--sp-2);
+}
+.lockReason {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+  color: var(--slate);
+  max-width: 32ch;
+  line-height: 1.6;
+}
+
+.streakLost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 13px;
+  background: rgba(255, 77, 94, 0.06);
+  border: 1px solid var(--red-border);
+  border-radius: 10px;
+  padding: var(--sp-3) var(--sp-4);
+}
+.streakLostFrom {
+  color: var(--slate);
+  text-decoration: line-through;
+}
+.streakLostTo {
+  color: var(--red-2);
+  font-weight: 600;
+}
+.streakLost svg {
+  width: 14px;
+  height: 14px;
+  color: var(--slate);
+}
+
+.secLabel {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--red-2);
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+  display: block;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.pqCard {
+  padding: var(--sp-5);
+  border-color: var(--red-border);
+  background: linear-gradient(180deg, rgba(255, 77, 94, 0.05), var(--panel));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.pqTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pqTag {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--red-2);
+  background: rgba(255, 77, 94, 0.12);
+  border: 1px solid var(--red-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.pqDur {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+}
+.pqTitle {
+  font-size: 18px;
+  font-weight: 600;
+}
+.pqNote {
+  font-size: 12.5px;
+  color: var(--slate);
+  line-height: 1.55;
+}
+
+.btn {
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  font-size: 15.5px;
+  letter-spacing: 0.03em;
+  border: none;
+  cursor: pointer;
+}
+.btnUnlock {
+  background: linear-gradient(180deg, rgba(255, 77, 94, 0.22), rgba(255, 77, 94, 0.12));
+  border: 1px solid var(--red-border);
+  color: #ffe4e6;
+  box-shadow:
+    0 0 0 1px rgba(255, 138, 148, 0.1) inset,
+    0 0 30px -10px rgba(255, 77, 94, 0.55);
+}
+.btn svg {
+  width: 15px;
+  height: 15px;
+  opacity: 0.85;
+}
+
+.infoLine {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  color: var(--slate);
+  line-height: 1.6;
+  padding: 0 var(--sp-2);
+}
+.infoLine svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--slate);
+}
+
+.footer {
+  padding: var(--sp-4) var(--gutter);
+  padding-bottom: calc(var(--sp-4) + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.lockedTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: #3d4665;
+  position: relative;
+  min-height: 44px;
+  justify-content: center;
+  padding: 0 6px;
+  flex: 1;
+}
+.lockedTab svg {
+  width: 19px;
+  height: 19px;
+}
+.lockedTab span {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.03em;
+}
+.miniLock {
+  position: absolute;
+  top: -2px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  color: var(--red);
+}

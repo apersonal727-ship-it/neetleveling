@@ -1,0 +1,249 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Hunter profile ──────────────────────────────────────────────
+
+model Profile {
+  id             String   @id @default(cuid())
+  authUserId     String   @unique
+  hunterId       String   @unique
+  email          String   @unique
+  name           String
+  isAdmin        Boolean  @default(false)
+  xp             Int      @default(0)
+  auraColor      String   @default("blue")
+  hunterClass    String   @default("Scholar")
+  equippedTitle  String?
+  streak         Int      @default(0)
+  bestStreak     Int      @default(0)
+  lastStreakDate DateTime?
+  locked         Boolean  @default(false)
+  walletCredit   Int      @default(0)
+  referralCode   String   @unique
+  referredByCode String?
+  createdAt      DateTime @default(now())
+
+  subscriptionStatus   SubscriptionStatus @default(PENDING)
+  subscriptionRenewsAt DateTime?
+  razorpaySubscriptionId String?
+
+  deletionScheduledFor DateTime?
+
+  questReminders Boolean @default(true)
+  streakWarnings Boolean @default(true)
+  penaltyAlerts  Boolean @default(true)
+
+  createdQuests       Quest[]              @relation("QuestCreatedBy")
+  assignedQuests      Quest[]              @relation("QuestAssignedTo")
+  questCompletions    QuestCompletion[]
+  questSessions       QuestSession[]
+  lockoutEvents       LockoutEvent[]
+  walletTransactions  WalletTransaction[]
+  paymentTransactions PaymentTransaction[]
+  notifications       Notification[]
+
+  @@index([referredByCode])
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELED
+}
+
+// ── Quests ───────────────────────────────────────────────────────
+
+enum QuestSubject {
+  PHYSICS
+  CHEMISTRY
+  BIOLOGY
+  DISCIPLINE
+  SECRET
+}
+
+enum QuestAssignScope {
+  ALL
+  RANK
+  SPECIFIC_HUNTER
+}
+
+model Quest {
+  id              String           @id @default(cuid())
+  title           String
+  subject         QuestSubject
+  durationMinutes Int
+  xpOverride      Int?
+  assignScope     QuestAssignScope @default(ALL)
+  assignRank      String?
+  assignedToId    String?
+  assignedTo      Profile?         @relation("QuestAssignedTo", fields: [assignedToId], references: [id])
+  scheduledFor    DateTime?
+  createdAt       DateTime         @default(now())
+  createdById     String
+  createdBy       Profile          @relation("QuestCreatedBy", fields: [createdById], references: [id])
+
+  completions QuestCompletion[]
+  sessions    QuestSession[]
+}
+
+model QuestCompletion {
+  id          String   @id @default(cuid())
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  questId     String
+  quest       Quest    @relation(fields: [questId], references: [id])
+  xpAwarded   Int
+  completedAt DateTime @default(now())
+
+  @@index([profileId, completedAt])
+}
+
+enum SessionKind {
+  QUEST
+  PUNISHMENT
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+model QuestSession {
+  id                String        @id @default(cuid())
+  profileId         String
+  profile           Profile       @relation(fields: [profileId], references: [id])
+  kind              SessionKind
+  questId           String?
+  quest             Quest?        @relation(fields: [questId], references: [id])
+  punishmentQuestId String?
+  punishmentQuest   PunishmentQuest? @relation(fields: [punishmentQuestId], references: [id])
+  startedAt         DateTime      @default(now())
+  status            SessionStatus @default(ACTIVE)
+  completedAt       DateTime?
+
+  @@index([profileId, status])
+}
+
+// ── Punishment pool ──────────────────────────────────────────────
+
+model PunishmentQuest {
+  id              String   @id @default(cuid())
+  title           String
+  durationMinutes Int
+  timesTriggered  Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  sessions       QuestSession[]
+  lockoutEvents  LockoutEvent[]
+}
+
+enum PunishmentMode {
+  RANDOM
+  FIXED
+}
+
+model PunishmentConfig {
+  id                  Int            @id @default(1)
+  mode                PunishmentMode @default(RANDOM)
+  fixedPunishmentId   String?
+}
+
+model LockoutEvent {
+  id                String           @id @default(cuid())
+  profileId         String
+  profile           Profile          @relation(fields: [profileId], references: [id])
+  lockedAt          DateTime         @default(now())
+  reason            String
+  punishmentQuestId String?
+  punishmentQuest   PunishmentQuest? @relation(fields: [punishmentQuestId], references: [id])
+  unlockedAt        DateTime?
+  resolved          Boolean          @default(false)
+
+  @@index([profileId, resolved])
+}
+
+// ── Wallet & billing ─────────────────────────────────────────────
+
+enum WalletTransactionKind {
+  REFERRAL_CREDIT
+  BILL_APPLIED
+  ADMIN_ADJUSTMENT
+}
+
+model WalletTransaction {
+  id          String                 @id @default(cuid())
+  profileId   String
+  profile     Profile                @relation(fields: [profileId], references: [id])
+  amount      Int
+  kind        WalletTransactionKind
+  description String
+  createdAt   DateTime               @default(now())
+
+  @@index([profileId, createdAt])
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+}
+
+model PaymentTransaction {
+  id               String        @id @default(cuid())
+  profileId        String
+  profile          Profile       @relation(fields: [profileId], references: [id])
+  amount           Int
+  status           PaymentStatus
+  method           PaymentMethod
+  razorpayPaymentId String?
+  razorpayOrderId   String?
+  createdAt        DateTime      @default(now())
+
+  @@index([profileId, createdAt])
+}
+
+// ── Notifications & broadcasts ───────────────────────────────────
+
+enum NotificationType {
+  QUEST
+  STREAK
+  PENALTY
+  SYSTEM
+  WALLET
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  profileId String
+  profile   Profile          @relation(fields: [profileId], references: [id])
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([profileId, read])
+}
+
+model Broadcast {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  audience  String
+  sentCount Int
+  createdAt DateTime @default(now())
+}

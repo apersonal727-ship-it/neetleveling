@@ -1,0 +1,399 @@
+.bgGrid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(79, 157, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 157, 255, 0.05) 1px, transparent 1px);
+  background-size: 38px 38px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 60% at 50% 40%,
+    black 10%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 10%, transparent 72%);
+}
+
+.app {
+  --gutter: 20px;
+  --app-max: 480px;
+  max-width: var(--app-max);
+  margin-inline: auto;
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: none;
+}
+
+.header {
+  padding: var(--sp-4) var(--gutter);
+  padding-top: max(var(--sp-4), env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lockPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--blue-2);
+  text-transform: uppercase;
+  border: 1px solid var(--border-strong);
+  padding: 7px 14px;
+  border-radius: 100px;
+  background: rgba(79, 157, 255, 0.08);
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue-2);
+  box-shadow: 0 0 8px var(--blue-2);
+  animation: pulse 1.6s infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6) var(--gutter);
+  gap: var(--sp-6);
+  text-align: center;
+}
+
+.questCat {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ringWrap {
+  position: relative;
+  width: 250px;
+  height: 250px;
+}
+.ringWrap svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+.ringTrack {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 8;
+}
+.ringFill {
+  fill: none;
+  stroke: url(#ringGrad);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+  filter: drop-shadow(0 0 8px rgba(143, 214, 255, 0.55));
+}
+.ringCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.ringTime {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-weight: 600;
+  font-size: clamp(30px, 9vw, 38px);
+  color: var(--ice);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.ringLabel {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  color: var(--slate);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.questInfo h1 {
+  font-size: clamp(19px, 5vw, 23px);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.questInfo p {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12.5px;
+  color: var(--slate);
+}
+
+.warnCard {
+  max-width: 340px;
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: 12px;
+  background: rgba(255, 77, 94, 0.06);
+  border: 1px solid rgba(255, 77, 94, 0.35);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: left;
+}
+.warnCard svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.warnCard p {
+  font-size: 12.5px;
+  color: #ffb3ba;
+  line-height: 1.55;
+}
+
+/* ===== Modal ===== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(3, 4, 8, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gutter);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.modalOverlayShow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modalCard {
+  width: 100%;
+  max-width: 340px;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid rgba(255, 77, 94, 0.4);
+  border-radius: 16px;
+  padding: var(--sp-6) var(--sp-5);
+  text-align: center;
+  box-shadow: 0 0 60px -14px rgba(255, 77, 94, 0.4);
+}
+.modalIcon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto var(--sp-4);
+  color: var(--red);
+}
+.modalCard h2 {
+  font-size: 17px;
+  margin-bottom: 8px;
+  color: #ffdde0;
+}
+.modalCard p {
+  font-size: 13px;
+  color: var(--slate);
+  line-height: 1.6;
+  margin-bottom: var(--sp-5);
+}
+.modalBtn {
+  width: 100%;
+  height: 46px;
+  border-radius: 10px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  background: linear-gradient(135deg, var(--red), #c22636);
+  color: #fff0f0;
+  border: none;
+  cursor: pointer;
+}
+
+/* ===== Complete overlay ===== */
+.completeOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: var(--void);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: var(--gutter);
+  overflow: hidden;
+}
+.completeOverlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 38%, rgba(79, 157, 255, 0.16), transparent 70%);
+  pointer-events: none;
+}
+.completeOverlay > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cmpRings {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: var(--sp-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cmpRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  opacity: 0;
+  animation: ringOut 1.6s ease-out infinite;
+}
+.cmpRing:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.cmpRing:nth-child(3) {
+  animation-delay: 1s;
+}
+@keyframes ringOut {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.cmpBadge {
+  position: relative;
+  z-index: 2;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(79, 157, 255, 0.18), rgba(79, 157, 255, 0.04));
+  border: 1.5px solid var(--blue-2);
+  box-shadow:
+    0 0 40px -6px var(--blue-2),
+    inset 0 0 24px rgba(79, 157, 255, 0.15);
+}
+.cmpBadge svg {
+  width: 36px;
+  height: 36px;
+  color: var(--blue-2);
+}
+
+.cmpEyebrow {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--blue-2);
+  text-transform: uppercase;
+}
+.completeOverlay h1 {
+  font-size: 26px;
+  color: var(--ice);
+  margin-top: 6px;
+}
+.cmpMeta {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--slate);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+.xpCounterWrap {
+  margin-top: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.xpCounter {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  color: var(--blue-2);
+  text-shadow: 0 0 26px rgba(143, 214, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+.xpCounterLbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  color: var(--slate);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.streakLine {
+  margin-top: var(--sp-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12.5px;
+  color: var(--ice);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 7px 14px;
+}
+.streakLine svg {
+  width: 14px;
+  height: 14px;
+  color: var(--blue-2);
+}
+
+.btnReturn {
+  margin-top: var(--sp-6);
+  height: 50px;
+  padding: 0 32px;
+  border-radius: 12px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--ice);
+  background: linear-gradient(180deg, rgba(79, 157, 255, 0.16), rgba(79, 157, 255, 0.07));
+  border: 1px solid var(--border-strong);
+  box-shadow:
+    0 0 0 1px rgba(143, 214, 255, 0.08) inset,
+    0 0 30px -10px rgba(79, 157, 255, 0.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btnReturn svg {
+  width: 15px;
+  height: 15px;
+  opacity: 0.8;
+}
