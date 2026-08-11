@@ -53,6 +53,43 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Page-to-page transitions — driven by template.tsx remounting per
+   navigation (see src/app/(app)/template.tsx etc.), animated via the
+   browser's View Transitions API through React's <ViewTransition>. */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(.page-exit) {
+  animation: 140ms ease-in both view-exit;
+}
+::view-transition-new(.page-enter) {
+  animation: 240ms ease-out both view-enter;
+}
+@keyframes view-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
 body {
   background: var(--void);
   color: var(--ice);
