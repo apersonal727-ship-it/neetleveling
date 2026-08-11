@@ -1,7 +1,9 @@
-"use client";
-
-import { useState, useTransition } from "react";
-import { activateSubscription } from "@/actions/billing";
+import QRCode from "qrcode";
+import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/lib/current-profile";
+import { prisma } from "@/lib/prisma";
+import { buildUpiLink, MONTHLY_PRICE, UPI_VPA } from "@/lib/payment";
+import { UpiPaymentForm } from "@/components/checkout/UpiPaymentForm";
 import styles from "../onboarding.module.css";
 
 function nextRenewalLabel() {
@@ -10,48 +12,24 @@ function nextRenewalLabel() {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export default function CheckoutPage() {
-  const [method, setMethod] = useState<"upi" | "card">("upi");
-  const [upi, setUpi] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvv, setCardCvv] = useState("");
-  const [agree, setAgree] = useState(true);
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+export default async function CheckoutPage() {
+  const profile = await getCurrentProfile();
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    const nextErrors: Record<string, boolean> = {};
+  const subscriptionActive =
+    profile.subscriptionStatus === "ACTIVE" &&
+    (!profile.subscriptionRenewsAt || profile.subscriptionRenewsAt.getTime() >= Date.now());
+  if (subscriptionActive) redirect("/dashboard");
 
-    if (method === "upi") {
-      if (!upi.includes("@")) nextErrors.upi = true;
-    } else {
-      const digits = cardNumber.replace(/\s/g, "");
-      if (digits.length < 12) nextErrors.cardNumber = true;
-      if (!/^\d{2}\/\d{2}$/.test(cardExpiry.trim())) nextErrors.cardExpiry = true;
-      if (cardCvv.trim().length < 3) nextErrors.cardCvv = true;
-    }
+  const pendingPayment = await prisma.paymentTransaction.findFirst({
+    where: { profileId: profile.id, status: "PENDING_REVIEW" },
+    orderBy: { createdAt: "desc" },
+  });
 
-    if (!agree) {
-      setError("Please accept the Terms and Refund Policy to continue.");
-      setErrors(nextErrors);
-      return;
-    }
+  const creditToApply = Math.min(profile.walletCredit, MONTHLY_PRICE);
+  const amountDue = MONTHLY_PRICE - creditToApply;
 
-    if (Object.keys(nextErrors).length) {
-      setErrors(nextErrors);
-      return;
-    }
-
-    setErrors({});
-    startTransition(async () => {
-      const result = await activateSubscription();
-      if (result && "error" in result) setError(result.error);
-    });
-  }
+  const upiLink = buildUpiLink(amountDue, `NEETLeveling Hunter Access - ${profile.hunterId}`);
+  const qrDataUrl = await QRCode.toDataURL(upiLink, { margin: 1, width: 220 });
 
   return (
     <>
@@ -81,9 +59,15 @@ export default function CheckoutPage() {
               </div>
             </div>
             <div className={styles.summaryDivider} />
+            {creditToApply > 0 && (
+              <div className={styles.summaryRow}>
+                <span>Wallet credit applied</span>
+                <b>−₹{creditToApply}</b>
+              </div>
+            )}
             <div className={styles.summaryRow}>
-              <span>Today&apos;s charge</span>
-              <b>₹99</b>
+              <span>Amount due today</span>
+              <b>₹{amountDue}</b>
             </div>
             <div className={styles.summaryRow}>
               <span>Next renewal</span>
@@ -91,124 +75,85 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <section>
-            <span className={styles.sectionLabel}>Pay with</span>
-            <div className={styles.methodRow}>
-              <button
-                type="button"
-                className={`${styles.methodBtn} ${method === "upi" ? styles.methodBtnActive : ""}`}
-                onClick={() => setMethod("upi")}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-                  <rect x="3" y="5" width="18" height="14" rx="2" />
-                  <path d="M3 10h18" />
-                </svg>
-                <span>UPI</span>
-              </button>
-              <button
-                type="button"
-                className={`${styles.methodBtn} ${method === "card" ? styles.methodBtnActive : ""}`}
-                onClick={() => setMethod("card")}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-                  <rect x="2" y="6" width="20" height="12" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-                <span>CARD</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              {error && (
-                <div className={styles.formError}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <path d="M12 9v4M12 17h.01" />
+          {pendingPayment ? (
+            <section style={{ textAlign: "center" }}>
+              <div className={styles.card} style={{ padding: "28px 20px" }}>
+                <div
+                  style={{
+                    width: "56px",
+                    height: "56px",
+                    borderRadius: "50%",
+                    margin: "0 auto 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "rgba(255,184,79,.12)",
+                    border: "1.5px solid var(--amber)",
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" strokeWidth="1.8" width="24" height="24">
                     <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3.5 2" />
                   </svg>
-                  <span>{error}</span>
                 </div>
-              )}
-
-              {method === "upi" ? (
-                <div className={styles.field2}>
-                  <span className={styles.fieldLabel}>UPI ID</span>
-                  <input
-                    className={`${styles.fieldInput} ${errors.upi ? styles.fieldInputError : ""}`}
-                    type="text"
-                    placeholder="yourname@upi"
-                    value={upi}
-                    onChange={(e) => setUpi(e.target.value)}
-                  />
-                </div>
-              ) : (
-                <>
-                  <div className={styles.field2}>
-                    <span className={styles.fieldLabel}>Card Number</span>
-                    <input
-                      className={`${styles.fieldInput} ${errors.cardNumber ? styles.fieldInputError : ""}`}
-                      type="text"
-                      placeholder="1234  5678  9012  3456"
-                      inputMode="numeric"
-                      value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value)}
-                    />
-                  </div>
-                  <div className={styles.fieldRow}>
-                    <div className={styles.field2}>
-                      <span className={styles.fieldLabel}>Expiry</span>
-                      <input
-                        className={`${styles.fieldInput} ${errors.cardExpiry ? styles.fieldInputError : ""}`}
-                        type="text"
-                        placeholder="MM/YY"
-                        value={cardExpiry}
-                        onChange={(e) => setCardExpiry(e.target.value)}
-                      />
-                    </div>
-                    <div className={styles.field2}>
-                      <span className={styles.fieldLabel}>CVV</span>
-                      <input
-                        className={`${styles.fieldInput} ${errors.cardCvv ? styles.fieldInputError : ""}`}
-                        type="text"
-                        placeholder="•••"
-                        inputMode="numeric"
-                        value={cardCvv}
-                        onChange={(e) => setCardCvv(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              <div className={styles.consent}>
-                <input
-                  type="checkbox"
-                  id="agree"
-                  checked={agree}
-                  onChange={(e) => setAgree(e.target.checked)}
-                />
-                <label htmlFor="agree">
-                  I agree to the <a href="/legal">Terms</a> and understand this is a recurring
-                  ₹99/month subscription — cancellable anytime, but{" "}
-                  <strong>all payments are final</strong> per the <a href="/legal">Refund Policy</a>.
-                </label>
+                <h2 style={{ fontSize: "17px", marginBottom: "8px" }}>Payment submitted — under review</h2>
+                <p style={{ fontSize: "13px", color: "var(--slate)", lineHeight: 1.6, marginBottom: "4px" }}>
+                  Reference: <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", color: "var(--blue-2)" }}>{pendingPayment.reference}</span>
+                </p>
+                <p style={{ fontSize: "12.5px", color: "var(--slate)", lineHeight: 1.6 }}>
+                  An admin verifies payments manually right now — this usually doesn&apos;t take long. You&apos;ll
+                  get a notification the moment it&apos;s approved.
+                </p>
               </div>
+            </section>
+          ) : (
+            <>
+              <section>
+                <span className={styles.sectionLabel}>Pay via UPI</span>
+                <div className={styles.card} style={{ padding: "24px 20px", textAlign: "center" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={qrDataUrl}
+                    alt="UPI payment QR code"
+                    width={180}
+                    height={180}
+                    style={{ margin: "0 auto 16px", borderRadius: "12px" }}
+                  />
+                  <a href={upiLink} className={`${styles.btn} ${styles.btnPrimary}`} style={{ marginBottom: "14px" }}>
+                    Open UPI App to Pay ₹{amountDue}
+                  </a>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      fontSize: "13px",
+                      color: "var(--blue-2)",
+                      border: "1px dashed var(--border-strong)",
+                      borderRadius: "9px",
+                      padding: "10px 14px",
+                      marginTop: "14px",
+                    }}
+                  >
+                    {UPI_VPA}
+                  </div>
+                  <p style={{ fontSize: "11.5px", color: "var(--slate)", marginTop: "10px", lineHeight: 1.6 }}>
+                    Scan the QR or tap the button on your phone, pay ₹{amountDue}, then enter the transaction
+                    reference below.
+                  </p>
+                </div>
+              </section>
 
-              <button type="submit" className={styles.btnPrimary} disabled={pending}>
-                <span>{pending ? "Processing…" : "Pay ₹99 & Unlock"}</span>
-                {!pending && (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                )}
-              </button>
-            </form>
-          </section>
+              <section>
+                <span className={styles.sectionLabel}>Confirm payment</span>
+                <UpiPaymentForm amountDue={amountDue} />
+              </section>
+            </>
+          )}
 
           <div className={styles.trustLine}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 6 9 17l-5-5" />
             </svg>
-            Payments encrypted &amp; processed securely
+            Payments verified manually — no card or bank details ever leave your UPI app
           </div>
         </main>
       </div>

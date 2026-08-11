@@ -103,7 +103,7 @@ export function LegalContent() {
             <ul>
               <li><strong>Account data:</strong> hunter name, email, password (hashed).</li>
               <li><strong>Activity data:</strong> quests started/completed, XP, streaks, penalty history — this is what powers your Status and History pages.</li>
-              <li><strong>Payment data:</strong> handled directly by our payment processor (Razorpay). We do not store your card or UPI details on our own servers.</li>
+              <li><strong>Payment data:</strong> you pay us directly via UPI. We only ever see the transaction reference you submit — we never see or store your card, bank, or UPI app details.</li>
             </ul>
 
             <h2>What we don&apos;t do</h2>

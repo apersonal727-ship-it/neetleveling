@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireAdminProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { AdminTransactionList } from "@/components/admin/AdminTransactionList";
+import { PendingPaymentsReview } from "@/components/admin/PendingPaymentsReview";
 import styles from "../admin.module.css";
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export default async function AdminBillingPage() {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  const [collected, successCount, failedCount, refundedCount, transactions] = await Promise.all([
+  const [collected, successCount, failedCount, refundedCount, transactions, pendingPayments] = await Promise.all([
     prisma.paymentTransaction.aggregate({
       where: { status: "SUCCESS", createdAt: { gte: startOfMonth } },
       _sum: { amount: true },
@@ -28,14 +29,31 @@ export default async function AdminBillingPage() {
     prisma.paymentTransaction.count({ where: { status: "FAILED", createdAt: { gte: startOfMonth } } }),
     prisma.paymentTransaction.count({ where: { status: "REFUNDED", createdAt: { gte: startOfMonth } } }),
     prisma.paymentTransaction.findMany({
+      where: { status: { notIn: ["PENDING_REVIEW", "PENDING"] } },
       include: { profile: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
       take: 30,
+    }),
+    prisma.paymentTransaction.findMany({
+      where: { status: "PENDING_REVIEW" },
+      include: { profile: { select: { name: true, email: true } } },
+      orderBy: { createdAt: "asc" },
     }),
   ]);
 
   return (
     <>
+      <PendingPaymentsReview
+        initialPending={pendingPayments.map((p) => ({
+          id: p.id,
+          hunterName: p.profile.name,
+          email: p.profile.email,
+          amount: p.amount,
+          reference: p.reference,
+          submittedAt: fmtDate(p.createdAt),
+        }))}
+      />
+
       <section>
         <span className={styles.secLabel}>This month</span>
         <div className={styles.metricGrid}>
@@ -75,8 +93,8 @@ export default async function AdminBillingPage() {
       </section>
 
       <p style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10.5px", color: "var(--slate)", lineHeight: 1.6 }}>
-        Live webhook event logs aren&apos;t available yet — no payment gateway is connected (see the
-        checkout flow), so there are no real Razorpay webhooks to display.
+        Payments are collected via direct UPI and verified manually — no payment gateway is live yet
+        (Cashfree activation pending), so every payment needs a manual Approve/Reject above.
       </p>
     </>
   );

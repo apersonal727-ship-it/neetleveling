@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { checkAndApplyLockout } from "@/lib/lockout";
+import { MONTHLY_PRICE } from "@/lib/payment";
 
 export type ActionResult = { error: string } | { success: true };
 
@@ -147,4 +148,89 @@ export async function getHunterQuestHistory(profileId: string) {
     orderBy: { completedAt: "desc" },
     take: 10,
   });
+}
+
+// ── Manual UPI payment review ─────────────────────────────────────
+
+export async function approvePayment(transactionId: string): Promise<ActionResult> {
+  await requireAdminProfile();
+
+  const tx = await prisma.paymentTransaction.findUnique({
+    where: { id: transactionId },
+    include: { profile: true },
+  });
+  if (!tx || tx.status !== "PENDING_REVIEW") return { error: "This payment is no longer pending." };
+
+  const creditToApply = Math.min(
+    tx.profile.walletCredit,
+    Math.max(0, MONTHLY_PRICE - tx.amount),
+  );
+
+  const renewsAt = new Date();
+  renewsAt.setMonth(renewsAt.getMonth() + 1);
+
+  await prisma.$transaction([
+    prisma.paymentTransaction.update({
+      where: { id: tx.id },
+      data: { status: "SUCCESS", reviewedAt: new Date() },
+    }),
+    prisma.profile.update({
+      where: { id: tx.profileId },
+      data: {
+        subscriptionStatus: "ACTIVE",
+        subscriptionRenewsAt: renewsAt,
+        walletCredit: { decrement: creditToApply },
+      },
+    }),
+    ...(creditToApply > 0
+      ? [
+          prisma.walletTransaction.create({
+            data: {
+              profileId: tx.profileId,
+              amount: -creditToApply,
+              kind: "BILL_APPLIED" as const,
+              description: "Applied to subscription renewal",
+            },
+          }),
+        ]
+      : []),
+    prisma.notification.create({
+      data: {
+        profileId: tx.profileId,
+        type: "WALLET",
+        title: "Payment verified",
+        message: "Your ₹99 payment was verified — Hunter Access is unlocked.",
+      },
+    }),
+  ]);
+
+  revalidatePath("/admin/billing");
+  return { success: true };
+}
+
+export async function rejectPayment(transactionId: string, note?: string): Promise<ActionResult> {
+  await requireAdminProfile();
+
+  const tx = await prisma.paymentTransaction.findUnique({ where: { id: transactionId } });
+  if (!tx || tx.status !== "PENDING_REVIEW") return { error: "This payment is no longer pending." };
+
+  await prisma.$transaction([
+    prisma.paymentTransaction.update({
+      where: { id: tx.id },
+      data: { status: "FAILED", reviewedAt: new Date(), rejectionNote: note ?? null },
+    }),
+    prisma.notification.create({
+      data: {
+        profileId: tx.profileId,
+        type: "WALLET",
+        title: "Payment couldn't be verified",
+        message: note
+          ? `We couldn't verify your payment: ${note}. Please try again or contact support.`
+          : "We couldn't verify your payment reference. Please try again or contact support.",
+      },
+    }),
+  ]);
+
+  revalidatePath("/admin/billing");
+  return { success: true };
 }
