@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireAdminProfile } from "@/lib/current-profile";
 import { DeployQuestForm } from "@/components/admin/DeployQuestForm";
+import { QuestTemplateManager } from "@/components/admin/QuestTemplateManager";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteQuest } from "@/actions/admin";
 import styles from "../admin.module.css";
@@ -19,7 +20,7 @@ function assignLabel(q: { assignScope: string; assignRank: string | null }) {
 export default async function AdminQuestsPage() {
   await requireAdminProfile();
 
-  const [hunters, quests] = await Promise.all([
+  const [hunters, quests, templates] = await Promise.all([
     prisma.profile.findMany({
       select: { id: true, name: true, email: true, hunterId: true },
       orderBy: { name: "asc" },
@@ -30,6 +31,7 @@ export default async function AdminQuestsPage() {
       take: 30,
       include: { _count: { select: { completions: true } } },
     }),
+    prisma.questTemplate.findMany({ orderBy: { createdAt: "asc" } }),
   ]);
 
   const today = new Date();
@@ -41,6 +43,18 @@ export default async function AdminQuestsPage() {
         <span className={styles.secLabel}>Deploy a quest</span>
         <DeployQuestForm hunters={hunters} />
       </section>
+
+      <QuestTemplateManager
+        initialTemplates={templates.map((t) => ({
+          id: t.id,
+          title: t.title,
+          subject: t.subject,
+          durationMinutes: t.durationMinutes,
+          xpOverride: t.xpOverride,
+          active: t.active,
+          lastDeployedAt: t.lastDeployedAt?.toISOString() ?? null,
+        }))}
+      />
 
       <section>
         <span className={styles.secLabel}>Recent quests</span>

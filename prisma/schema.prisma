@@ -40,14 +40,15 @@ model Profile {
   streakWarnings Boolean @default(true)
   penaltyAlerts  Boolean @default(true)
 
-  createdQuests       Quest[]              @relation("QuestCreatedBy")
-  assignedQuests      Quest[]              @relation("QuestAssignedTo")
-  questCompletions    QuestCompletion[]
-  questSessions       QuestSession[]
-  lockoutEvents       LockoutEvent[]
-  walletTransactions  WalletTransaction[]
-  paymentTransactions PaymentTransaction[]
-  notifications       Notification[]
+  createdQuests         Quest[]              @relation("QuestCreatedBy")
+  assignedQuests        Quest[]              @relation("QuestAssignedTo")
+  createdQuestTemplates QuestTemplate[]      @relation("QuestTemplateCreatedBy")
+  questCompletions      QuestCompletion[]
+  questSessions         QuestSession[]
+  lockoutEvents         LockoutEvent[]
+  walletTransactions    WalletTransaction[]
+  paymentTransactions   PaymentTransaction[]
+  notifications         Notification[]
 
   @@index([referredByCode])
 }
@@ -92,6 +93,23 @@ model Quest {
 
   completions QuestCompletion[]
   sessions    QuestSession[]
+}
+
+// A quest definition an admin sets once; ensureDailyQuestsDeployed() (see
+// src/lib/quest-deploy.ts) lazily re-deploys it as a fresh Quest assigned to
+// ALL hunters once per day, the same no-cron pattern used for lockouts and
+// streaks.
+model QuestTemplate {
+  id              String       @id @default(cuid())
+  title           String
+  subject         QuestSubject
+  durationMinutes Int
+  xpOverride      Int?
+  active          Boolean      @default(true)
+  lastDeployedAt  DateTime?
+  createdAt       DateTime     @default(now())
+  createdById     String
+  createdBy       Profile      @relation("QuestTemplateCreatedBy", fields: [createdById], references: [id])
 }
 
 model QuestCompletion {
@@ -192,8 +210,8 @@ model WalletTransaction {
 }
 
 enum PaymentStatus {
-  PENDING         // Cashfree order created, awaiting checkout completion
-  PENDING_REVIEW  // legacy manual UTR submission awaiting admin review
+  PENDING // Cashfree order created, awaiting checkout completion
+  PENDING_REVIEW // legacy manual UTR submission awaiting admin review
   SUCCESS
   FAILED
   REFUNDED

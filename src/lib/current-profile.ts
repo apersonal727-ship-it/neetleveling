@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { checkAndApplyLockout } from "@/lib/lockout";
+import { ensureDailyQuestsDeployed } from "@/lib/quest-deploy";
 
 // Fetches the signed-in hunter's Profile and lazily evaluates whether a
 // prior day's quest window closed unstarted (see checkAndApplyLockout).
@@ -22,6 +23,7 @@ export async function getCurrentProfile() {
 
   if (!profile) redirect("/character-creation");
 
+  await ensureDailyQuestsDeployed();
   await checkAndApplyLockout(profile.id);
   profile = await prisma.profile.findUniqueOrThrow({ where: { id: profile.id } });
 

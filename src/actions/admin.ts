@@ -52,6 +52,48 @@ export async function deleteQuest(id: string): Promise<ActionResult> {
   return { success: true };
 }
 
+// ── Default daily quests ──────────────────────────────────────
+
+export async function addQuestTemplate(formData: FormData): Promise<ActionResult> {
+  const admin = await requireAdminProfile();
+
+  const title = String(formData.get("title") ?? "").trim();
+  const subject = String(formData.get("subject") ?? "PHYSICS");
+  const durationMinutes = parseInt(String(formData.get("durationMinutes") ?? ""), 10);
+  const xpOverrideRaw = String(formData.get("xpOverride") ?? "").trim();
+
+  if (!title) return { error: "Title is required." };
+  if (!durationMinutes || durationMinutes <= 0) return { error: "Duration must be a positive number of minutes." };
+
+  await prisma.questTemplate.create({
+    data: {
+      title,
+      subject: subject as never,
+      durationMinutes,
+      xpOverride: xpOverrideRaw ? parseInt(xpOverrideRaw, 10) : null,
+      createdById: admin.id,
+    },
+  });
+
+  revalidatePath("/admin/quests");
+  return { success: true };
+}
+
+export async function removeQuestTemplate(id: string): Promise<ActionResult> {
+  await requireAdminProfile();
+  await prisma.questTemplate.delete({ where: { id } });
+  revalidatePath("/admin/quests");
+  return { success: true };
+}
+
+export async function toggleQuestTemplateActive(id: string): Promise<ActionResult> {
+  await requireAdminProfile();
+  const template = await prisma.questTemplate.findUniqueOrThrow({ where: { id } });
+  await prisma.questTemplate.update({ where: { id }, data: { active: !template.active } });
+  revalidatePath("/admin/quests");
+  return { success: true };
+}
+
 // ── Punishment pool ────────────────────────────────────────────
 
 export async function addPunishmentQuest(formData: FormData): Promise<ActionResult> {
