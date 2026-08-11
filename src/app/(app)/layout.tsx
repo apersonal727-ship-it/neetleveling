@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress } from "@/lib/rank";
 import { FlameIcon } from "@/components/icons/FlameIcon";
@@ -27,9 +28,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <span className={styles.lvlTag}>
             LVL <b>{progress.level}</b>
           </span>
-          <div className={styles.userChip}>
-            {profile.name}
-            <FlameIcon className={styles.flame} />
+          <div className={styles.headerRight}>
+            {profile.isAdmin && (
+              <Link href="/admin/quests" className={styles.adminBadge} title="Admin panel" aria-label="Admin panel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6z" />
+                </svg>
+              </Link>
+            )}
+            <div className={styles.userChip}>
+              {profile.name}
+              <FlameIcon className={styles.flame} />
+            </div>
           </div>
         </div>
         <div className={styles.xpTrack}>
