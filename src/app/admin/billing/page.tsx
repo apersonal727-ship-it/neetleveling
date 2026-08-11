@@ -93,8 +93,8 @@ export default async function AdminBillingPage() {
       </section>
 
       <p style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10.5px", color: "var(--slate)", lineHeight: 1.6 }}>
-        Payments are collected via direct UPI and verified manually — no payment gateway is live yet
-        (Cashfree activation pending), so every payment needs a manual Approve/Reject above.
+        Payments are processed automatically via Cashfree and verified by webhook — no manual review needed.
+        The Pending Verification queue above only shows legacy manual submissions, if any.
       </p>
     </>
   );

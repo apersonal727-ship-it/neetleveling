@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { FlameIcon } from "@/components/icons/FlameIcon";
-import { signIn, signUp } from "@/actions/auth";
+import { signIn, signUp, verifySignupOtp, resendSignupOtp } from "@/actions/auth";
 import styles from "@/app/(auth)/auth.module.css";
 
 type Mode = "login" | "signup";
@@ -30,11 +30,42 @@ export function AuthCard({ initialMode }: { initialMode: Mode }) {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
   const [pending, startTransition] = useTransition();
+  const [verifyingEmail, setVerifyingEmail] = useState<string | null>(null);
+  const [otp, setOtp] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
 
   function setModeAndReset(next: Mode) {
     setMode(next);
     setError(null);
     setFieldErrors({});
+  }
+
+  function handleVerifyOtp() {
+    setError(null);
+    if (!/^\d{6}$/.test(otp)) {
+      setError("Enter the 6-digit code from your email.");
+      return;
+    }
+    startTransition(async () => {
+      const result = await verifySignupOtp(verifyingEmail!, otp);
+      if (result && "error" in result) setError(result.error);
+    });
+  }
+
+  function handleResendOtp() {
+    if (resendCooldown > 0 || !verifyingEmail) return;
+    setError(null);
+    startTransition(async () => {
+      const result = await resendSignupOtp(verifyingEmail);
+      if (result && "error" in result) setError(result.error);
+      setResendCooldown(30);
+    });
   }
 
   function handleLogin(formData: FormData) {
@@ -79,6 +110,11 @@ export function AuthCard({ initialMode }: { initialMode: Mode }) {
         if (result.error.toLowerCase().includes("email")) {
           setFieldErrors({ email: true });
         }
+        return;
+      }
+      if ("needsVerification" in result) {
+        setVerifyingEmail(result.email);
+        setResendCooldown(30);
       }
     });
   }
@@ -98,24 +134,86 @@ export function AuthCard({ initialMode }: { initialMode: Mode }) {
         </div>
 
         <main className={styles.main}>
-          <div className={styles.modeToggle}>
-            <button
-              type="button"
-              className={`${styles.modeBtn} ${mode === "login" ? styles.modeBtnActive : ""}`}
-              onClick={() => setModeAndReset("login")}
-            >
-              Log In
-            </button>
-            <button
-              type="button"
-              className={`${styles.modeBtn} ${mode === "signup" ? styles.modeBtnActive : ""}`}
-              onClick={() => setModeAndReset("signup")}
-            >
-              Sign Up
-            </button>
-          </div>
+          {verifyingEmail ? (
+            <>
+              <div className={styles.signupNote}>
+                <AlertIcon />
+                <span>
+                  We sent a 6-digit code to <b>{verifyingEmail}</b>. Enter it below to verify your
+                  email.
+                </span>
+              </div>
+              {error && (
+                <div className={styles.formError}>
+                  <AlertIcon />
+                  <span>{error}</span>
+                </div>
+              )}
+              <div className={styles.field}>
+                <span className={styles.fieldLabel}>Verification code</span>
+                <input
+                  className={styles.fieldInput}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  style={{ letterSpacing: "0.3em", textAlign: "center", fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                />
+              </div>
+              <button
+                type="button"
+                className={`${styles.btnPrimary} ${pending ? styles.btnPrimaryLoading : ""}`}
+                onClick={handleVerifyOtp}
+              >
+                <span>Verify Email</span>
+                <ArrowIcon />
+              </button>
+              <div className={styles.switchLine}>
+                {resendCooldown > 0 ? (
+                  <>Resend code in {resendCooldown}s</>
+                ) : (
+                  <>
+                    Didn&apos;t get it?{" "}
+                    <button type="button" onClick={handleResendOtp}>
+                      Resend code
+                    </button>
+                  </>
+                )}
+                {" · "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVerifyingEmail(null);
+                    setOtp("");
+                    setError(null);
+                  }}
+                >
+                  Use a different email
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.modeToggle}>
+                <button
+                  type="button"
+                  className={`${styles.modeBtn} ${mode === "login" ? styles.modeBtnActive : ""}`}
+                  onClick={() => setModeAndReset("login")}
+                >
+                  Log In
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.modeBtn} ${mode === "signup" ? styles.modeBtnActive : ""}`}
+                  onClick={() => setModeAndReset("signup")}
+                >
+                  Sign Up
+                </button>
+              </div>
 
-          {mode === "login" ? (
+              {mode === "login" ? (
             <form action={handleLogin}>
               {error && (
                 <div className={styles.formError}>
@@ -234,6 +332,8 @@ export function AuthCard({ initialMode }: { initialMode: Mode }) {
               </>
             )}
           </div>
+            </>
+          )}
         </main>
       </div>
     </>

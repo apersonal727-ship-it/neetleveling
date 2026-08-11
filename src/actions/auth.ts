@@ -7,6 +7,7 @@ import { generateHunterId, generateReferralCode } from "@/lib/hunter-id";
 import { SITE_URL } from "@/lib/site";
 
 export type AuthResult = { error: string } | { success: true };
+export type SignUpResult = { error: string } | { needsVerification: true; email: string };
 
 export async function signIn(formData: FormData): Promise<AuthResult> {
   const email = String(formData.get("email") ?? "").trim();
@@ -34,7 +35,7 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
   redirect("/dashboard");
 }
 
-export async function signUp(formData: FormData): Promise<AuthResult> {
+export async function signUp(formData: FormData): Promise<SignUpResult> {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
@@ -76,7 +77,29 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     },
   });
 
+  if (!data.session) {
+    // Email confirmation (OTP) is required before a session exists.
+    return { needsVerification: true, email };
+  }
+
   redirect("/character-creation");
+}
+
+export async function verifySignupOtp(email: string, token: string): Promise<AuthResult> {
+  if (!/^\d{6}$/.test(token)) return { error: "Enter the 6-digit code from your email." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({ email, token, type: "signup" });
+  if (error) return { error: "That code is incorrect or expired. Please try again." };
+
+  redirect("/character-creation");
+}
+
+export async function resendSignupOtp(email: string): Promise<AuthResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({ type: "signup", email });
+  if (error) return { error: "Couldn't resend the code. Please try again in a moment." };
+  return { success: true };
 }
 
 export async function signOut() {
