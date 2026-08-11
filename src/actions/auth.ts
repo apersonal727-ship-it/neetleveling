@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { generateHunterId, generateReferralCode } from "@/lib/hunter-id";
+import { SITE_URL } from "@/lib/site";
 
 export type AuthResult = { error: string } | { success: true };
 
@@ -92,7 +93,7 @@ export async function requestPasswordReset(formData: FormData): Promise<AuthResu
   // Always report success regardless of whether the account exists, so this
   // endpoint can't be used to enumerate registered emails.
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/change-password`,
+    redirectTo: `${SITE_URL}/change-password`,
   });
 
   return { success: true };
