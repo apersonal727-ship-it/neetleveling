@@ -33,6 +33,7 @@ model Profile {
   subscriptionStatus     SubscriptionStatus @default(PENDING)
   subscriptionRenewsAt   DateTime?
   cashfreeSubscriptionId String?
+  renewalReminderSentAt  DateTime?
 
   deletionScheduledFor DateTime?
 

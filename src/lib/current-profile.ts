@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { checkAndApplyLockout } from "@/lib/lockout";
 import { ensureDailyQuestsDeployed } from "@/lib/quest-deploy";
+import { checkSubscriptionStatus } from "@/lib/subscription";
 
 // Fetches the signed-in hunter's Profile and lazily evaluates whether a
 // prior day's quest window closed unstarted (see checkAndApplyLockout).
@@ -25,6 +26,7 @@ export async function getCurrentProfile() {
 
   await ensureDailyQuestsDeployed();
   await checkAndApplyLockout(profile.id);
+  await checkSubscriptionStatus(profile.id);
   profile = await prisma.profile.findUniqueOrThrow({ where: { id: profile.id } });
 
   return profile;
