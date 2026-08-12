@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { Profile } from "@/generated/prisma/client";
 
 const REMINDER_WINDOW_DAYS = 2;
 
@@ -9,8 +10,8 @@ const REMINDER_WINDOW_DAYS = 2;
 // on an ACTIVE profile forever with nothing to actually enforce it — this
 // is what flips status to EXPIRED so the (app) layout's gate locks them
 // out until they pay again, and reminds them a couple days beforehand.
-export async function checkSubscriptionStatus(profileId: string) {
-  const profile = await prisma.profile.findUniqueOrThrow({ where: { id: profileId } });
+export async function checkSubscriptionStatus(profile: Profile) {
+  const profileId = profile.id;
 
   if (profile.subscriptionStatus !== "ACTIVE" || !profile.subscriptionRenewsAt) return;
 

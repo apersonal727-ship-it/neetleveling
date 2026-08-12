@@ -163,7 +163,7 @@ export async function toggleHunterLock(profileId: string): Promise<ActionResult>
     // forward (see checkAndApplyLockout) so the lazy check doesn't also fire
     // for whatever quest triggered this, then apply the same lock+assign
     // logic an automatic penalty would.
-    await checkAndApplyLockout(profileId);
+    await checkAndApplyLockout(profile);
     const after = await prisma.profile.findUniqueOrThrow({ where: { id: profileId } });
     if (!after.locked) {
       // No missed quest for the lazy check to find — lock directly.

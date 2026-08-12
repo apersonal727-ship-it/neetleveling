@@ -10,6 +10,12 @@ import { checkSubscriptionStatus } from "@/lib/subscription";
 // Does NOT redirect based on `locked` — callers decide what that means for
 // their route (the app shell redirects to /locked, but /locked and
 // /focus-lock need to keep rendering for a locked hunter).
+//
+// Runs on every request, so the lazy checks below are deliberately batched:
+// each accepts the already-fetched profile instead of re-querying it, and
+// independent checks run via Promise.all instead of sequentially — cuts
+// this from ~7 sequential round trips to ~3, which matters a lot given the
+// DB is in a different region than most requests.
 export async function getCurrentProfile() {
   const supabase = await createClient();
   const {
@@ -18,18 +24,16 @@ export async function getCurrentProfile() {
 
   if (!user) redirect("/login");
 
-  let profile = await prisma.profile.findUnique({
-    where: { authUserId: user.id },
-  });
+  const [profile] = await Promise.all([
+    prisma.profile.findUnique({ where: { authUserId: user.id } }),
+    ensureDailyQuestsDeployed(),
+  ]);
 
   if (!profile) redirect("/character-creation");
 
-  await ensureDailyQuestsDeployed();
-  await checkAndApplyLockout(profile.id);
-  await checkSubscriptionStatus(profile.id);
-  profile = await prisma.profile.findUniqueOrThrow({ where: { id: profile.id } });
+  await Promise.all([checkAndApplyLockout(profile), checkSubscriptionStatus(profile)]);
 
-  return profile;
+  return prisma.profile.findUniqueOrThrow({ where: { id: profile.id } });
 }
 
 export async function requireAdminProfile() {

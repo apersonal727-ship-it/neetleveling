@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { Profile } from "@/generated/prisma/client";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 
 function startOfDay(d: Date) {
@@ -30,9 +31,9 @@ async function pickPunishmentQuest() {
 // lockout would immediately re-trigger a new one on the very next page
 // load, since completing the punishment quest doesn't retroactively
 // complete the quest that was actually missed.
-export async function checkAndApplyLockout(profileId: string) {
-  const profile = await prisma.profile.findUniqueOrThrow({ where: { id: profileId } });
+export async function checkAndApplyLockout(profile: Profile) {
   if (profile.locked) return;
+  const profileId = profile.id;
 
   const today = startOfDay(new Date());
   const rank = rankForLevel(getLevelProgress(profile.xp).level).code;
