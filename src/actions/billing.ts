@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
-import { MONTHLY_PRICE } from "@/lib/payment";
+import { MONTHLY_PRICE, maybeGrantReferralCredit } from "@/lib/payment";
 import { createCashfreeOrder } from "@/lib/cashfree";
 import { SITE_URL } from "@/lib/site";
 
@@ -16,6 +16,7 @@ export async function initiatePayment(): Promise<ActionResult & { paymentSession
   const amountDue = MONTHLY_PRICE - creditToApply;
 
   if (amountDue <= 0) {
+    const isFirstActivation = profile.subscriptionRenewsAt === null;
     const renewsAt = new Date();
     renewsAt.setMonth(renewsAt.getMonth() + 1);
     await prisma.$transaction([
@@ -36,6 +37,7 @@ export async function initiatePayment(): Promise<ActionResult & { paymentSession
         },
       }),
     ]);
+    if (isFirstActivation) await maybeGrantReferralCredit(profile.id);
     redirect("/dashboard");
   }
 

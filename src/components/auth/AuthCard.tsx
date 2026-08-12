@@ -25,7 +25,13 @@ const ArrowIcon = () => (
   </svg>
 );
 
-export function AuthCard({ initialMode }: { initialMode: Mode }) {
+export function AuthCard({
+  initialMode,
+  initialReferralCode = "",
+}: {
+  initialMode: Mode;
+  initialReferralCode?: string;
+}) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
@@ -297,6 +303,18 @@ export function AuthCard({ initialMode }: { initialMode: Mode }) {
                     Password must be at least 8 characters.
                   </div>
                 )}
+              </div>
+              <div className={styles.field}>
+                <span className={styles.fieldLabel}>Referral code (optional)</span>
+                <input
+                  className={styles.fieldInput}
+                  name="referredByCode"
+                  type="text"
+                  placeholder="e.g. NEET-XXXXXX"
+                  autoComplete="off"
+                  defaultValue={initialReferralCode}
+                  style={{ textTransform: "uppercase" }}
+                />
               </div>
               <button
                 type="submit"

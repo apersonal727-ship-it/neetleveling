@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getWalletData } from "@/lib/wallet";
+import { REFERRAL_CREDIT_AMOUNT } from "@/lib/payment";
 import { ReferralCard } from "@/components/wallet/ReferralCard";
 import appStyles from "../app.module.css";
 import styles from "./wallet.module.css";
@@ -58,7 +59,7 @@ export default async function WalletPage() {
         <span className={appStyles.secLabel}>Invite hunters</span>
         <div className={`${appStyles.card} ${styles.refCard}`}>
           <div>
-            <div className={styles.rtTitle}>Every subscriber you bring in earns you ₹35 credit</div>
+            <div className={styles.rtTitle}>Every subscriber you bring in earns you ₹{REFERRAL_CREDIT_AMOUNT} credit</div>
             <div className={styles.rtSub}>Applied the moment they complete their first payment.</div>
           </div>
           <ReferralCard referralCode={wallet.referralCode} />

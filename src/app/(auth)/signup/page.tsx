@@ -5,6 +5,11 @@ export const metadata: Metadata = {
   title: "Sign Up — NEETLeveling",
 };
 
-export default function SignupPage() {
-  return <AuthCard initialMode="signup" />;
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
+  const { ref } = await searchParams;
+  return <AuthCard initialMode="signup" initialReferralCode={ref ?? ""} />;
 }

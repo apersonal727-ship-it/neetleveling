@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { checkAndApplyLockout } from "@/lib/lockout";
-import { MONTHLY_PRICE } from "@/lib/payment";
+import { MONTHLY_PRICE, maybeGrantReferralCredit } from "@/lib/payment";
 
 export type ActionResult = { error: string } | { success: true };
 
@@ -203,6 +203,7 @@ export async function approvePayment(transactionId: string): Promise<ActionResul
   });
   if (!tx || tx.status !== "PENDING_REVIEW") return { error: "This payment is no longer pending." };
 
+  const isFirstActivation = tx.profile.subscriptionRenewsAt === null;
   const creditToApply = Math.min(
     tx.profile.walletCredit,
     Math.max(0, MONTHLY_PRICE - tx.amount),
@@ -245,6 +246,8 @@ export async function approvePayment(transactionId: string): Promise<ActionResul
       },
     }),
   ]);
+
+  if (isFirstActivation) await maybeGrantReferralCredit(tx.profileId);
 
   revalidatePath("/admin/billing");
   return { success: true };

@@ -39,6 +39,7 @@ export async function signUp(formData: FormData): Promise<SignUpResult> {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const referredByCodeRaw = String(formData.get("referredByCode") ?? "").trim().toUpperCase();
 
   if (!name) return { error: "Pick a Hunter Name." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -67,6 +68,12 @@ export async function signUp(formData: FormData): Promise<SignUpResult> {
     generateReferralCode(),
   ]);
 
+  let referredByCode: string | null = null;
+  if (referredByCodeRaw) {
+    const referrer = await prisma.profile.findUnique({ where: { referralCode: referredByCodeRaw } });
+    if (referrer) referredByCode = referredByCodeRaw;
+  }
+
   await prisma.profile.create({
     data: {
       authUserId: data.user.id,
@@ -74,6 +81,7 @@ export async function signUp(formData: FormData): Promise<SignUpResult> {
       name,
       hunterId,
       referralCode,
+      referredByCode,
     },
   });
 

@@ -13,7 +13,7 @@ export function ReferralCard({ referralCode }: { referralCode: string }) {
   }
 
   async function share() {
-    const url = typeof window !== "undefined" ? window.location.origin : "";
+    const url = typeof window !== "undefined" ? `${window.location.origin}/signup?ref=${referralCode}` : "";
     const text = `Join me on NEETLeveling — use my code ${referralCode} at signup.`;
     if (navigator.share) {
       try {
