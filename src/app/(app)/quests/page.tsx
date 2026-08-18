@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
-import { getLevelProgress, rankForLevel } from "@/lib/rank";
-import { prisma } from "@/lib/prisma";
-import { questDayStart, questDayEnd } from "@/lib/quest-day";
-import { isPracticeQuest, progressiveQuestionCount, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
-import { startQuestSession } from "@/actions/focus";
-import { StartSessionButton } from "@/components/app/StartSessionButton";
+import { getLevelProgress } from "@/lib/rank";
+import { getTodaysQuests } from "@/lib/todays-quest";
+import { TodaysQuestList } from "@/components/app/TodaysQuestList";
 import appStyles from "../app.module.css";
 import styles from "./quests.module.css";
 
@@ -13,107 +10,11 @@ export const metadata: Metadata = {
   title: "Quests — NEETLeveling",
 };
 
-const CATEGORIES = [
-  {
-    subject: "PHYSICS" as const,
-    name: "Physics",
-    color: "#8fd6ff",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="2.5" />
-        <ellipse cx="12" cy="12" rx="10" ry="4.2" />
-        <ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(60 12 12)" />
-        <ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(120 12 12)" />
-      </>
-    ),
-  },
-  {
-    subject: "CHEMISTRY" as const,
-    name: "Chemistry",
-    color: "#ffb84f",
-    icon: <path d="M9 3h6M10 3v6l-5 9a1.6 1.6 0 0 0 1.4 2.4h11.2A1.6 1.6 0 0 0 19 18l-5-9V3" />,
-  },
-  {
-    subject: "BIOLOGY" as const,
-    name: "Biology",
-    color: "#3ddc84",
-    icon: <path d="M12 21S4 14.5 4 8.8A4.8 4.8 0 0 1 12 5a4.8 4.8 0 0 1 8 3.8C20 14.5 12 21 12 21Z" />,
-  },
-  {
-    subject: "DISCIPLINE" as const,
-    name: "Discipline",
-    color: "#8fd6ff",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v5l3.5 2" />
-      </>
-    ),
-  },
-];
-
-function QuestButton({
-  quest,
-  done,
-}: {
-  quest: { id: string; title: string; durationMinutes: number };
-  done: boolean;
-}) {
-  const row = (
-    <div className={styles.questRow}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div className={styles.questRowTitle}>{quest.title}</div>
-        <div className={styles.questRowMeta} style={{ color: done ? "var(--green)" : "var(--amber)" }}>
-          {done ? "✓ Completed" : `● ${quest.durationMinutes} min`}
-        </div>
-      </div>
-    </div>
-  );
-
-  if (done) return row;
-  return (
-    <StartSessionButton
-      action={startQuestSession.bind(null, quest.id)}
-      style={{ all: "unset", cursor: "pointer", display: "block", width: "100%" }}
-    >
-      {row}
-    </StartSessionButton>
-  );
-}
-
 export default async function QuestsPage() {
   const profile = await getCurrentProfile();
   const progress = getLevelProgress(profile.xp);
-  const rank = rankForLevel(progress.level).code;
 
-  const startOfDay = questDayStart();
-  const endOfDay = questDayEnd();
-
-  const todaysQuests = await prisma.quest.findMany({
-    where: {
-      OR: [
-        { assignScope: "ALL" },
-        { assignScope: "RANK", assignRank: rank },
-        { assignScope: "SPECIFIC_HUNTER", assignedToId: profile.id },
-      ],
-      scheduledFor: null,
-      createdAt: { gte: startOfDay, lt: endOfDay },
-    },
-    include: { completions: { where: { profileId: profile.id } } },
-    orderBy: { createdAt: "asc" },
-  });
-
-  const bySubject = new Map<string, typeof todaysQuests>();
-  for (const cat of CATEGORIES) bySubject.set(cat.subject, []);
-  for (const q of todaysQuests) bySubject.get(q.subject)?.push(q);
-
-  const questionCount = progressiveQuestionCount(profile.streak);
-  const practiceDuration = practiceQuestDurationMinutes(profile.streak);
-  const withDisplayFields = (q: (typeof todaysQuests)[number]) => {
-    if (!isPracticeQuest(q.title)) return q;
-    const baseTitle = q.title.replace(/\s*—\s*\d+\s*Questions?$/i, "");
-    return { ...q, title: `${baseTitle} — ${questionCount} Questions`, durationMinutes: practiceDuration };
-  };
+  const todaysQuests = await getTodaysQuests(profile.id, progress.level);
 
   return (
     <>
@@ -124,34 +25,7 @@ export default async function QuestsPage() {
 
       <section>
         <span className={appStyles.secLabel}>Today&apos;s set</span>
-        {CATEGORIES.map((cat) => {
-          const quests = bySubject.get(cat.subject) ?? [];
-          return (
-            <div key={cat.subject} className={styles.subjectGroup}>
-              <div className={styles.subjectHeading} style={{ "--c": cat.color } as React.CSSProperties}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                  {cat.icon}
-                </svg>
-                {cat.name}
-              </div>
-              {quests.length === 0 ? (
-                <div className={`${appStyles.card}`}>
-                  <div className={styles.questRow}>
-                    <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "#4a5476" }}>
-                      Not assigned today
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className={appStyles.card}>
-                  {quests.map((q) => (
-                    <QuestButton key={q.id} quest={withDisplayFields(q)} done={q.completions.length > 0} />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        <TodaysQuestList quests={todaysQuests} streak={profile.streak} />
       </section>
 
       <section>

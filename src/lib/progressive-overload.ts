@@ -22,3 +22,16 @@ export function isPracticeQuest(title: string): boolean {
 export function practiceQuestDurationMinutes(streak: number): number {
   return progressiveQuestionCount(streak);
 }
+
+// Rewrites a practice quest's stored (static) title/duration to reflect the
+// hunter's live streak — the underlying Quest row is shared across every
+// hunter, so this can't be baked in at deploy time.
+export function applyPracticeOverrides<T extends { title: string; durationMinutes: number }>(
+  quest: T,
+  streak: number,
+): T {
+  if (!isPracticeQuest(quest.title)) return quest;
+  const questionCount = progressiveQuestionCount(streak);
+  const baseTitle = quest.title.replace(/\s*—\s*\d+\s*Questions?$/i, "");
+  return { ...quest, title: `${baseTitle} — ${questionCount} Questions`, durationMinutes: practiceQuestDurationMinutes(streak) };
+}

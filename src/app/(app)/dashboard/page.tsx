@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { getStatBars } from "@/lib/stats";
-import { getTodaysQuest, questSubjectLabel } from "@/lib/todays-quest";
-import { isPracticeQuest, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
-import { startQuestSession } from "@/actions/focus";
-import { StartSessionButton } from "@/components/app/StartSessionButton";
+import { getTodaysQuests } from "@/lib/todays-quest";
+import { TodaysQuestList } from "@/components/app/TodaysQuestList";
+import appStyles from "../app.module.css";
 import styles from "./dashboard.module.css";
 
 export const metadata: Metadata = {
@@ -24,16 +22,12 @@ export default async function DashboardPage({
   const rank = rankForLevel(progress.level);
   const pct = progress.xpForLevel > 0 ? (progress.xpInLevel / progress.xpForLevel) * 100 : 100;
 
-  const [statBars, { next: quest, total: totalQuests, remaining: remainingQuests }] = await Promise.all([
+  const [statBars, todaysQuests] = await Promise.all([
     getStatBars(profile.id),
-    getTodaysQuest(profile.id, progress.level),
+    getTodaysQuests(profile.id, progress.level),
   ]);
 
-  const questDurationMinutes = quest
-    ? isPracticeQuest(quest.title)
-      ? practiceQuestDurationMinutes(profile.streak)
-      : quest.durationMinutes
-    : 0;
+  const doneCount = todaysQuests.filter((q) => q.completions.length > 0).length;
 
   return (
     <>
@@ -85,44 +79,16 @@ export default async function DashboardPage({
       </section>
 
       <section>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <span className={styles.secLabel}>Today</span>
-          {totalQuests > 0 && (
-            <Link href="/quests" className={styles.questDur} style={{ textDecoration: "none" }}>
-              {totalQuests - remainingQuests} of {totalQuests} done · View all
-            </Link>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "12px" }}>
+          <span className={styles.secLabel} style={{ marginBottom: 0 }}>Today</span>
+          {todaysQuests.length > 0 && (
+            <span className={styles.questDur}>
+              {doneCount} of {todaysQuests.length} done
+            </span>
           )}
         </div>
-        <div className={`${styles.card} ${styles.questCard}`}>
-          {quest ? (
-            <>
-              <div className={styles.questTop}>
-                <span className={styles.questCat}>{questSubjectLabel(quest.subject)}</span>
-              </div>
-              <div>
-                <div className={styles.questTitle}>{quest.title}</div>
-                <div className={styles.questDur}>
-                  Duration: {questDurationMinutes} min · +
-                  {quest.xpOverride ?? Math.round(questDurationMinutes * 0.67)} XP on completion
-                </div>
-              </div>
-              <StartSessionButton
-                action={startQuestSession.bind(null, quest.id)}
-                className={`${styles.btn} ${styles.btnPrimary}`}
-                style={{ width: "100%", border: "none" }}
-              >
-                Start Quest
-              </StartSessionButton>
-            </>
-          ) : totalQuests > 0 ? (
-            <div className={styles.emptyQuest}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <path d="M8 13l2.5 2.5L16 9" />
-                <circle cx="12" cy="12" r="9" />
-              </svg>
-              <p>All {totalQuests} of today&apos;s quests are cleared. Come back after the 5 AM reset.</p>
-            </div>
-          ) : (
+        {todaysQuests.length === 0 ? (
+          <div className={`${appStyles.card} ${styles.questCard}`}>
             <div className={styles.emptyQuest}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <circle cx="12" cy="12" r="9" />
@@ -133,8 +99,10 @@ export default async function DashboardPage({
                 quests on a daily cycle.
               </p>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <TodaysQuestList quests={todaysQuests} streak={profile.streak} />
+        )}
       </section>
 
       <section>
