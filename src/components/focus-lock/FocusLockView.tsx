@@ -104,6 +104,19 @@ export function FocusLockView({
     return () => window.removeEventListener("beforeunload", handler);
   }, [remaining]);
 
+  // Trap the browser/OS back gesture while the lock is active: push a dummy
+  // history entry, then immediately re-push on every popstate so leaving via
+  // back never actually navigates away. Released once the session completes.
+  useEffect(() => {
+    if (completed) return;
+    window.history.pushState(null, "", window.location.href);
+    function handlePopState() {
+      window.history.pushState(null, "", window.location.href);
+    }
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [completed]);
+
   const pct = durationSeconds > 0 ? remaining / durationSeconds : 0;
   const strokeDashoffset = CIRCUMFERENCE * (1 - (1 - pct));
 

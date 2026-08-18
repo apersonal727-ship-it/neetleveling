@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { questSubjectLabel } from "@/lib/todays-quest";
 import { penaltyReps, penaltyDurationMinutes } from "@/lib/penalty";
+import { isPracticeQuest, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
 import { FocusLockView } from "@/components/focus-lock/FocusLockView";
 
 export const metadata: Metadata = {
@@ -36,7 +37,9 @@ export default async function FocusLockPage({
     : session.quest!.title;
   const durationMinutes = isPunishment
     ? penaltyDurationMinutes(profile.penaltyStreak)
-    : session.quest!.durationMinutes;
+    : isPracticeQuest(session.quest!.title)
+      ? practiceQuestDurationMinutes(profile.streak)
+      : session.quest!.durationMinutes;
   const category = isPunishment ? "Punishment Quest" : questSubjectLabel(session.quest!.subject);
   const xpAwarded = isPunishment
     ? 0

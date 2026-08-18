@@ -5,6 +5,7 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { maybeIncrementStreak } from "@/lib/streaks";
 import { penaltyDurationMinutes } from "@/lib/penalty";
+import { isPracticeQuest, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
 
 export async function startQuestSession(questId: string) {
   const profile = await getCurrentProfile();
@@ -66,8 +67,12 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
     return { error: "This quest is no longer active." };
   }
 
+  const durationMinutes = isPracticeQuest(session.quest.title)
+    ? practiceQuestDurationMinutes(profile.streak)
+    : session.quest.durationMinutes;
+
   const elapsedMs = Date.now() - session.startedAt.getTime();
-  const requiredMs = session.quest.durationMinutes * 60 * 1000;
+  const requiredMs = durationMinutes * 60 * 1000;
   if (elapsedMs < requiredMs) {
     return { error: "The timer hasn't finished yet." };
   }

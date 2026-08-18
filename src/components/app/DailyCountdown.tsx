@@ -56,6 +56,7 @@ export function DailyCountdown({ deadline }: { deadline: string }) {
             Quests reset in <b>{formatRemaining(remainingMs)}</b>
           </>
         )}
+        <span className={styles.countdownNote}> · daily reset at 5:00 AM IST</span>
       </span>
     </div>
   );

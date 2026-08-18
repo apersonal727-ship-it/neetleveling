@@ -14,10 +14,11 @@ export function questSubjectLabel(subject: string) {
   return SUBJECT_LABEL[subject] ?? subject;
 }
 
-// Today's assigned-but-not-yet-completed quest for this hunter: quests
-// created today (or explicitly scheduled for today) that target them via
-// ALL / their current rank / them specifically, and that they haven't
-// already finished or don't have an active Focus Lock session for.
+// Today's quest set for this hunter: quests created today (or explicitly
+// scheduled for today) that target them via ALL / their current rank / them
+// specifically. Returns the next not-yet-completed one to act on, plus how
+// many total/remaining there are today — a hunter has several quests a day
+// (class + practice per subject), not just one.
 export async function getTodaysQuest(profileId: string, level: number) {
   const rank = rankForLevel(level).code;
 
@@ -39,11 +40,16 @@ export async function getTodaysQuest(profileId: string, level: number) {
           ],
         },
       ],
-      completions: { none: { profileId } },
     },
+    include: { completions: { where: { profileId } } },
     orderBy: { createdAt: "asc" },
-    take: 1,
   });
 
-  return quests[0] ?? null;
+  const incomplete = quests.filter((q) => q.completions.length === 0);
+
+  return {
+    next: incomplete[0] ?? null,
+    total: quests.length,
+    remaining: incomplete.length,
+  };
 }

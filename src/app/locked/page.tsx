@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { startPunishmentSession } from "@/actions/focus";
 import { penaltyReps, penaltyDurationMinutes } from "@/lib/penalty";
+import { StartSessionButton } from "@/components/app/StartSessionButton";
 import styles from "./locked.module.css";
 
 export const metadata: Metadata = {
@@ -93,14 +94,17 @@ export default async function LockedPage() {
                       <p className={styles.pqNote}>
                         Complete {remaining > 1 ? "all of these" : "it"} and you&apos;re back in.
                       </p>
-                      <form action={startPunishmentSession.bind(null, lp.punishmentQuestId)}>
-                        <button type="submit" className={`${styles.btn} ${styles.btnUnlock}`} style={{ width: "100%" }}>
-                          Start
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M5 12h14M13 6l6 6-6 6" />
-                          </svg>
-                        </button>
-                      </form>
+                      <StartSessionButton
+                        action={startPunishmentSession.bind(null, lp.punishmentQuestId)}
+                        className={`${styles.btn} ${styles.btnUnlock}`}
+                        style={{ width: "100%" }}
+                        message="Once you begin, the timer can't be paused, abandoned, or backed out of until it ends."
+                      >
+                        Start
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                      </StartSessionButton>
                     </>
                   )}
                 </div>

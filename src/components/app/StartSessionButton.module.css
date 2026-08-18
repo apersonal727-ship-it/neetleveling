@@ -1,0 +1,66 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(3, 4, 8, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.card {
+  width: 100%;
+  max-width: 340px;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid rgba(255, 77, 94, 0.4);
+  border-radius: 16px;
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: 0 0 60px -14px rgba(255, 77, 94, 0.4);
+}
+.icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  color: var(--red);
+}
+.card h2 {
+  font-size: 17px;
+  margin-bottom: 8px;
+  color: #ffdde0;
+}
+.card p {
+  font-size: 13px;
+  color: var(--slate);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+}
+.cancelBtn,
+.confirmBtn {
+  flex: 1;
+  height: 46px;
+  border-radius: 10px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+}
+.cancelBtn {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ice);
+  border: 1px solid var(--border-strong);
+}
+.confirmBtn {
+  background: linear-gradient(135deg, var(--red), #c22636);
+  color: #fff0f0;
+}
+.confirmBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

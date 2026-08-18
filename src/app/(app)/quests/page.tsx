@@ -3,8 +3,9 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { prisma } from "@/lib/prisma";
 import { questDayStart, questDayEnd } from "@/lib/quest-day";
-import { progressiveQuestionCount } from "@/lib/progressive-overload";
+import { isPracticeQuest, progressiveQuestionCount, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
 import { startQuestSession } from "@/actions/focus";
+import { StartSessionButton } from "@/components/app/StartSessionButton";
 import appStyles from "../app.module.css";
 import styles from "./quests.module.css";
 
@@ -71,11 +72,12 @@ function QuestButton({
 
   if (done) return row;
   return (
-    <form action={startQuestSession.bind(null, quest.id)}>
-      <button type="submit" style={{ all: "unset", cursor: "pointer", display: "block", width: "100%" }}>
-        {row}
-      </button>
-    </form>
+    <StartSessionButton
+      action={startQuestSession.bind(null, quest.id)}
+      style={{ all: "unset", cursor: "pointer", display: "block", width: "100%" }}
+    >
+      {row}
+    </StartSessionButton>
   );
 }
 
@@ -106,11 +108,11 @@ export default async function QuestsPage() {
   for (const q of todaysQuests) bySubject.get(q.subject)?.push(q);
 
   const questionCount = progressiveQuestionCount(profile.streak);
-  const withDisplayTitle = (q: (typeof todaysQuests)[number]) => {
-    const isPractice = q.title.includes("Practice");
-    if (!isPractice) return q;
+  const practiceDuration = practiceQuestDurationMinutes(profile.streak);
+  const withDisplayFields = (q: (typeof todaysQuests)[number]) => {
+    if (!isPracticeQuest(q.title)) return q;
     const baseTitle = q.title.replace(/\s*—\s*\d+\s*Questions?$/i, "");
-    return { ...q, title: `${baseTitle} — ${questionCount} Questions` };
+    return { ...q, title: `${baseTitle} — ${questionCount} Questions`, durationMinutes: practiceDuration };
   };
 
   return (
@@ -143,7 +145,7 @@ export default async function QuestsPage() {
               ) : (
                 <div className={appStyles.card}>
                   {quests.map((q) => (
-                    <QuestButton key={q.id} quest={withDisplayTitle(q)} done={q.completions.length > 0} />
+                    <QuestButton key={q.id} quest={withDisplayFields(q)} done={q.completions.length > 0} />
                   ))}
                 </div>
               )}

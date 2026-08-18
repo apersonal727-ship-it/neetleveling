@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { getStatBars } from "@/lib/stats";
 import { getTodaysQuest, questSubjectLabel } from "@/lib/todays-quest";
+import { isPracticeQuest, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
 import { startQuestSession } from "@/actions/focus";
+import { StartSessionButton } from "@/components/app/StartSessionButton";
 import styles from "./dashboard.module.css";
 
 export const metadata: Metadata = {
@@ -21,10 +24,16 @@ export default async function DashboardPage({
   const rank = rankForLevel(progress.level);
   const pct = progress.xpForLevel > 0 ? (progress.xpInLevel / progress.xpForLevel) * 100 : 100;
 
-  const [statBars, quest] = await Promise.all([
+  const [statBars, { next: quest, total: totalQuests, remaining: remainingQuests }] = await Promise.all([
     getStatBars(profile.id),
     getTodaysQuest(profile.id, progress.level),
   ]);
+
+  const questDurationMinutes = quest
+    ? isPracticeQuest(quest.title)
+      ? practiceQuestDurationMinutes(profile.streak)
+      : quest.durationMinutes
+    : 0;
 
   return (
     <>
@@ -76,7 +85,14 @@ export default async function DashboardPage({
       </section>
 
       <section>
-        <span className={styles.secLabel}>Today</span>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+          <span className={styles.secLabel}>Today</span>
+          {totalQuests > 0 && (
+            <Link href="/quests" className={styles.questDur} style={{ textDecoration: "none" }}>
+              {totalQuests - remainingQuests} of {totalQuests} done · View all
+            </Link>
+          )}
+        </div>
         <div className={`${styles.card} ${styles.questCard}`}>
           {quest ? (
             <>
@@ -86,16 +102,26 @@ export default async function DashboardPage({
               <div>
                 <div className={styles.questTitle}>{quest.title}</div>
                 <div className={styles.questDur}>
-                  Duration: {quest.durationMinutes} min · +
-                  {quest.xpOverride ?? Math.round(quest.durationMinutes * 0.67)} XP on completion
+                  Duration: {questDurationMinutes} min · +
+                  {quest.xpOverride ?? Math.round(questDurationMinutes * 0.67)} XP on completion
                 </div>
               </div>
-              <form action={startQuestSession.bind(null, quest.id)}>
-                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", border: "none" }}>
-                  Start Quest
-                </button>
-              </form>
+              <StartSessionButton
+                action={startQuestSession.bind(null, quest.id)}
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                style={{ width: "100%", border: "none" }}
+              >
+                Start Quest
+              </StartSessionButton>
             </>
+          ) : totalQuests > 0 ? (
+            <div className={styles.emptyQuest}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <path d="M8 13l2.5 2.5L16 9" />
+                <circle cx="12" cy="12" r="9" />
+              </svg>
+              <p>All {totalQuests} of today&apos;s quests are cleared. Come back after the 5 AM reset.</p>
+            </div>
           ) : (
             <div className={styles.emptyQuest}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">

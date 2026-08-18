@@ -13,3 +13,12 @@ export function progressiveQuestionCount(streak: number): number {
   const partialSum = STEP_PATTERN.slice(0, remainder).reduce((a, b) => a + b, 0);
   return Math.min(CAP, START_COUNT + fullCycles * CYCLE_SUM + partialSum);
 }
+
+export function isPracticeQuest(title: string): boolean {
+  return title.includes("Practice");
+}
+
+// 1 minute per question — duration rides the same ramp as the question count.
+export function practiceQuestDurationMinutes(streak: number): number {
+  return progressiveQuestionCount(streak);
+}

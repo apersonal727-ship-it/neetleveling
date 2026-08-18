@@ -89,6 +89,10 @@
   color: var(--ice);
   font-weight: 600;
 }
+.countdownNote {
+  color: #4a5476;
+  opacity: 0.85;
+}
 .countdown[data-urgency="warning"] {
   color: var(--amber);
 }
