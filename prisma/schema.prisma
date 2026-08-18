@@ -153,42 +153,51 @@ model QuestSession {
   @@index([profileId, status])
 }
 
-// ── Punishment pool ──────────────────────────────────────────────
+// ── Punishment protocol ────────────────────────────────────────────
+// Fixed set of 3 exercises (Pushups/Situps/Squats, seeded once) — not
+// admin-configurable. Reps and duration are computed from penaltyStreak
+// (see src/lib/penalty.ts), not stored per row.
 
 model PunishmentQuest {
-  id              String   @id @default(cuid())
-  title           String
-  durationMinutes Int
-  timesTriggered  Int      @default(0)
-  createdAt       DateTime @default(now())
+  id    String @id @default(cuid())
+  title String
 
-  sessions      QuestSession[]
-  lockoutEvents LockoutEvent[]
-}
-
-enum PunishmentMode {
-  RANDOM
-  FIXED
-}
-
-model PunishmentConfig {
-  id                Int            @id @default(1)
-  mode              PunishmentMode @default(RANDOM)
-  fixedPunishmentId String?
+  sessions           QuestSession[]
+  lockoutPunishments LockoutPunishment[]
 }
 
 model LockoutEvent {
-  id                String           @id @default(cuid())
-  profileId         String
-  profile           Profile          @relation(fields: [profileId], references: [id])
-  lockedAt          DateTime         @default(now())
-  reason            String
-  punishmentQuestId String?
-  punishmentQuest   PunishmentQuest? @relation(fields: [punishmentQuestId], references: [id])
-  unlockedAt        DateTime?
-  resolved          Boolean          @default(false)
+  id                  String    @id @default(cuid())
+  profileId           String
+  profile             Profile   @relation(fields: [profileId], references: [id])
+  lockedAt            DateTime  @default(now())
+  reason              String
+  unlockedAt          DateTime?
+  resolved            Boolean   @default(false)
+  // Profile.penaltyStreak AFTER incrementing for this lock — snapshotted so
+  // reps/duration (see src/lib/penalty.ts) can be computed correctly for
+  // past lockouts even after penaltyStreak has since climbed further.
+  penaltyStreakAtLock Int       @default(1)
+
+  punishments LockoutPunishment[]
 
   @@index([profileId, resolved])
+}
+
+// Every punishment quest in the pool is required to clear a lockout — one
+// row per quest, snapshotted at lock time so later pool edits don't
+// retroactively change what's already assigned to a locked hunter. The
+// account unlocks once every row for a LockoutEvent is completed.
+model LockoutPunishment {
+  id                String          @id @default(cuid())
+  lockoutEventId    String
+  lockoutEvent      LockoutEvent    @relation(fields: [lockoutEventId], references: [id])
+  punishmentQuestId String
+  punishmentQuest   PunishmentQuest @relation(fields: [punishmentQuestId], references: [id])
+  completed         Boolean         @default(false)
+  completedAt       DateTime?
+
+  @@index([lockoutEventId])
 }
 
 // ── Wallet & billing ─────────────────────────────────────────────

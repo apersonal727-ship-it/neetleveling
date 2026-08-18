@@ -96,43 +96,6 @@ export async function toggleQuestTemplateActive(id: string): Promise<ActionResul
   return { success: true };
 }
 
-// ── Punishment pool ────────────────────────────────────────────
-
-export async function addPunishmentQuest(formData: FormData): Promise<ActionResult> {
-  await requireAdminSession();
-  const title = String(formData.get("title") ?? "").trim();
-  const durationMinutes = parseInt(String(formData.get("durationMinutes") ?? ""), 10);
-
-  if (!title) return { error: "Title is required." };
-  if (!durationMinutes || durationMinutes <= 0) return { error: "Duration must be a positive number of minutes." };
-
-  await prisma.punishmentQuest.create({ data: { title, durationMinutes } });
-  revalidatePath("/admin/punishment");
-  return { success: true };
-}
-
-export async function removePunishmentQuest(id: string): Promise<ActionResult> {
-  await requireAdminSession();
-  await prisma.punishmentConfig.updateMany({
-    where: { id: 1, fixedPunishmentId: id },
-    data: { fixedPunishmentId: null },
-  });
-  await prisma.punishmentQuest.delete({ where: { id } });
-  revalidatePath("/admin/punishment");
-  return { success: true };
-}
-
-export async function setPunishmentMode(mode: "RANDOM" | "FIXED", fixedPunishmentId?: string): Promise<ActionResult> {
-  await requireAdminSession();
-  await prisma.punishmentConfig.upsert({
-    where: { id: 1 },
-    create: { id: 1, mode, fixedPunishmentId: fixedPunishmentId ?? null },
-    update: { mode, fixedPunishmentId: mode === "FIXED" ? (fixedPunishmentId ?? null) : null },
-  });
-  revalidatePath("/admin/punishment");
-  return { success: true };
-}
-
 // ── Hunters ────────────────────────────────────────────────────
 
 export async function adjustHunterXp(profileId: string, xp: number): Promise<ActionResult> {
@@ -169,17 +132,25 @@ export async function toggleHunterLock(profileId: string): Promise<ActionResult>
     const after = await prisma.profile.findUniqueOrThrow({ where: { id: profileId } });
     if (!after.locked) {
       // No missed quest for the lazy check to find — lock directly.
-      const pool = await prisma.punishmentQuest.findMany();
-      const punishment = pool[Math.floor(Math.random() * pool.length)];
-      await prisma.$transaction([
-        prisma.profile.update({
+      const pool = await prisma.punishmentQuest.findMany({ select: { id: true } });
+      await prisma.$transaction(async (tx) => {
+        await tx.profile.update({
           where: { id: profileId },
           data: { locked: true, streak: 0, penaltyStreak: { increment: 1 } },
-        }),
-        prisma.lockoutEvent.create({
-          data: { profileId, reason: "Manually locked by admin", punishmentQuestId: punishment?.id },
-        }),
-      ]);
+        });
+        const lockoutEvent = await tx.lockoutEvent.create({
+          data: {
+            profileId,
+            reason: "Manually locked by admin",
+            penaltyStreakAtLock: profile.penaltyStreak + 1,
+          },
+        });
+        if (pool.length > 0) {
+          await tx.lockoutPunishment.createMany({
+            data: pool.map((p) => ({ lockoutEventId: lockoutEvent.id, punishmentQuestId: p.id })),
+          });
+        }
+      });
     }
   }
 

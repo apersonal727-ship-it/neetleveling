@@ -6,7 +6,6 @@ import styles from "@/app/admin/admin.module.css";
 
 const TABS = [
   { href: "/admin/quests", label: "Quests" },
-  { href: "/admin/punishment", label: "Punishment Pool" },
   { href: "/admin/hunters", label: "Hunters" },
   { href: "/admin/broadcast", label: "Broadcast" },
   { href: "/admin/analytics", label: "Analytics" },

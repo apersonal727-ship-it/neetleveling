@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { maybeIncrementStreak } from "@/lib/streaks";
+import { penaltyDurationMinutes } from "@/lib/penalty";
 
 export async function startQuestSession(questId: string) {
   const profile = await getCurrentProfile();
@@ -21,26 +22,26 @@ export async function startQuestSession(questId: string) {
   redirect(`/focus-lock?sessionId=${session.id}`);
 }
 
-export async function startPunishmentSession() {
+export async function startPunishmentSession(punishmentQuestId: string) {
   const profile = await getCurrentProfile();
 
   const existing = await prisma.questSession.findFirst({
-    where: { profileId: profile.id, kind: "PUNISHMENT", status: "ACTIVE" },
+    where: { profileId: profile.id, kind: "PUNISHMENT", punishmentQuestId, status: "ACTIVE" },
   });
   if (existing) redirect(`/focus-lock?sessionId=${existing.id}`);
 
   const lockoutEvent = await prisma.lockoutEvent.findFirst({
     where: { profileId: profile.id, resolved: false },
     orderBy: { lockedAt: "desc" },
+    include: { punishments: true },
   });
-  if (!lockoutEvent?.punishmentQuestId) redirect("/locked");
+  const target = lockoutEvent?.punishments.find(
+    (p) => p.punishmentQuestId === punishmentQuestId && !p.completed,
+  );
+  if (!target) redirect("/locked");
 
   const session = await prisma.questSession.create({
-    data: {
-      profileId: profile.id,
-      kind: "PUNISHMENT",
-      punishmentQuestId: lockoutEvent.punishmentQuestId,
-    },
+    data: { profileId: profile.id, kind: "PUNISHMENT", punishmentQuestId },
   });
 
   redirect(`/focus-lock?sessionId=${session.id}`);
@@ -115,25 +116,40 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
   }
 
   const elapsedMs = Date.now() - session.startedAt.getTime();
-  const requiredMs = session.punishmentQuest.durationMinutes * 60 * 1000;
+  const requiredMs = penaltyDurationMinutes(profile.penaltyStreak) * 60 * 1000;
   if (elapsedMs < requiredMs) {
     return { error: "The timer hasn't finished yet." };
   }
 
-  await prisma.$transaction([
-    prisma.questSession.update({
+  await prisma.$transaction(async (tx) => {
+    await tx.questSession.update({
       where: { id: session.id },
       data: { status: "COMPLETED", completedAt: new Date() },
-    }),
-    prisma.profile.update({
-      where: { id: profile.id },
-      data: { locked: false },
-    }),
-    prisma.lockoutEvent.updateMany({
+    });
+
+    const lockoutEvent = await tx.lockoutEvent.findFirst({
       where: { profileId: profile.id, resolved: false },
-      data: { resolved: true, unlockedAt: new Date() },
-    }),
-  ]);
+      orderBy: { lockedAt: "desc" },
+    });
+    if (!lockoutEvent) return;
+
+    await tx.lockoutPunishment.updateMany({
+      where: { lockoutEventId: lockoutEvent.id, punishmentQuestId: session.punishmentQuestId!, completed: false },
+      data: { completed: true, completedAt: new Date() },
+    });
+
+    const remaining = await tx.lockoutPunishment.count({
+      where: { lockoutEventId: lockoutEvent.id, completed: false },
+    });
+
+    if (remaining === 0) {
+      await tx.profile.update({ where: { id: profile.id }, data: { locked: false } });
+      await tx.lockoutEvent.update({
+        where: { id: lockoutEvent.id },
+        data: { resolved: true, unlockedAt: new Date() },
+      });
+    }
+  });
 
   return { success: true, xpAwarded: 0, streak: 0 };
 }

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { startPunishmentSession } from "@/actions/focus";
-import { penaltyReps } from "@/lib/penalty";
+import { penaltyReps, penaltyDurationMinutes } from "@/lib/penalty";
 import styles from "./locked.module.css";
 
 export const metadata: Metadata = {
@@ -17,11 +17,16 @@ export default async function LockedPage() {
   const lockoutEvent = await prisma.lockoutEvent.findFirst({
     where: { profileId: profile.id, resolved: false },
     orderBy: { lockedAt: "desc" },
-    include: { punishmentQuest: true },
+    include: { punishments: { include: { punishmentQuest: true }, orderBy: { id: "asc" } } },
   });
 
+  const punishments = lockoutEvent?.punishments ?? [];
+  const remaining = punishments.filter((p) => !p.completed).length;
+
   const previousStreak = profile.bestStreak > 0 && profile.streak === 0 ? profile.bestStreak : null;
-  const reps = penaltyReps(profile.penaltyStreak);
+  const tier = lockoutEvent?.penaltyStreakAtLock ?? profile.penaltyStreak;
+  const reps = penaltyReps(tier);
+  const durationMinutes = penaltyDurationMinutes(tier);
 
   return (
     <>
@@ -63,29 +68,43 @@ export default async function LockedPage() {
             </div>
           )}
 
-          {lockoutEvent?.punishmentQuest ? (
+          {punishments.length > 0 ? (
             <section>
-              <span className={styles.secLabel}>Only way back in</span>
-              <div className={`${styles.card} ${styles.pqCard}`}>
-                <div className={styles.pqTop}>
-                  <span className={styles.pqTag}>PUNISHMENT QUEST</span>
-                  <span className={`${styles.pqDur} mono`}>
-                    {lockoutEvent.punishmentQuest.durationMinutes} min
-                  </span>
+              <span className={styles.secLabel}>
+                Only way back in{remaining > 0 ? ` — ${remaining} left` : ""}
+              </span>
+              {punishments.map((lp) => (
+                <div
+                  key={lp.id}
+                  className={`${styles.card} ${styles.pqCard}`}
+                  style={{ marginBottom: "12px", opacity: lp.completed ? 0.55 : 1 }}
+                >
+                  <div className={styles.pqTop}>
+                    <span className={styles.pqTag}>{lp.completed ? "CLEARED" : "PUNISHMENT QUEST"}</span>
+                    <span className={`${styles.pqDur} mono`}>{durationMinutes} min</span>
+                  </div>
+                  <div className={styles.pqTitle}>
+                    {reps} {lp.punishmentQuest.title}
+                  </div>
+                  {lp.completed ? (
+                    <p className={styles.pqNote}>Cleared.</p>
+                  ) : (
+                    <>
+                      <p className={styles.pqNote}>
+                        Complete {remaining > 1 ? "all of these" : "it"} and you&apos;re back in.
+                      </p>
+                      <form action={startPunishmentSession.bind(null, lp.punishmentQuestId)}>
+                        <button type="submit" className={`${styles.btn} ${styles.btnUnlock}`} style={{ width: "100%" }}>
+                          Start
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                          </svg>
+                        </button>
+                      </form>
+                    </>
+                  )}
                 </div>
-                <div className={styles.pqTitle}>
-                  {reps} {lockoutEvent.punishmentQuest.title}
-                </div>
-                <p className={styles.pqNote}>Complete it and you&apos;re back in.</p>
-                <form action={startPunishmentSession}>
-                  <button type="submit" className={`${styles.btn} ${styles.btnUnlock}`} style={{ width: "100%" }}>
-                    Start Punishment Quest
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                  </button>
-                </form>
-              </div>
+              ))}
             </section>
           ) : (
             <div className={styles.infoLine}>

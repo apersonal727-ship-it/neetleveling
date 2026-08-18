@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { penaltyReps, penaltyDurationMinutes } from "@/lib/penalty";
 
 function startOfDay(d: Date) {
   const x = new Date(d);
@@ -114,7 +115,7 @@ export async function getRecentActivity(profileId: string, limit = 12): Promise<
   });
   const lockouts = await prisma.lockoutEvent.findMany({
     where: { profileId },
-    include: { punishmentQuest: true },
+    include: { punishments: { include: { punishmentQuest: true } } },
     orderBy: { lockedAt: "desc" },
     take: limit,
   });
@@ -130,15 +131,19 @@ export async function getRecentActivity(profileId: string, limit = 12): Promise<
         at: c.completedAt,
       }),
     ),
-    ...lockouts.map(
-      (l): ActivityEntry => ({
+    ...lockouts.map((l): ActivityEntry => {
+      const reps = penaltyReps(l.penaltyStreakAtLock);
+      return {
         kind: "penalty",
-        title: l.punishmentQuest?.title ?? "Punishment quest",
-        durationMinutes: l.punishmentQuest?.durationMinutes ?? 0,
+        title:
+          l.punishments.length > 0
+            ? l.punishments.map((p) => `${reps} ${p.punishmentQuest.title}`).join(", ")
+            : "Punishment quest",
+        durationMinutes: penaltyDurationMinutes(l.penaltyStreakAtLock),
         at: l.lockedAt,
         resolved: l.resolved,
-      }),
-    ),
+      };
+    }),
   ];
 
   entries.sort((a, b) => b.at.getTime() - a.at.getTime());

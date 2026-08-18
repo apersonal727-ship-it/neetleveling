@@ -3,22 +3,11 @@ import type { Profile } from "@/generated/prisma/client";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { questDayStart } from "@/lib/quest-day";
 
-async function pickPunishmentQuest() {
-  const config = await prisma.punishmentConfig.findUnique({ where: { id: 1 } });
-  const pool = await prisma.punishmentQuest.findMany();
-  if (pool.length === 0) return null;
-
-  if (config?.mode === "FIXED" && config.fixedPunishmentId) {
-    const fixed = pool.find((p) => p.id === config.fixedPunishmentId);
-    if (fixed) return fixed;
-  }
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
 // Lazily evaluated on every app page load (no cron): if any quest assigned
 // to this hunter on a prior day was never completed, its 24h window has
-// closed — lock the account, reset the streak, and assign a punishment
-// quest from the pool. No-ops if the profile is already locked.
+// closed — lock the account, reset the streak, and assign every punishment
+// quest in the pool (all must be cleared to unlock). No-ops if the profile
+// is already locked.
 //
 // Only quests created *after* the hunter's most recent lockout event (or
 // account creation, if they've never been locked) are considered. Without
@@ -57,27 +46,24 @@ export async function checkAndApplyLockout(profile: Profile) {
 
   if (pastQuests.length === 0) return;
 
-  const punishment = await pickPunishmentQuest();
+  const pool = await prisma.punishmentQuest.findMany({ select: { id: true } });
 
-  await prisma.$transaction([
-    prisma.profile.update({
+  await prisma.$transaction(async (tx) => {
+    await tx.profile.update({
       where: { id: profileId },
       data: { locked: true, streak: 0, penaltyStreak: { increment: 1 } },
-    }),
-    prisma.lockoutEvent.create({
+    });
+    const lockoutEvent = await tx.lockoutEvent.create({
       data: {
         profileId,
         reason: "Missed quest window",
-        punishmentQuestId: punishment?.id,
+        penaltyStreakAtLock: profile.penaltyStreak + 1,
       },
-    }),
-    ...(punishment
-      ? [
-          prisma.punishmentQuest.update({
-            where: { id: punishment.id },
-            data: { timesTriggered: { increment: 1 } },
-          }),
-        ]
-      : []),
-  ]);
+    });
+    if (pool.length > 0) {
+      await tx.lockoutPunishment.createMany({
+        data: pool.map((p) => ({ lockoutEventId: lockoutEvent.id, punishmentQuestId: p.id })),
+      });
+    }
+  });
 }
