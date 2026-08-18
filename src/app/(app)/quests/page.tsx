@@ -3,6 +3,7 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { prisma } from "@/lib/prisma";
 import { questDayStart, questDayEnd } from "@/lib/quest-day";
+import { progressiveQuestionCount } from "@/lib/progressive-overload";
 import { startQuestSession } from "@/actions/focus";
 import appStyles from "../app.module.css";
 import styles from "./quests.module.css";
@@ -104,6 +105,14 @@ export default async function QuestsPage() {
   for (const cat of CATEGORIES) bySubject.set(cat.subject, []);
   for (const q of todaysQuests) bySubject.get(q.subject)?.push(q);
 
+  const questionCount = progressiveQuestionCount(profile.streak);
+  const withDisplayTitle = (q: (typeof todaysQuests)[number]) => {
+    const isPractice = q.title.includes("Practice");
+    if (!isPractice) return q;
+    const baseTitle = q.title.replace(/\s*—\s*\d+\s*Questions?$/i, "");
+    return { ...q, title: `${baseTitle} — ${questionCount} Questions` };
+  };
+
   return (
     <>
       <div className={appStyles.pageHead}>
@@ -134,7 +143,7 @@ export default async function QuestsPage() {
               ) : (
                 <div className={appStyles.card}>
                   {quests.map((q) => (
-                    <QuestButton key={q.id} quest={q} done={q.completions.length > 0} />
+                    <QuestButton key={q.id} quest={withDisplayTitle(q)} done={q.completions.length > 0} />
                   ))}
                 </div>
               )}
