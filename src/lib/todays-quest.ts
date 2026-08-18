@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { rankForLevel } from "@/lib/rank";
+import { questDayStart, questDayEnd } from "@/lib/quest-day";
 
 const SUBJECT_LABEL: Record<string, string> = {
   PHYSICS: "PHYSICS",
@@ -20,10 +21,8 @@ export function questSubjectLabel(subject: string) {
 export async function getTodaysQuest(profileId: string, level: number) {
   const rank = rankForLevel(level).code;
 
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(startOfDay);
-  endOfDay.setDate(endOfDay.getDate() + 1);
+  const startOfDay = questDayStart();
+  const endOfDay = questDayEnd();
 
   const quests = await prisma.quest.findMany({
     where: {

@@ -1,12 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { Profile } from "@/generated/prisma/client";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
-
-function startOfDay(d: Date) {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
-}
+import { questDayStart } from "@/lib/quest-day";
 
 async function pickPunishmentQuest() {
   const config = await prisma.punishmentConfig.findUnique({ where: { id: 1 } });
@@ -35,7 +30,7 @@ export async function checkAndApplyLockout(profile: Profile) {
   if (profile.locked) return;
   const profileId = profile.id;
 
-  const today = startOfDay(new Date());
+  const today = questDayStart();
   const rank = rankForLevel(getLevelProgress(profile.xp).level).code;
 
   const lastLockout = await prisma.lockoutEvent.findFirst({

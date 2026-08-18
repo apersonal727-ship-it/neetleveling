@@ -86,6 +86,44 @@
   width: 18px;
   height: 18px;
 }
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--blue-2);
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+.countdown svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+.countdown b {
+  color: var(--ice);
+  font-weight: 600;
+}
+.countdown[data-urgency="warning"] {
+  color: var(--amber);
+}
+.countdown[data-urgency="warning"] b {
+  color: var(--amber-2);
+}
+.countdown[data-urgency="critical"] {
+  color: var(--red);
+  animation: countdownPulse 1s ease-in-out infinite;
+}
+.countdown[data-urgency="critical"] b {
+  color: var(--red-2);
+}
+@keyframes countdownPulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 .xpTrack {
   height: 6px;
   border-radius: 100px;

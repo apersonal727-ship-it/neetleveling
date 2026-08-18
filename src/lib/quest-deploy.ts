@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { questDayStart } from "@/lib/quest-day";
 
 // Lazily re-deploys active QuestTemplates as fresh, ALL-hunters Quest rows
 // once per day — same no-cron pattern as checkAndApplyLockout and streak
 // crediting. Called from getCurrentProfile() on every request; the query
 // is a fast no-op once today's batch is already deployed.
 export async function ensureDailyQuestsDeployed() {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = questDayStart();
 
   const due = await prisma.questTemplate.findMany({
     where: {

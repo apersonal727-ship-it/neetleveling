@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress } from "@/lib/rank";
+import { questDayEnd } from "@/lib/quest-day";
 import { FlameIcon } from "@/components/icons/FlameIcon";
 import { BottomTabbar } from "@/components/app/BottomTabbar";
+import { DailyCountdown } from "@/components/app/DailyCountdown";
 import styles from "./app.module.css";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -42,6 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
           </div>
         </div>
+        <DailyCountdown deadline={questDayEnd().toISOString()} />
         <div className={styles.xpTrack}>
           <div className={styles.xpFill} style={{ width: `${pct}%` }} />
         </div>

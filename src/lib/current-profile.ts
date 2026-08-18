@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
@@ -11,12 +12,15 @@ import { checkSubscriptionStatus } from "@/lib/subscription";
 // their route (the app shell redirects to /locked, but /locked and
 // /focus-lock need to keep rendering for a locked hunter).
 //
-// Runs on every request, so the lazy checks below are deliberately batched:
-// each accepts the already-fetched profile instead of re-querying it, and
-// independent checks run via Promise.all instead of sequentially — cuts
-// this from ~7 sequential round trips to ~3, which matters a lot given the
-// DB is in a different region than most requests.
-export async function getCurrentProfile() {
+// Wrapped in React's cache() — most pages call this from both their layout
+// and the page itself, and without dedup each of the "check once, then act"
+// lazy checks below can run concurrently within the same request and race
+// (e.g. two calls both see today's batch as "not yet deployed" and each
+// deploy their own copy before the other's write is visible). cache()
+// makes every call in one request share a single in-flight execution, so
+// the checks only actually run once — this also cuts DB round trips
+// further on top of the batching below.
+export const getCurrentProfile = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -34,7 +38,7 @@ export async function getCurrentProfile() {
   await Promise.all([checkAndApplyLockout(profile), checkSubscriptionStatus(profile)]);
 
   return prisma.profile.findUniqueOrThrow({ where: { id: profile.id } });
-}
+});
 
 export async function requireAdminProfile() {
   const profile = await getCurrentProfile();

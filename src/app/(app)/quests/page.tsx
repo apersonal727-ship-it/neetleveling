@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { prisma } from "@/lib/prisma";
+import { questDayStart, questDayEnd } from "@/lib/quest-day";
 import { startQuestSession } from "@/actions/focus";
 import appStyles from "../app.module.css";
 import styles from "./quests.module.css";
@@ -49,15 +50,41 @@ const CATEGORIES = [
   },
 ];
 
+function QuestButton({
+  quest,
+  done,
+}: {
+  quest: { id: string; title: string; durationMinutes: number };
+  done: boolean;
+}) {
+  const row = (
+    <div className={styles.questRow}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className={styles.questRowTitle}>{quest.title}</div>
+        <div className={styles.questRowMeta} style={{ color: done ? "var(--green)" : "var(--amber)" }}>
+          {done ? "✓ Completed" : `● ${quest.durationMinutes} min`}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (done) return row;
+  return (
+    <form action={startQuestSession.bind(null, quest.id)}>
+      <button type="submit" style={{ all: "unset", cursor: "pointer", display: "block", width: "100%" }}>
+        {row}
+      </button>
+    </form>
+  );
+}
+
 export default async function QuestsPage() {
   const profile = await getCurrentProfile();
   const progress = getLevelProgress(profile.xp);
   const rank = rankForLevel(progress.level).code;
 
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(startOfDay);
-  endOfDay.setDate(endOfDay.getDate() + 1);
+  const startOfDay = questDayStart();
+  const endOfDay = questDayEnd();
 
   const todaysQuests = await prisma.quest.findMany({
     where: {
@@ -70,10 +97,12 @@ export default async function QuestsPage() {
       createdAt: { gte: startOfDay, lt: endOfDay },
     },
     include: { completions: { where: { profileId: profile.id } } },
+    orderBy: { createdAt: "asc" },
   });
 
-  const bySubject = new Map<string, (typeof todaysQuests)[number]>();
-  for (const q of todaysQuests) if (!bySubject.has(q.subject)) bySubject.set(q.subject, q);
+  const bySubject = new Map<string, typeof todaysQuests>();
+  for (const cat of CATEGORIES) bySubject.set(cat.subject, []);
+  for (const q of todaysQuests) bySubject.get(q.subject)?.push(q);
 
   return (
     <>
@@ -84,45 +113,34 @@ export default async function QuestsPage() {
 
       <section>
         <span className={appStyles.secLabel}>Today&apos;s set</span>
-        <div className={styles.catGrid}>
-          {CATEGORIES.map((cat) => {
-            const quest = bySubject.get(cat.subject);
-            const done = quest && quest.completions.length > 0;
-            const statusClass = done
-              ? styles.catStatusDone
-              : quest
-                ? styles.catStatusPending
-                : styles.catStatusLocked;
-            const statusText = done
-              ? "✓ Completed"
-              : quest
-                ? `● ${quest.durationMinutes} min assigned`
-                : "Not assigned today";
-
-            const card = (
-              <div className={`${appStyles.card} ${styles.catCard}`}>
-                <div className={styles.catIcon} style={{ "--c": cat.color } as React.CSSProperties}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                    {cat.icon}
-                  </svg>
-                </div>
-                <div className={styles.catName}>{cat.name}</div>
-                <div className={`${styles.catStatus} ${statusClass}`}>{statusText}</div>
+        {CATEGORIES.map((cat) => {
+          const quests = bySubject.get(cat.subject) ?? [];
+          return (
+            <div key={cat.subject} className={styles.subjectGroup}>
+              <div className={styles.subjectHeading} style={{ "--c": cat.color } as React.CSSProperties}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                  {cat.icon}
+                </svg>
+                {cat.name}
               </div>
-            );
-
-            if (quest && !done) {
-              return (
-                <form key={cat.subject} action={startQuestSession.bind(null, quest.id)}>
-                  <button type="submit" style={{ all: "unset", cursor: "pointer", display: "block", width: "100%" }}>
-                    {card}
-                  </button>
-                </form>
-              );
-            }
-            return <div key={cat.subject}>{card}</div>;
-          })}
-        </div>
+              {quests.length === 0 ? (
+                <div className={`${appStyles.card}`}>
+                  <div className={styles.questRow}>
+                    <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "#4a5476" }}>
+                      Not assigned today
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className={appStyles.card}>
+                  {quests.map((q) => (
+                    <QuestButton key={q.id} quest={q} done={q.completions.length > 0} />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </section>
 
       <section>
