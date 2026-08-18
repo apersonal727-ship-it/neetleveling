@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdminProfile } from "@/lib/current-profile";
+import { requireAdminSession, getAdminProfileId } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { checkAndApplyLockout } from "@/lib/lockout";
 import { MONTHLY_PRICE, maybeGrantReferralCredit } from "@/lib/payment";
@@ -11,7 +11,8 @@ export type ActionResult = { error: string } | { success: true };
 // ── Quests ─────────────────────────────────────────────────────
 
 export async function deployQuest(formData: FormData): Promise<ActionResult> {
-  const admin = await requireAdminProfile();
+  await requireAdminSession();
+  const adminId = await getAdminProfileId();
 
   const title = String(formData.get("title") ?? "").trim();
   const subject = String(formData.get("subject") ?? "PHYSICS");
@@ -37,7 +38,7 @@ export async function deployQuest(formData: FormData): Promise<ActionResult> {
       assignRank: assignScope === "RANK" ? assignRank : null,
       assignedToId: assignScope === "SPECIFIC_HUNTER" ? assignedToId : null,
       scheduledFor: scheduledForRaw ? new Date(scheduledForRaw) : null,
-      createdById: admin.id,
+      createdById: adminId,
     },
   });
 
@@ -46,7 +47,7 @@ export async function deployQuest(formData: FormData): Promise<ActionResult> {
 }
 
 export async function deleteQuest(id: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   await prisma.quest.delete({ where: { id } });
   revalidatePath("/admin/quests");
   return { success: true };
@@ -55,7 +56,8 @@ export async function deleteQuest(id: string): Promise<ActionResult> {
 // ── Default daily quests ──────────────────────────────────────
 
 export async function addQuestTemplate(formData: FormData): Promise<ActionResult> {
-  const admin = await requireAdminProfile();
+  await requireAdminSession();
+  const adminId = await getAdminProfileId();
 
   const title = String(formData.get("title") ?? "").trim();
   const subject = String(formData.get("subject") ?? "PHYSICS");
@@ -71,7 +73,7 @@ export async function addQuestTemplate(formData: FormData): Promise<ActionResult
       subject: subject as never,
       durationMinutes,
       xpOverride: xpOverrideRaw ? parseInt(xpOverrideRaw, 10) : null,
-      createdById: admin.id,
+      createdById: adminId,
     },
   });
 
@@ -80,14 +82,14 @@ export async function addQuestTemplate(formData: FormData): Promise<ActionResult
 }
 
 export async function removeQuestTemplate(id: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   await prisma.questTemplate.delete({ where: { id } });
   revalidatePath("/admin/quests");
   return { success: true };
 }
 
 export async function toggleQuestTemplateActive(id: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   const template = await prisma.questTemplate.findUniqueOrThrow({ where: { id } });
   await prisma.questTemplate.update({ where: { id }, data: { active: !template.active } });
   revalidatePath("/admin/quests");
@@ -97,7 +99,7 @@ export async function toggleQuestTemplateActive(id: string): Promise<ActionResul
 // ── Punishment pool ────────────────────────────────────────────
 
 export async function addPunishmentQuest(formData: FormData): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   const title = String(formData.get("title") ?? "").trim();
   const durationMinutes = parseInt(String(formData.get("durationMinutes") ?? ""), 10);
 
@@ -110,7 +112,7 @@ export async function addPunishmentQuest(formData: FormData): Promise<ActionResu
 }
 
 export async function removePunishmentQuest(id: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   await prisma.punishmentConfig.updateMany({
     where: { id: 1, fixedPunishmentId: id },
     data: { fixedPunishmentId: null },
@@ -121,7 +123,7 @@ export async function removePunishmentQuest(id: string): Promise<ActionResult> {
 }
 
 export async function setPunishmentMode(mode: "RANDOM" | "FIXED", fixedPunishmentId?: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   await prisma.punishmentConfig.upsert({
     where: { id: 1 },
     create: { id: 1, mode, fixedPunishmentId: fixedPunishmentId ?? null },
@@ -134,7 +136,7 @@ export async function setPunishmentMode(mode: "RANDOM" | "FIXED", fixedPunishmen
 // ── Hunters ────────────────────────────────────────────────────
 
 export async function adjustHunterXp(profileId: string, xp: number): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   if (xp < 0) return { error: "XP can't be negative." };
   await prisma.profile.update({ where: { id: profileId }, data: { xp } });
   revalidatePath("/admin/hunters");
@@ -142,14 +144,14 @@ export async function adjustHunterXp(profileId: string, xp: number): Promise<Act
 }
 
 export async function resetHunterStreak(profileId: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   await prisma.profile.update({ where: { id: profileId }, data: { streak: 0 } });
   revalidatePath("/admin/hunters");
   return { success: true };
 }
 
 export async function toggleHunterLock(profileId: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
   const profile = await prisma.profile.findUniqueOrThrow({ where: { id: profileId } });
 
   if (profile.locked) {
@@ -170,7 +172,10 @@ export async function toggleHunterLock(profileId: string): Promise<ActionResult>
       const pool = await prisma.punishmentQuest.findMany();
       const punishment = pool[Math.floor(Math.random() * pool.length)];
       await prisma.$transaction([
-        prisma.profile.update({ where: { id: profileId }, data: { locked: true, streak: 0 } }),
+        prisma.profile.update({
+          where: { id: profileId },
+          data: { locked: true, streak: 0, penaltyStreak: { increment: 1 } },
+        }),
         prisma.lockoutEvent.create({
           data: { profileId, reason: "Manually locked by admin", punishmentQuestId: punishment?.id },
         }),
@@ -183,7 +188,7 @@ export async function toggleHunterLock(profileId: string): Promise<ActionResult>
 }
 
 export async function getHunterQuestHistory(profileId: string) {
-  await requireAdminProfile();
+  await requireAdminSession();
   return prisma.questCompletion.findMany({
     where: { profileId },
     include: { quest: true },
@@ -195,7 +200,7 @@ export async function getHunterQuestHistory(profileId: string) {
 // ── Manual UPI payment review ─────────────────────────────────────
 
 export async function approvePayment(transactionId: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const tx = await prisma.paymentTransaction.findUnique({
     where: { id: transactionId },
@@ -254,7 +259,7 @@ export async function approvePayment(transactionId: string): Promise<ActionResul
 }
 
 export async function rejectPayment(transactionId: string, note?: string): Promise<ActionResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const tx = await prisma.paymentTransaction.findUnique({ where: { id: transactionId } });
   if (!tx || tx.status !== "PENDING_REVIEW") return { error: "This payment is no longer pending." };

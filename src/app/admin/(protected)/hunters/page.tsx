@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { requireAdminProfile } from "@/lib/current-profile";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { HuntersManager } from "@/components/admin/HuntersManager";
-import styles from "../admin.module.css";
+import styles from "../../admin.module.css";
 
 export const metadata: Metadata = {
   title: "Hunter Management — NEETLeveling Admin",
 };
 
 export default async function AdminHuntersPage() {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const profiles = await prisma.profile.findMany({
     select: {

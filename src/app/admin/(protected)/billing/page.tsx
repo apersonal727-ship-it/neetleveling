@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { requireAdminProfile } from "@/lib/current-profile";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { AdminTransactionList } from "@/components/admin/AdminTransactionList";
 import { PendingPaymentsReview } from "@/components/admin/PendingPaymentsReview";
-import styles from "../admin.module.css";
+import styles from "../../admin.module.css";
 
 export const metadata: Metadata = {
   title: "Billing — NEETLeveling Admin",
@@ -14,7 +14,7 @@ function fmtDate(d: Date) {
 }
 
 export default async function AdminBillingPage() {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const startOfMonth = new Date();
   startOfMonth.setDate(1);

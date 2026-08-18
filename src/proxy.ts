@@ -2,6 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
 const AUTH_PATHS = ["/login", "/signup"];
+// /admin is deliberately excluded — it has its own password-gated session
+// (see src/lib/admin-auth.ts), entirely independent of Supabase Auth and
+// the hunter Profile system.
 const APP_PATHS = [
   "/dashboard",
   "/quests",
@@ -13,7 +16,6 @@ const APP_PATHS = [
   "/notifications",
   "/billing",
   "/locked",
-  "/admin",
   "/change-password",
   "/character-creation",
   "/onboarding",

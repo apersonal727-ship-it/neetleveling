@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { requireAdminProfile } from "@/lib/current-profile";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { DeployQuestForm } from "@/components/admin/DeployQuestForm";
 import { QuestTemplateManager } from "@/components/admin/QuestTemplateManager";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteQuest } from "@/actions/admin";
-import styles from "../admin.module.css";
+import styles from "../../admin.module.css";
 
 export const metadata: Metadata = {
   title: "Quest Management — NEETLeveling Admin",
@@ -18,7 +18,7 @@ function assignLabel(q: { assignScope: string; assignRank: string | null }) {
 }
 
 export default async function AdminQuestsPage() {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const [hunters, quests, templates] = await Promise.all([
     prisma.profile.findMany({

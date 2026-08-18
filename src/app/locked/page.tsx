@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { startPunishmentSession } from "@/actions/focus";
+import { penaltyReps } from "@/lib/penalty";
 import styles from "./locked.module.css";
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default async function LockedPage() {
   });
 
   const previousStreak = profile.bestStreak > 0 && profile.streak === 0 ? profile.bestStreak : null;
+  const reps = penaltyReps(profile.penaltyStreak);
 
   return (
     <>
@@ -71,7 +73,9 @@ export default async function LockedPage() {
                     {lockoutEvent.punishmentQuest.durationMinutes} min
                   </span>
                 </div>
-                <div className={styles.pqTitle}>{lockoutEvent.punishmentQuest.title}</div>
+                <div className={styles.pqTitle}>
+                  {reps} {lockoutEvent.punishmentQuest.title}
+                </div>
                 <p className={styles.pqNote}>Complete it and you&apos;re back in.</p>
                 <form action={startPunishmentSession}>
                   <button type="submit" className={`${styles.btn} ${styles.btnUnlock}`} style={{ width: "100%" }}>

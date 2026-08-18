@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { requireAdminProfile } from "@/lib/current-profile";
+import { requireAdminSession } from "@/lib/admin-auth";
 import {
   getOverviewMetrics,
   getRevenueByMonth,
@@ -7,14 +7,14 @@ import {
   getSignupFunnel,
 } from "@/lib/admin-analytics";
 import { RevenueBarChart, CompletionLineChart, FunnelChart } from "@/components/admin/AnalyticsCharts";
-import styles from "../admin.module.css";
+import styles from "../../admin.module.css";
 
 export const metadata: Metadata = {
   title: "Analytics — NEETLeveling Admin",
 };
 
 export default async function AdminAnalyticsPage() {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const [metrics, revenue, completionTrend, funnel] = await Promise.all([
     getOverviewMetrics(),

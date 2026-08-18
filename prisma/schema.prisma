@@ -25,6 +25,7 @@ model Profile {
   bestStreak     Int       @default(0)
   lastStreakDate DateTime?
   locked         Boolean   @default(false)
+  penaltyStreak  Int       @default(0)
   walletCredit   Int       @default(0)
   referralCode   String    @unique
   referredByCode String?

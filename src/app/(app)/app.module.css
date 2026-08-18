@@ -66,22 +66,6 @@
   align-items: center;
   gap: 10px;
 }
-.adminBadge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 184, 79, 0.4);
-  background: rgba(255, 184, 79, 0.08);
-  color: var(--amber);
-  flex-shrink: 0;
-}
-.adminBadge svg {
-  width: 14px;
-  height: 14px;
-}
 .flame {
   width: 18px;
   height: 18px;

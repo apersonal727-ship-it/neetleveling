@@ -39,9 +39,3 @@ export const getCurrentProfile = cache(async () => {
 
   return prisma.profile.findUniqueOrThrow({ where: { id: profile.id } });
 });
-
-export async function requireAdminProfile() {
-  const profile = await getCurrentProfile();
-  if (!profile.isAdmin) redirect("/dashboard");
-  return profile;
-}

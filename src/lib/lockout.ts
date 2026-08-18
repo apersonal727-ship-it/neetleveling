@@ -62,7 +62,7 @@ export async function checkAndApplyLockout(profile: Profile) {
   await prisma.$transaction([
     prisma.profile.update({
       where: { id: profileId },
-      data: { locked: true, streak: 0 },
+      data: { locked: true, streak: 0, penaltyStreak: { increment: 1 } },
     }),
     prisma.lockoutEvent.create({
       data: {

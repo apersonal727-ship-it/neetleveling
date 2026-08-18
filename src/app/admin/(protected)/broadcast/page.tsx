@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { requireAdminProfile } from "@/lib/current-profile";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { BroadcastForm } from "@/components/admin/BroadcastForm";
-import styles from "../admin.module.css";
+import styles from "../../admin.module.css";
 
 export const metadata: Metadata = {
   title: "Broadcast — NEETLeveling Admin",
@@ -16,7 +16,7 @@ function fmtRelative(d: Date) {
 }
 
 export default async function AdminBroadcastPage() {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const sent = await prisma.broadcast.findMany({
     orderBy: { createdAt: "desc" },

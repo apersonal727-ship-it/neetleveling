@@ -1,14 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdminProfile } from "@/lib/current-profile";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { rankForLevel, getLevelProgress } from "@/lib/rank";
 
 export type Audience = "all" | "active" | "locked" | "e" | "d" | "c" | "b" | "a" | "s";
 
 export async function getAudienceReach(audience: Audience): Promise<number> {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   if (audience === "all") return prisma.profile.count();
   if (audience === "active") return prisma.profile.count({ where: { subscriptionStatus: "ACTIVE" } });
@@ -24,7 +24,7 @@ export async function getAudienceReach(audience: Audience): Promise<number> {
 export type BroadcastResult = { error: string } | { success: true; sentCount: number };
 
 export async function sendBroadcast(formData: FormData): Promise<BroadcastResult> {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const title = String(formData.get("title") ?? "").trim();
   const message = String(formData.get("message") ?? "").trim();

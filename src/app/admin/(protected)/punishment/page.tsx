@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { requireAdminProfile } from "@/lib/current-profile";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { PunishmentPoolManager } from "@/components/admin/PunishmentPoolManager";
-import styles from "../admin.module.css";
+import styles from "../../admin.module.css";
 
 export const metadata: Metadata = {
   title: "Punishment Pool — NEETLeveling Admin",
 };
 
 export default async function AdminPunishmentPage() {
-  await requireAdminProfile();
+  await requireAdminSession();
 
   const [pool, config, totalLockouts] = await Promise.all([
     prisma.punishmentQuest.findMany({ orderBy: { createdAt: "asc" } }),
