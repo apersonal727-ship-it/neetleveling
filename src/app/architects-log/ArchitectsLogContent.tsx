@@ -346,7 +346,11 @@ export function ArchitectsLogContent() {
           <div className={styles.secHead}>
             <span className={styles.tag}>The Build</span>
             <h2>What Actually Happened In Between</h2>
-            <p>Six stages, zigzagging from foundation to launch. What got conquered, month by month.</p>
+            <p>
+              Six stages, zigzagging from foundation to launch.
+              <br />
+              What got conquered, month by month.
+            </p>
           </div>
         </section>
 
