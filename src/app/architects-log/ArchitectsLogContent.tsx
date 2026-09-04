@@ -109,6 +109,7 @@ const ACHIEVEMENTS = [
 
 const STACK_LANGUAGES = ["HTML5", "CSS3", "JavaScript", "Next.js", "SQL"];
 const STACK_INFRA = ["Supabase", "Vercel", "Hostinger VPS", "GitHub"];
+const STACK_AI = ["Claude Code"];
 
 const LAUNCH_DATE = new Date("2026-05-07T00:00:00");
 
@@ -452,6 +453,18 @@ export function ArchitectsLogContent() {
             <div className={styles.stackPills}>
               {STACK_INFRA.map((s) => (
                 <span key={s} className={`${styles.stackPill} ${styles.stackPillViolet}`}>
+                  <span className={styles.pdot} />
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.stackGroup}>
+            <div className={styles.stackGroupLabel}>AI Assistance</div>
+            <div className={styles.stackPills}>
+              {STACK_AI.map((s) => (
+                <span key={s} className={styles.stackPill}>
                   <span className={styles.pdot} />
                   {s}
                 </span>
