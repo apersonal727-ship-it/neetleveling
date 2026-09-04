@@ -245,7 +245,7 @@ export function ArchitectsLogContent() {
         </nav>
 
         {/* HERO */}
-        <section className={styles.hero}>
+        <section className={`${styles.section} ${styles.hero}`}>
           <span className={styles.eyebrow}>
             <span className={styles.dot} />
             THE ARCHITECT&apos;S LOG · ARGHYA DAS
@@ -270,7 +270,7 @@ export function ArchitectsLogContent() {
         </section>
 
         {/* ORIGIN */}
-        <section className={styles.reveal} data-reveal>
+        <section className={`${styles.section} ${styles.reveal}`} data-reveal>
           <div className={styles.secHead}>
             <span className={styles.tag}>Log 00 · November 2025</span>
             <h2>The Night It Started</h2>
@@ -303,7 +303,7 @@ export function ArchitectsLogContent() {
         </div>
 
         {/* ARCHITECT CARD */}
-        <section className={styles.reveal} data-reveal>
+        <section className={`${styles.section} ${styles.reveal}`} data-reveal>
           <div className={styles.architectCard}>
             <div className={styles.architectTitlebar}>
               <span>ARCHITECT PROFILE</span>
@@ -342,7 +342,7 @@ export function ArchitectsLogContent() {
         </section>
 
         {/* BUILD TIMELINE */}
-        <section>
+        <section className={styles.section}>
           <div className={styles.secHead}>
             <span className={styles.tag}>The Build</span>
             <h2>What Actually Happened In Between</h2>
@@ -407,7 +407,7 @@ export function ArchitectsLogContent() {
         </div>
 
         {/* LAUNCH DATE */}
-        <section className={`${styles.launchDate} ${styles.reveal}`} data-reveal>
+        <section className={`${styles.section} ${styles.launchDate} ${styles.reveal}`} data-reveal>
           <div className={styles.ldLine} />
           <div className={styles.ldLabel}>Official System Activation</div>
           <div className={styles.ldDate}>
@@ -424,7 +424,7 @@ export function ArchitectsLogContent() {
         </section>
 
         {/* TECH STACK */}
-        <section className={styles.reveal} data-reveal>
+        <section className={`${styles.section} ${styles.reveal}`} data-reveal>
           <div className={styles.secHead}>
             <span className={styles.tag}>Under The Hood</span>
             <h2>Built With</h2>
@@ -463,7 +463,7 @@ export function ArchitectsLogContent() {
         </section>
 
         {/* GROWTH */}
-        <section className={styles.reveal} data-reveal>
+        <section className={`${styles.section} ${styles.reveal}`} data-reveal>
           <div className={styles.secHead}>
             <span className={styles.tag}>The Growth</span>
             <h2>Every Milestone, On The Record</h2>
@@ -509,7 +509,7 @@ export function ArchitectsLogContent() {
         </section>
 
         {/* STATS */}
-        <section className={styles.reveal} data-reveal>
+        <section className={`${styles.section} ${styles.reveal}`} data-reveal>
           <div className={styles.secHead}>
             <span className={styles.tag}>While You Were Doubting</span>
             <h2>What Was Actually Happening</h2>
@@ -534,7 +534,7 @@ export function ArchitectsLogContent() {
         </section>
 
         {/* FOUNDER'S NOTE */}
-        <section className={styles.reveal} data-reveal>
+        <section className={`${styles.section} ${styles.reveal}`} data-reveal>
           <div className={styles.notePanel}>
             <div className={styles.noteTitlebar}>
               <span className={styles.dot} />A Note From The Architect
@@ -566,7 +566,7 @@ export function ArchitectsLogContent() {
         </section>
 
         {/* CLOSING */}
-        <section className={`${styles.closing} ${styles.reveal}`} data-reveal>
+        <section className={`${styles.section} ${styles.closing} ${styles.reveal}`} data-reveal>
           <span className={styles.tag}>For The Record</span>
           <h2>
             They Watched.
