@@ -239,6 +239,7 @@ export default function LandingPage() {
           NEETLEVELING
         </div>
         <div className={styles.footLinks}>
+          <Link href="/architects-log">Our Story</Link>
           <Link href="/legal">Terms</Link>
           <Link href="/legal">Privacy</Link>
           <Link href="/legal">Refund Policy</Link>
