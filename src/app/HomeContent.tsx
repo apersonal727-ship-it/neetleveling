@@ -963,6 +963,55 @@ export function HomeContent() {
           </div>
         </section>
 
+        {/* USAGE */}
+        <section className={styles.section}>
+          <div className={styles.secHead}>
+            <span className={styles.tag}>Getting The Most Out Of It</span>
+            <h2>Run It Beside Your Setup, Not Instead Of It</h2>
+            <p>The System doesn&apos;t need your full attention on one screen. Most Hunters split it across two.</p>
+          </div>
+          <div className={styles.usageGrid}>
+            <div className={styles.usageCard}>
+              <div className={styles.usageDevices}>
+                <div className={styles.usageDevice}>
+                  <span className={styles.icon}>📱</span>
+                  <span className={styles.label}>NEETLeveling</span>
+                </div>
+                <div className={styles.usagePlus}>+</div>
+                <div className={styles.usageDevice}>
+                  <span className={styles.icon}>💻</span>
+                  <span className={styles.label}>Online Classes &amp; PDFs</span>
+                </div>
+              </div>
+              <div className={styles.usageDesc}>
+                Keep your quest running on your phone while your laptop handles lectures, notes, and study
+                material.
+              </div>
+            </div>
+            <div className={styles.usageCard}>
+              <div className={styles.usageDevices}>
+                <div className={styles.usageDevice}>
+                  <span className={styles.icon}>💻</span>
+                  <span className={styles.label}>NEETLeveling</span>
+                </div>
+                <div className={styles.usagePlus}>+</div>
+                <div className={styles.usageDevice}>
+                  <span className={styles.icon}>📖</span>
+                  <span className={styles.label}>Books &amp; Notes</span>
+                </div>
+              </div>
+              <div className={styles.usageDesc}>
+                Or flip it — System open on your laptop, books and handwritten notes on the desk in front of
+                you.
+              </div>
+            </div>
+          </div>
+          <div className={styles.usageNote}>
+            However you split it, the System only asks for one thing:{" "}
+            <b>the quest gets done before the timer runs out.</b>
+          </div>
+        </section>
+
         {/* PENALTY */}
         <section className={styles.section}>
           <div className={styles.secHead}>
