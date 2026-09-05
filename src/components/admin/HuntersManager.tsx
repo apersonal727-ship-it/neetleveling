@@ -267,7 +267,7 @@ export function HuntersManager({ hunters: initial }: { hunters: Hunter[] }) {
                   ) : (
                     history.map((h) => (
                       <div key={h.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px" }}>
-                        <span style={{ color: "var(--ice)", fontFamily: "var(--font-inter), sans-serif", fontSize: "12.5px" }}>{h.title}</span>
+                        <span style={{ color: "var(--ice)", fontFamily: "var(--font-body), sans-serif", fontSize: "12.5px" }}>{h.title}</span>
                         <span style={{ color: "var(--blue-2)", flexShrink: 0 }}>+{h.xpAwarded}</span>
                       </div>
                     ))

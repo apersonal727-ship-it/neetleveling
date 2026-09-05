@@ -23,7 +23,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className={styles.app}>
-      <div className={styles.bgGrid} />
+      <div className="systemBackdrop" />
       <header className={styles.header}>
         <div className={styles.topRow}>
           <span className={styles.lvlTag}>

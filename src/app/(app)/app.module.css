@@ -1,20 +1,3 @@
-.bgGrid {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(79, 157, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(79, 157, 255, 0.045) 1px, transparent 1px);
-  background-size: 38px 38px;
-  -webkit-mask-image: radial-gradient(
-    ellipse 70% 45% at 50% 0%,
-    black 10%,
-    transparent 65%
-  );
-  mask-image: radial-gradient(ellipse 70% 45% at 50% 0%, black 10%, transparent 65%);
-}
-
 .app {
   --gutter: 20px;
   --app-max: 480px;
@@ -122,7 +105,7 @@
   height: 100%;
   border-radius: 100px;
   background: linear-gradient(90deg, var(--blue), var(--blue-2));
-  box-shadow: 0 0 10px rgba(143, 214, 255, 0.6);
+  box-shadow: 0 0 10px rgba(143, 232, 255, 0.6);
   transition: width 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -137,7 +120,7 @@
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 
 .secLabel {
@@ -200,5 +183,5 @@
   color: var(--blue-2);
 }
 .tabActive svg {
-  filter: drop-shadow(0 0 6px rgba(143, 214, 255, 0.6));
+  filter: drop-shadow(0 0 6px rgba(143, 232, 255, 0.6));
 }

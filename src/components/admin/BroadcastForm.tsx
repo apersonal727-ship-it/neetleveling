@@ -68,7 +68,7 @@ export function BroadcastForm() {
                 name="message"
                 maxLength={180}
                 placeholder="Keep it short — this shows as a push notification."
-                style={{ resize: "none", minHeight: "90px", lineHeight: 1.5, fontFamily: "var(--font-inter), sans-serif" }}
+                style={{ resize: "none", minHeight: "90px", lineHeight: 1.5, fontFamily: "var(--font-body), sans-serif" }}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />

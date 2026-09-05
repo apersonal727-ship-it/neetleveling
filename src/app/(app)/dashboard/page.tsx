@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { getStatBars } from "@/lib/stats";
-import { getTodaysQuests } from "@/lib/todays-quest";
+import { getTodaysQuests, questSubjectLabel } from "@/lib/todays-quest";
+import { applyPracticeOverrides } from "@/lib/progressive-overload";
+import { startQuestSession } from "@/actions/focus";
+import { StartSessionButton } from "@/components/app/StartSessionButton";
 import { TodaysQuestList } from "@/components/app/TodaysQuestList";
 import appStyles from "../app.module.css";
 import styles from "./dashboard.module.css";
@@ -37,7 +40,7 @@ export default async function DashboardPage({
         </div>
       )}
 
-      <section className={`${styles.card} ${styles.statusCard}`}>
+      <section className={`${appStyles.card} ${styles.statusCard}`}>
         <div className={styles.statusTop}>
           <div className={styles.rankOrb} style={{ "--rc": rank.color } as React.CSSProperties}>
             {rank.code}
@@ -107,7 +110,7 @@ export default async function DashboardPage({
 
       <section>
         <span className={styles.secLabel}>Stats</span>
-        <div className={styles.card}>
+        <div className={appStyles.card}>
           <div className={styles.statRow}>
             {statBars.map((s) => (
               <div key={s.key} className={styles.statLine}>

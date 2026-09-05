@@ -134,7 +134,7 @@ export function DeleteAccountFlow({ hunterName }: { hunterName: string }) {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{ width: "100%", background: "var(--panel)", border: "1px solid var(--border-strong)", borderRadius: "10px", padding: "14px 15px", fontFamily: "var(--font-inter), sans-serif", fontSize: "14.5px", color: "var(--ice)" }}
+              style={{ width: "100%", background: "var(--panel)", border: "1px solid var(--border-strong)", borderRadius: "10px", padding: "14px 15px", fontFamily: "var(--font-body), sans-serif", fontSize: "14.5px", color: "var(--ice)" }}
             />
           </div>
           <button

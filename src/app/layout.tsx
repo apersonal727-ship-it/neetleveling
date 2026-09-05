@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Rajdhani, Inter, JetBrains_Mono } from "next/font/google";
+import { Rajdhani, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -9,8 +9,8 @@ const rajdhani = Rajdhani({
   weight: ["500", "600", "700"],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${rajdhani.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${rajdhani.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <body>{children}</body>
     </html>
