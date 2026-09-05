@@ -1227,9 +1227,9 @@ export function HomeContent() {
                   </div>
                 ))}
               </div>
-              <button type="button" className={styles.btnPrimary} style={{ width: "100%" }}>
+              <Link href="/signup" className={styles.btnPrimary} style={{ width: "100%", display: "block" }}>
                 Activate The System
-              </button>
+              </Link>
               <div className={styles.priceFine}>
                 No complicated plans. No content library you don&apos;t need. Just the System.
               </div>
