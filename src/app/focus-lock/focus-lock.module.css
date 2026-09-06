@@ -132,7 +132,7 @@
 .warnCard {
   max-width: 340px;
   padding: var(--sp-4) var(--sp-5);
-  border-radius: 12px;
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
   background: rgba(255, 77, 94, 0.06);
   border: 1px solid rgba(255, 77, 94, 0.35);
   display: flex;
@@ -174,7 +174,7 @@
   max-width: 340px;
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
   border: 1px solid rgba(255, 77, 94, 0.4);
-  border-radius: 16px;
+  clip-path: polygon(0 14px, 14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
   padding: var(--sp-6) var(--sp-5);
   text-align: center;
   box-shadow: 0 0 60px -14px rgba(255, 77, 94, 0.4);

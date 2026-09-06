@@ -185,7 +185,7 @@
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .pqCard {
   padding: var(--sp-5);
