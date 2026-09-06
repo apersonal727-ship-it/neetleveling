@@ -1329,6 +1329,34 @@ export function HomeContent() {
           </div>
         </section>
 
+        {/* REFERRAL */}
+        <section className={styles.section}>
+          <div className={styles.secHead}>
+            <span className={styles.tag}>Bring A Friend</span>
+            <h2>Every Hunter You Refer Pays Toward Your Bill.</h2>
+            <p>
+              Real feature, not a gimmick — refer someone, and the moment they activate the System for the
+              first time, you get credited automatically.
+            </p>
+          </div>
+          <div className={styles.referralCard}>
+            <div className={styles.referralAmount}>
+              ₹20<span>credit per referral</span>
+            </div>
+            <ul className={styles.referralList}>
+              <li>Credited the moment they complete their first month&apos;s payment</li>
+              <li>Applied automatically toward your own next ₹99 bill</li>
+              <li>Never cash — always a bill credit, nothing to withdraw</li>
+            </ul>
+            <Link href="/signup" className={styles.btnPrimary} style={{ display: "inline-block" }}>
+              Get Your Referral Code
+            </Link>
+            <div className={styles.referralFine}>
+              Your referral code and credit balance live in your Wallet once you&apos;re in.
+            </div>
+          </div>
+        </section>
+
         {/* FINAL CTA */}
         <section className={`${styles.section} ${styles.final}`}>
           <h2>

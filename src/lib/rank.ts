@@ -7,11 +7,11 @@ export const RANKS: {
   minLevel: number;
 }[] = [
   { code: "E", title: "World's Weakest NEET Hunter", color: "#5d708f", minLevel: 0 },
-  { code: "D", title: "Wolf Slayer", color: "#4f9dff", minLevel: 20 },
-  { code: "C", title: "Demon Slayer", color: "#5fb2ff", minLevel: 40 },
-  { code: "B", title: "Necromancer", color: "#7cc7ff", minLevel: 60 },
-  { code: "A", title: "Shadow Lord", color: "#a7dcff", minLevel: 80 },
-  { code: "S", title: "Shadow Monarch", color: "#ffffff", minLevel: 100 },
+  { code: "D", title: "Distraction Slayer", color: "#4f9dff", minLevel: 20 },
+  { code: "C", title: "Procrastination Slayer", color: "#5fb2ff", minLevel: 40 },
+  { code: "B", title: "Discipline Master", color: "#7cc7ff", minLevel: 60 },
+  { code: "A", title: "Consistency Lord", color: "#a7dcff", minLevel: 80 },
+  { code: "S", title: "NEET Monarch", color: "#ffffff", minLevel: 100 },
 ];
 
 // XP cost to go from level N to N+1, by which band level N falls in.

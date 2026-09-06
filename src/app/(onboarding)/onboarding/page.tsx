@@ -33,7 +33,7 @@ const SLIDES = [
     danger: false,
     eyebrow: "Progression is real",
     title: "Level 0 to 100. Six ranks. No shortcuts.",
-    body: "XP comes only from completed quests. About 8 months of consistency stands between you and Shadow Monarch.",
+    body: "XP comes only from completed quests. About 8 months of consistency stands between you and NEET Monarch.",
     icon: <path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z" />,
   },
   {

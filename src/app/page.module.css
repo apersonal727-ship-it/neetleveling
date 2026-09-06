@@ -1806,6 +1806,58 @@
   background: var(--panel-line);
 }
 
+/* ---------- REFERRAL ---------- */
+.referralCard {
+  max-width: 640px;
+  margin: 0 auto;
+  border: 1px solid var(--cyan-dim);
+  background: linear-gradient(180deg, rgba(79, 216, 255, 0.06), transparent 40%);
+  box-shadow: 0 0 40px rgba(79, 216, 255, 0.08), inset 0 0 30px rgba(79, 216, 255, 0.03);
+  padding: 38px 34px;
+  text-align: center;
+  clip-path: polygon(0 16px, 16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+}
+.referralAmount {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 48px;
+  color: var(--cyan);
+  text-shadow: 0 0 20px rgba(79, 216, 255, 0.4);
+}
+.referralAmount span {
+  font-size: 15px;
+  color: var(--text-dim);
+  font-weight: 500;
+  margin-left: 8px;
+}
+.referralList {
+  list-style: none;
+  text-align: left;
+  max-width: 420px;
+  margin: 26px auto;
+}
+.referralList li {
+  padding: 9px 0;
+  color: var(--text-dim);
+  font-size: 14.5px;
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+.referralList li:last-child {
+  border-bottom: none;
+}
+.referralList li::before {
+  content: "▸";
+  color: var(--cyan);
+}
+.referralFine {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--text-dim);
+  opacity: 0.75;
+}
+
 /* ---------- FAQ ---------- */
 .faqList {
   max-width: 760px;

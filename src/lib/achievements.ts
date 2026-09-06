@@ -62,7 +62,7 @@ export async function getBadges(profileId: string) {
     },
     {
       key: "rank-s",
-      name: "Shadow Monarch",
+      name: "NEET Monarch",
       icon: "shield",
       unlocked: level >= 100,
       progress: `LVL ${level}/100`,
