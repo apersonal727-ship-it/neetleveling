@@ -194,8 +194,8 @@
   transform: scale(0.98);
 }
 .btnPrimary {
-  background: linear-gradient(135deg, var(--blue), #2f6fe0);
-  color: #04070f;
+  background: linear-gradient(135deg, var(--blue), var(--blue-2));
+  color: var(--void);
   box-shadow:
     0 0 0 1px rgba(143, 214, 255, 0.4) inset,
     0 8px 24px -10px rgba(79, 157, 255, 0.7);

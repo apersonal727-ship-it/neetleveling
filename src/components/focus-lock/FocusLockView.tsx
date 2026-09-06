@@ -132,7 +132,7 @@ export function FocusLockView({
 
   return (
     <>
-      <div className={styles.bgGrid} />
+      <div className="systemBackdrop" />
       <div className={styles.app}>
         <header className={styles.header}>
           <span className={styles.lockPill}>
@@ -147,8 +147,8 @@ export function FocusLockView({
             <svg viewBox="0 0 250 250">
               <defs>
                 <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#4f9dff" />
-                  <stop offset="100%" stopColor="#8fd6ff" />
+                  <stop offset="0%" stopColor="#4fd8ff" />
+                  <stop offset="100%" stopColor="#8fe8ff" />
                 </linearGradient>
               </defs>
               <circle className={styles.ringTrack} cx="125" cy="125" r={R} />

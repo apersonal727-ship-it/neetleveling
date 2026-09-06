@@ -72,7 +72,7 @@ export default function CharacterCreationPage() {
 
   return (
     <>
-      <div className={styles.bgGrid} />
+      <div className="systemBackdrop" />
       <div className={styles.app}>
         <header className={styles.header}>
           <div className={styles.stepTrack}>

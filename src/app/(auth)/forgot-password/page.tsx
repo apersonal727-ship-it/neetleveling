@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <>
-      <div className={styles.bgGrid} />
+      <div className="systemBackdrop" />
       <div className={styles.app}>
         <div className={styles.top}>
           <div className={styles.brand}>

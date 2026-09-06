@@ -2,7 +2,7 @@ export const CATEGORIES = [
   {
     subject: "PHYSICS" as const,
     name: "Physics",
-    color: "#8fd6ff",
+    color: "#8fe8ff",
     icon: (
       <>
         <circle cx="12" cy="12" r="2.5" />
@@ -27,7 +27,7 @@ export const CATEGORIES = [
   {
     subject: "DISCIPLINE" as const,
     name: "Discipline",
-    color: "#8fd6ff",
+    color: "#8fe8ff",
     icon: (
       <>
         <circle cx="12" cy="12" r="9" />

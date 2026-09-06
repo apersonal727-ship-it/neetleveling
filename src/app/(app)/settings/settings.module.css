@@ -31,8 +31,8 @@
   font-family: var(--font-rajdhani), sans-serif;
   font-weight: 700;
   font-size: 13.5px;
-  background: linear-gradient(135deg, var(--blue), #2f6fe0);
-  color: #04070f;
+  background: linear-gradient(135deg, var(--blue), var(--blue-2));
+  color: var(--void);
   border: none;
   cursor: pointer;
 }

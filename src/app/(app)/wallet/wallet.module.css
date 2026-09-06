@@ -76,13 +76,13 @@
   font-size: 14px;
   color: var(--blue-2);
   border: 1px dashed var(--border-strong);
-  border-radius: 10px;
+  clip-path: polygon(0 9px, 9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%);
   padding: 12px 14px;
   letter-spacing: 0.04em;
 }
 .refCopy {
   width: 46px;
-  border-radius: 10px;
+  clip-path: polygon(0 9px, 9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%);
   border: 1px solid var(--border-strong);
   display: flex;
   align-items: center;
@@ -97,7 +97,7 @@
 }
 .btnShare {
   height: 46px;
-  border-radius: 10px;
+  clip-path: polygon(0 9px, 9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,8 +106,8 @@
   font-weight: 700;
   font-size: 14.5px;
   letter-spacing: 0.02em;
-  background: linear-gradient(135deg, var(--blue), #2f6fe0);
-  color: #04070f;
+  background: linear-gradient(135deg, var(--blue), var(--blue-2));
+  color: var(--void);
   box-shadow:
     0 0 0 1px rgba(143, 214, 255, 0.4) inset,
     0 8px 24px -10px rgba(79, 157, 255, 0.7);
@@ -153,7 +153,7 @@
 .txIcon {
   width: 34px;
   height: 34px;
-  border-radius: 9px;
+  clip-path: polygon(0 7px, 7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
   flex-shrink: 0;
   display: flex;
   align-items: center;
