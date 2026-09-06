@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
-import { getStatBars } from "@/lib/stats";
+import { getStatBars, getHunterProgressStats } from "@/lib/stats";
 import { getTodaysQuests, questSubjectLabel } from "@/lib/todays-quest";
 import { applyPracticeOverrides } from "@/lib/progressive-overload";
 import { startQuestSession } from "@/actions/focus";
@@ -25,8 +25,9 @@ export default async function DashboardPage({
   const rank = rankForLevel(progress.level);
   const pct = progress.xpForLevel > 0 ? (progress.xpInLevel / progress.xpForLevel) * 100 : 100;
 
-  const [statBars, todaysQuests] = await Promise.all([
+  const [statBars, hunterStats, todaysQuests] = await Promise.all([
     getStatBars(profile.id),
+    getHunterProgressStats(profile.id),
     getTodaysQuests(profile.id, progress.level),
   ]);
 
@@ -106,6 +107,26 @@ export default async function DashboardPage({
         ) : (
           <TodaysQuestList quests={todaysQuests} streak={profile.streak} />
         )}
+      </section>
+
+      <section>
+        <span className={styles.secLabel}>Hunter Stats</span>
+        <div className={appStyles.card} style={{ padding: "var(--sp-3)" }}>
+          <div className={styles.chipRow}>
+            <div className={styles.chip}>
+              <div className={styles.chipVal}>{hunterStats.classHours.toLocaleString("en-IN")}</div>
+              <div className={styles.chipLbl}>Class hours</div>
+            </div>
+            <div className={styles.chip}>
+              <div className={styles.chipVal}>{hunterStats.questionHours.toLocaleString("en-IN")}</div>
+              <div className={styles.chipLbl}>Question hours</div>
+            </div>
+            <div className={styles.chip}>
+              <div className={styles.chipVal}>{hunterStats.questionsSolved.toLocaleString("en-IN")}</div>
+              <div className={styles.chipLbl}>Questions solved</div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section>

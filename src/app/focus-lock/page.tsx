@@ -38,7 +38,7 @@ export default async function FocusLockPage({
   const durationMinutes = isPunishment
     ? penaltyDurationMinutes(profile.penaltyStreak)
     : isPracticeQuest(session.quest!.title)
-      ? practiceQuestDurationMinutes(profile.streak)
+      ? practiceQuestDurationMinutes(profile.streak, session.quest!.subject)
       : session.quest!.durationMinutes;
   const category = isPunishment ? "Punishment Quest" : questSubjectLabel(session.quest!.subject);
   const xpAwarded = isPunishment

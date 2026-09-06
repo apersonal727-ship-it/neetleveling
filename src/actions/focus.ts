@@ -68,7 +68,7 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
   }
 
   const durationMinutes = isPracticeQuest(session.quest.title)
-    ? practiceQuestDurationMinutes(profile.streak)
+    ? practiceQuestDurationMinutes(profile.streak, session.quest.subject)
     : session.quest.durationMinutes;
 
   const elapsedMs = Date.now() - session.startedAt.getTime();

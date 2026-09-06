@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import { isPracticeQuest } from "@/lib/progressive-overload";
 
 const HOUR_REFERENCE = 10; // matches the History page's 10-hour reference bar
+const CLASS_SUBJECTS = new Set(["PHYSICS", "CHEMISTRY", "BIOLOGY"]);
 
 function hoursToPct(hours: number) {
   return Math.min(100, Math.round((hours / HOUR_REFERENCE) * 100));
@@ -49,4 +51,34 @@ export async function getStatBars(profileId: string) {
     { key: "FOC", name: "Deep-work blocks", pct: hoursToPct(focHours) },
     { key: "PER", name: "Streak · consistency", pct: perPct },
   ];
+}
+
+// Lifetime Hunter Stats — Class Hours, Question Hours, and Questions Solved.
+// Practice quests run exactly 1 minute per question (see
+// progressive-overload.ts), so a completed practice quest's recorded
+// duration doubles as its question count: questionsSolved is that same
+// total expressed as a count instead of hours, not a separately tracked
+// number.
+export async function getHunterProgressStats(profileId: string) {
+  const completions = await prisma.questCompletion.findMany({
+    where: { profileId },
+    include: { quest: { select: { subject: true, durationMinutes: true, title: true } } },
+  });
+
+  let classMinutes = 0;
+  let practiceMinutes = 0;
+  for (const c of completions) {
+    if (!CLASS_SUBJECTS.has(c.quest.subject)) continue;
+    if (isPracticeQuest(c.quest.title)) {
+      practiceMinutes += c.quest.durationMinutes;
+    } else {
+      classMinutes += c.quest.durationMinutes;
+    }
+  }
+
+  return {
+    classHours: Math.round(classMinutes / 60),
+    questionHours: Math.round(practiceMinutes / 60),
+    questionsSolved: practiceMinutes,
+  };
 }

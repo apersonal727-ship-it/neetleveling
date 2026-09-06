@@ -3,6 +3,12 @@ import type { Profile } from "@/generated/prisma/client";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { questDayStart } from "@/lib/quest-day";
 
+// QA throwaway accounts used for manual testing — never subject to the
+// lockout/penalty system, so a testing session can't get itself locked out
+// mid-verification. Not a product feature; remove alongside the accounts
+// themselves once they're no longer needed.
+const LOCKOUT_EXEMPT_EMAILS = new Set(["claude-qa-test-2@example.com"]);
+
 // Lazily evaluated on every app page load (no cron): if any quest assigned
 // to this hunter on a prior day was never completed, its 24h window has
 // closed — lock the account, reset the streak, and assign every punishment
@@ -17,6 +23,7 @@ import { questDayStart } from "@/lib/quest-day";
 // complete the quest that was actually missed.
 export async function checkAndApplyLockout(profile: Profile) {
   if (profile.locked) return;
+  if (LOCKOUT_EXEMPT_EMAILS.has(profile.email)) return;
   const profileId = profile.id;
 
   const today = questDayStart();

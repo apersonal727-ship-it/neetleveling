@@ -22,6 +22,8 @@ const APP_PATHS = [
   "/checkout",
   "/delete-account",
   "/subscription-expired",
+  "/report-bug",
+  "/feature-requests",
 ];
 
 export async function proxy(request: NextRequest) {
