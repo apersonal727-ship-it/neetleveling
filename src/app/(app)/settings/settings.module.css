@@ -70,7 +70,7 @@
   cursor: pointer;
 }
 .switchOn {
-  background: rgba(79, 157, 255, 0.5);
+  background: rgba(79, 216, 255, 0.5);
 }
 .switch::after {
   content: "";
@@ -86,7 +86,7 @@
 .switchOn::after {
   transform: translateX(18px);
   background: var(--blue-2);
-  box-shadow: 0 0 6px rgba(143, 214, 255, 0.8);
+  box-shadow: 0 0 6px rgba(143, 232, 255, 0.8);
 }
 
 .rowLink {

@@ -35,12 +35,12 @@
   border-bottom: none;
 }
 .nItemUnread {
-  background: rgba(79, 157, 255, 0.04);
+  background: rgba(79, 216, 255, 0.04);
 }
 .nIcon {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -52,7 +52,7 @@
 }
 .nIconQuest,
 .nIconSystem {
-  background: rgba(79, 157, 255, 0.12);
+  background: rgba(79, 216, 255, 0.12);
   border: 1px solid var(--border-strong);
   color: var(--blue-2);
 }
