@@ -1,0 +1,95 @@
+.planRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.planName {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+.planPrice {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 3px;
+}
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--slate);
+}
+.detailRow + .detailRow {
+  margin-top: 8px;
+}
+.detailVal {
+  color: var(--ice);
+}
+
+.methodRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.methodIcon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(79, 216, 255, 0.1);
+  border: 1px solid var(--border-strong);
+  clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+  color: var(--blue-2);
+}
+.methodBody {
+  flex: 1;
+}
+.methodTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.methodSub {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 3px;
+}
+
+.emptyState {
+  padding: 20px;
+  text-align: center;
+  color: var(--slate);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+}
+
+.txDate {
+  font-size: 13px;
+  font-weight: 600;
+}
+.txStatus {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  margin-top: 3px;
+}
+.txStatusSuccess {
+  color: var(--green);
+}
+.txStatusFailed {
+  color: var(--red);
+}
+.txStatusPending {
+  color: var(--amber);
+}
+.txAmount {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 13px;
+}
