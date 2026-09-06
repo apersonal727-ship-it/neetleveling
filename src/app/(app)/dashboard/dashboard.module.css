@@ -32,12 +32,36 @@
   }
 }
 
+/* ===== STATUS TERMINAL ===== */
 .statusCard {
-  padding: var(--sp-6) var(--sp-5);
+  padding: 0;
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
   border-color: var(--border-strong);
   box-shadow: 0 0 50px -22px rgba(79, 216, 255, 0.32);
+  overflow: hidden;
 }
+.titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--blue-dim);
+  text-transform: uppercase;
+}
+.titlebar .live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--blue-2);
+}
+.titlebarBody {
+  padding: var(--sp-5);
+}
+
 .statusTop {
   display: flex;
   align-items: center;
@@ -47,7 +71,7 @@
 .rankOrb {
   width: 64px;
   height: 64px;
-  border-radius: 16px;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -63,25 +87,26 @@
   background: rgba(79, 216, 255, 0.06);
 }
 .hname {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.rtitle {
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 11.5px;
   color: var(--blue-2);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 3px;
-}
-.rtitle {
-  font-family: var(--font-rajdhani), sans-serif;
-  font-weight: 700;
-  font-size: 19px;
-  letter-spacing: 0.01em;
+  margin-top: 4px;
+  letter-spacing: 0.02em;
 }
 .rsub {
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 11.5px;
+  font-size: 10.5px;
   color: var(--slate);
-  margin-top: 3px;
-  letter-spacing: 0.04em;
+  margin-top: 5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .xpDetail {
@@ -92,9 +117,9 @@
 }
 .xpDetailLbl {
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--slate);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .xpDetailVal {
@@ -103,11 +128,11 @@
   color: var(--blue-2);
 }
 .bigXpTrack {
-  height: 10px;
+  height: 8px;
   border-radius: 100px;
   background: rgba(255, 255, 255, 0.06);
   overflow: hidden;
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--sp-5);
 }
 .bigXpFill {
   height: 100%;
@@ -119,28 +144,72 @@
 .chipRow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--sp-2);
+  border-top: 1px dashed var(--border);
+  padding-top: var(--sp-4);
 }
 .chip {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: var(--sp-3) var(--sp-2);
   text-align: center;
+  border-right: 1px dashed var(--border);
+}
+.chip:last-child {
+  border-right: none;
 }
 .chipVal {
   font-family: var(--font-rajdhani), sans-serif;
   font-weight: 700;
-  font-size: 17px;
+  font-size: 26px;
   color: var(--ice);
+  text-shadow: 0 0 16px rgba(79, 216, 255, 0.35);
+  line-height: 1;
 }
 .chipLbl {
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 9.5px;
+  font-size: 9px;
   color: var(--slate);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 6px;
+}
+
+/* ===== SECTION HEADS ===== */
+.secEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--violet);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.secEyebrow .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 6px var(--violet);
+}
+.secTitleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+.secTitle {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.01em;
+}
+.secLabel {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--blue);
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+  display: block;
 }
 
 /* Today's quest */
@@ -175,8 +244,9 @@
 }
 .questDur {
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--slate);
+  letter-spacing: 0.04em;
 }
 .btn {
   font-family: var(--font-rajdhani), sans-serif;
@@ -221,6 +291,42 @@
   max-width: 30ch;
 }
 
+/* Hunter stats */
+.hstatGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+.hstat {
+  background: var(--panel);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hstatIcon {
+  font-size: 19px;
+  flex-shrink: 0;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(79, 216, 255, 0.35));
+}
+.hstatVal {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  color: var(--ice);
+  line-height: 1.1;
+}
+.hstatLbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9.5px;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
 /* Stats */
 .statRow {
   display: flex;
@@ -232,6 +338,10 @@
   align-items: center;
   gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px dashed var(--border);
+}
+.statLine:last-child {
+  border-bottom: none;
 }
 .statKey {
   font-family: var(--font-jetbrains-mono), monospace;

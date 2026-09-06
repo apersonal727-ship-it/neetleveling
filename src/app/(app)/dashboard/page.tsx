@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { getStatBars, getHunterProgressStats } from "@/lib/stats";
-import { getTodaysQuests, questSubjectLabel } from "@/lib/todays-quest";
-import { applyPracticeOverrides } from "@/lib/progressive-overload";
-import { startQuestSession } from "@/actions/focus";
-import { StartSessionButton } from "@/components/app/StartSessionButton";
+import { getTodaysQuests } from "@/lib/todays-quest";
 import { TodaysQuestList } from "@/components/app/TodaysQuestList";
 import appStyles from "../app.module.css";
 import styles from "./dashboard.module.css";
@@ -42,52 +39,65 @@ export default async function DashboardPage({
       )}
 
       <section className={`${appStyles.card} ${styles.statusCard}`}>
-        <div className={styles.statusTop}>
-          <div className={styles.rankOrb} style={{ "--rc": rank.color } as React.CSSProperties}>
-            {rank.code}
-          </div>
-          <div>
-            <div className={styles.hname}>{profile.name}</div>
-            <div className={styles.rtitle}>{rank.title}</div>
-            <div className={styles.rsub}>
-              RANK {rank.code} · LEVEL {progress.level} OF 100
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.xpDetail}>
-          <span className={styles.xpDetailLbl}>XP to next level</span>
-          <span className={styles.xpDetailVal}>
-            {progress.xpInLevel.toLocaleString("en-IN")} /{" "}
-            {progress.xpForLevel > 0 ? progress.xpForLevel.toLocaleString("en-IN") : "—"}
+        <div className={styles.titlebar}>
+          <span>[ Hunter Status ]</span>
+          <span className={styles.live}>
+            <span className={styles.welcomeDot} /> Online
           </span>
         </div>
-        <div className={styles.bigXpTrack}>
-          <div className={styles.bigXpFill} style={{ width: `${pct}%` }} />
-        </div>
 
-        <div className={styles.chipRow}>
-          <div className={styles.chip}>
-            <div className={styles.chipVal}>{profile.streak}</div>
-            <div className={styles.chipLbl}>Day streak</div>
+        <div className={styles.titlebarBody}>
+          <div className={styles.statusTop}>
+            <div className={styles.rankOrb} style={{ "--rc": rank.color } as React.CSSProperties}>
+              {rank.code}
+            </div>
+            <div>
+              <div className={styles.hname}>{profile.name}</div>
+              <div className={styles.rtitle}>{rank.title}</div>
+              <div className={styles.rsub}>
+                Rank {rank.code} · Level {progress.level} of 100
+              </div>
+            </div>
           </div>
-          <div className={styles.chip}>
-            <div className={styles.chipVal}>{profile.bestStreak}</div>
-            <div className={styles.chipLbl}>Best streak</div>
+
+          <div className={styles.xpDetail}>
+            <span className={styles.xpDetailLbl}>XP to next level</span>
+            <span className={styles.xpDetailVal}>
+              {progress.xpInLevel.toLocaleString("en-IN")} /{" "}
+              {progress.xpForLevel > 0 ? progress.xpForLevel.toLocaleString("en-IN") : "—"}
+            </span>
           </div>
-          <div className={styles.chip}>
-            <div className={styles.chipVal}>{profile.xp.toLocaleString("en-IN")}</div>
-            <div className={styles.chipLbl}>Total XP</div>
+          <div className={styles.bigXpTrack}>
+            <div className={styles.bigXpFill} style={{ width: `${pct}%` }} />
+          </div>
+
+          <div className={styles.chipRow}>
+            <div className={styles.chip}>
+              <div className={styles.chipVal}>{profile.streak}</div>
+              <div className={styles.chipLbl}>Day streak</div>
+            </div>
+            <div className={styles.chip}>
+              <div className={styles.chipVal}>{profile.bestStreak}</div>
+              <div className={styles.chipLbl}>Best streak</div>
+            </div>
+            <div className={styles.chip}>
+              <div className={styles.chipVal}>{profile.xp.toLocaleString("en-IN")}</div>
+              <div className={styles.chipLbl}>Total XP</div>
+            </div>
           </div>
         </div>
       </section>
 
       <section>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "12px" }}>
-          <span className={styles.secLabel} style={{ marginBottom: 0 }}>Today</span>
+        <span className={styles.secEyebrow}>
+          <span className={styles.dot} />
+          Today&apos;s Briefing
+        </span>
+        <div className={styles.secTitleRow}>
+          <span className={styles.secTitle}>Quest Log</span>
           {todaysQuests.length > 0 && (
             <span className={styles.questDur}>
-              {doneCount} of {todaysQuests.length} done
+              {doneCount} / {todaysQuests.length} complete
             </span>
           )}
         </div>
@@ -111,19 +121,28 @@ export default async function DashboardPage({
 
       <section>
         <span className={styles.secLabel}>Hunter Stats</span>
-        <div className={appStyles.card} style={{ padding: "var(--sp-3)" }}>
-          <div className={styles.chipRow}>
-            <div className={styles.chip}>
-              <div className={styles.chipVal}>{hunterStats.classHours.toLocaleString("en-IN")}</div>
-              <div className={styles.chipLbl}>Class hours</div>
+        <div className={appStyles.card}>
+          <div className={styles.hstatGrid}>
+            <div className={styles.hstat}>
+              <span className={styles.hstatIcon}>🎥</span>
+              <div>
+                <div className={styles.hstatVal}>{hunterStats.classHours.toLocaleString("en-IN")}</div>
+                <div className={styles.hstatLbl}>Class hours</div>
+              </div>
             </div>
-            <div className={styles.chip}>
-              <div className={styles.chipVal}>{hunterStats.questionHours.toLocaleString("en-IN")}</div>
-              <div className={styles.chipLbl}>Question hours</div>
+            <div className={styles.hstat}>
+              <span className={styles.hstatIcon}>🧠</span>
+              <div>
+                <div className={styles.hstatVal}>{hunterStats.questionHours.toLocaleString("en-IN")}</div>
+                <div className={styles.hstatLbl}>Question hours</div>
+              </div>
             </div>
-            <div className={styles.chip}>
-              <div className={styles.chipVal}>{hunterStats.questionsSolved.toLocaleString("en-IN")}</div>
-              <div className={styles.chipLbl}>Questions solved</div>
+            <div className={styles.hstat}>
+              <span className={styles.hstatIcon}>🎯</span>
+              <div>
+                <div className={styles.hstatVal}>{hunterStats.questionsSolved.toLocaleString("en-IN")}</div>
+                <div className={styles.hstatLbl}>Questions solved</div>
+              </div>
             </div>
           </div>
         </div>
