@@ -1,0 +1,197 @@
+.bgGrid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 184, 79, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 184, 79, 0.04) 1px, transparent 1px);
+  background-size: 38px 38px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 30%, black 10%, transparent 70%);
+  mask-image: radial-gradient(ellipse 70% 55% at 50% 30%, black 10%, transparent 70%);
+}
+
+.app {
+  --gutter: 20px;
+  --app-max: 480px;
+  max-width: var(--app-max);
+  margin-inline: auto;
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  padding: var(--sp-4) var(--gutter);
+  padding-top: max(var(--sp-4), env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.warnBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  color: var(--amber);
+  text-transform: uppercase;
+  border: 1px solid var(--amber-border);
+  padding: 7px 16px;
+  border-radius: 100px;
+  background: rgba(255, 184, 79, 0.06);
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.main {
+  flex: 1;
+  padding: var(--sp-3) var(--gutter) var(--sp-7);
+  text-align: center;
+}
+.main h1 {
+  font-size: clamp(26px, 6vw, 34px);
+  margin: var(--sp-4) 0 10px;
+  line-height: 1.15;
+}
+.sub {
+  color: var(--slate);
+  font-size: 13.5px;
+  line-height: 1.7;
+  max-width: 400px;
+  margin: 0 auto;
+}
+.sub b {
+  color: var(--amber-2);
+}
+
+.countdown {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: clamp(44px, 12vw, 58px);
+  color: var(--amber);
+  text-shadow: 0 0 30px rgba(255, 184, 79, 0.5);
+  letter-spacing: 0.02em;
+  margin: var(--sp-6) 0 0;
+}
+.countdownLbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--sp-5);
+}
+
+.openLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--sp-3);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.questBox {
+  border: 1px solid var(--amber-border);
+  background: var(--panel-2);
+  text-align: left;
+  margin-bottom: var(--sp-6);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+.questRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 18px;
+  border-bottom: 1px dashed var(--border);
+}
+.questRow:last-child {
+  border-bottom: none;
+}
+.questName {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  font-size: 15.5px;
+}
+.questMeta {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+.startBtn {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+  padding: 8px 14px;
+  background: rgba(255, 184, 79, 0.06);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.consequenceNote {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+  color: var(--slate);
+  line-height: 1.7;
+  padding: 14px 18px;
+  border: 1px dashed var(--red);
+  background: rgba(255, 77, 94, 0.04);
+  margin-bottom: var(--sp-6);
+  text-align: left;
+}
+.consequenceNote b {
+  color: var(--red-2);
+}
+
+.primaryBtn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--void);
+  background: linear-gradient(135deg, var(--amber), var(--amber-2));
+  border: none;
+  text-transform: uppercase;
+  box-shadow: 0 0 26px rgba(255, 184, 79, 0.4);
+  text-align: center;
+}
+.dismissNote {
+  margin-top: 14px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+}

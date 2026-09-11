@@ -4,7 +4,9 @@ import { getLevelProgress } from "@/lib/rank";
 import { questDayEnd } from "@/lib/quest-day";
 import { FlameIcon } from "@/components/icons/FlameIcon";
 import { BottomTabbar } from "@/components/app/BottomTabbar";
+import { SideNav } from "@/components/app/SideNav";
 import { DailyCountdown } from "@/components/app/DailyCountdown";
+import { questDayStart } from "@/lib/quest-day";
 import styles from "./app.module.css";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -19,11 +21,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (subscriptionLapsed) redirect("/subscription-expired");
 
   const progress = getLevelProgress(profile.xp);
-  const pct = progress.xpForLevel > 0 ? (progress.xpInLevel / progress.xpForLevel) * 100 : 100;
 
   return (
     <div className={styles.app}>
       <div className="systemBackdrop" />
+      <SideNav />
       <header className={styles.header}>
         <div className={styles.topRow}>
           <span className={styles.lvlTag}>
@@ -36,10 +38,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
           </div>
         </div>
-        <DailyCountdown deadline={questDayEnd().toISOString()} />
-        <div className={styles.xpTrack}>
-          <div className={styles.xpFill} style={{ width: `${pct}%` }} />
-        </div>
+        <DailyCountdown
+          deadline={questDayEnd().toISOString()}
+          dayStart={questDayStart().toISOString()}
+        />
       </header>
 
       <main className={styles.main}>{children}</main>

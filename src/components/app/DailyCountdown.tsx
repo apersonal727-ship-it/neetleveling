@@ -16,8 +16,9 @@ function formatRemaining(ms: number) {
 // the same instant checkAndApplyLockout uses to decide a quest's window has
 // closed. Renders a placeholder until mount to avoid a hydration mismatch
 // between server-render time and client hydration time.
-export function DailyCountdown({ deadline }: { deadline: string }) {
+export function DailyCountdown({ deadline, dayStart }: { deadline: string; dayStart: string }) {
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
+  const dayLengthMs = new Date(deadline).getTime() - new Date(dayStart).getTime();
 
   useEffect(() => {
     function tick() {
@@ -30,34 +31,45 @@ export function DailyCountdown({ deadline }: { deadline: string }) {
 
   if (remainingMs === null) {
     return (
-      <div className={styles.countdown}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7v5l3.5 2" />
-        </svg>
-        <span>Quests reset in --:--:--</span>
-      </div>
+      <>
+        <div className={styles.countdown}>
+          <span className={styles.countdownTxt}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3.5 2" />
+            </svg>
+            Quests reset in --:--:--
+          </span>
+        </div>
+        <div className={styles.countdownTrack} />
+      </>
     );
   }
 
   const urgency = remainingMs < 60 * 60 * 1000 ? "critical" : remainingMs < 3 * 60 * 60 * 1000 ? "warning" : "normal";
+  const elapsedPct = dayLengthMs > 0 ? Math.min(100, Math.max(0, ((dayLengthMs - remainingMs) / dayLengthMs) * 100)) : 0;
 
   return (
-    <div className={styles.countdown} data-urgency={urgency}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v5l3.5 2" />
-      </svg>
-      <span>
-        {remainingMs <= 0 ? (
-          "Resetting…"
-        ) : (
-          <>
-            Quests reset in <b>{formatRemaining(remainingMs)}</b>
-          </>
-        )}
-        <span className={styles.countdownNote}> · daily reset at 5:00 AM IST</span>
-      </span>
-    </div>
+    <>
+      <div className={styles.countdown} data-urgency={urgency}>
+        <span className={styles.countdownTxt}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3.5 2" />
+          </svg>
+          {remainingMs <= 0 ? (
+            "Resetting…"
+          ) : (
+            <>
+              Quests reset in <b>{formatRemaining(remainingMs)}</b>
+            </>
+          )}
+        </span>
+        <span className={styles.countdownNote}>daily reset at 5:00 AM IST</span>
+      </div>
+      <div className={styles.countdownTrack}>
+        <div className={styles.countdownFill} style={{ width: `${elapsedPct}%` }} />
+      </div>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { isPracticeQuest } from "@/lib/progressive-overload";
+import { questDayStart, questDayEnd } from "@/lib/quest-day";
 
 const HOUR_REFERENCE = 10; // matches the History page's 10-hour reference bar
 const CLASS_SUBJECTS = new Set(["PHYSICS", "CHEMISTRY", "BIOLOGY"]);
@@ -81,4 +82,20 @@ export async function getHunterProgressStats(profileId: string) {
     questionHours: Math.round(practiceMinutes / 60),
     questionsSolved: practiceMinutes,
   };
+}
+
+// The two real numbers behind the dashboard's "System Network" panel — total
+// registered hunters and quests actually cleared across everyone today.
+// "Hunters Online" / "In Focus Mode" have no live presence tracking behind
+// them, so those stay client-side flavor ticks (matching the homepage's own
+// animated counters) rather than being faked here as real aggregates.
+export async function getSystemNetworkStats() {
+  const [totalHunters, clearedToday] = await Promise.all([
+    prisma.profile.count(),
+    prisma.questCompletion.count({
+      where: { completedAt: { gte: questDayStart(), lt: questDayEnd() } },
+    }),
+  ]);
+
+  return { totalHunters, clearedToday };
 }

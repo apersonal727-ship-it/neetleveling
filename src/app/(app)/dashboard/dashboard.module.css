@@ -32,13 +32,94 @@
   }
 }
 
+/* ===== SYSTEM TOAST ===== */
+.sysToast {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(10, 14, 28, 0.95);
+  border: 1px solid var(--blue);
+  padding: 10px 18px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+  color: var(--blue);
+  box-shadow: 0 0 24px rgba(79, 216, 255, 0.35);
+  white-space: nowrap;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.sysToast b {
+  color: var(--ice);
+}
+.sysToast[data-hidden="true"] {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+  pointer-events: none;
+}
+
+/* ===== DASHBOARD GRID (desktop two-column) ===== */
+.dashGrid {
+  display: block;
+}
+.leftCol {
+  display: block;
+}
+.rightCol {
+  display: block;
+  margin-top: var(--sp-6);
+}
+@media (min-width: 900px) {
+  .dashGrid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: var(--sp-7);
+    align-items: start;
+  }
+  .leftCol {
+    position: sticky;
+    top: var(--sp-6);
+  }
+  .rightCol {
+    margin-top: 0;
+  }
+}
+
 /* ===== STATUS TERMINAL ===== */
 .statusCard {
+  position: relative;
   padding: 0;
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
   border-color: var(--border-strong);
   box-shadow: 0 0 50px -22px rgba(79, 216, 255, 0.32);
   overflow: hidden;
+}
+.corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--blue-2);
+  opacity: 0.7;
+  z-index: 1;
+  pointer-events: none;
+}
+.corner.tl {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+.corner.br {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
 }
 .titlebar {
   display: flex;
@@ -169,6 +250,112 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-top: 6px;
+}
+
+/* ===== SYSTEM NETWORK ===== */
+.pulsePanel {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  margin-top: var(--sp-6);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+.pulseHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--slate);
+  text-transform: uppercase;
+}
+.pulseLive {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--blue-2);
+}
+.pulseDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue-2);
+  box-shadow: 0 0 7px var(--blue-2);
+  animation: pulse 1.6s infinite;
+}
+.pulseGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 520px) {
+  .pulseGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.pulseTile {
+  padding: 16px 10px;
+  text-align: center;
+  border-right: 1px dashed var(--border);
+}
+.pulseTile:last-child {
+  border-right: none;
+}
+@media (max-width: 520px) {
+  .pulseTile:nth-child(2) {
+    border-right: none;
+  }
+  .pulseTile:nth-child(3) {
+    border-top: 1px dashed var(--border);
+  }
+  .pulseTile:nth-child(4) {
+    border-top: 1px dashed var(--border);
+  }
+}
+.pulseNum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+}
+.pdot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse 1.4s infinite;
+}
+.pulseOnline .pdot {
+  background: var(--green);
+  box-shadow: 0 0 7px var(--green);
+}
+.pulseOnline .pulseNum {
+  color: var(--green);
+}
+.pulseTotal .pulseNum {
+  color: var(--blue-2);
+}
+.pulseDone .pulseNum {
+  color: var(--gold);
+}
+.pulseFocus .pdot {
+  background: var(--violet);
+  box-shadow: 0 0 7px var(--violet);
+}
+.pulseFocus .pulseNum {
+  color: var(--violet);
+}
+.pulseLbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9.5px;
+  color: var(--slate);
+  text-transform: uppercase;
+  margin-top: 5px;
+  letter-spacing: 0.02em;
 }
 
 /* ===== SECTION HEADS ===== */

@@ -30,7 +30,7 @@ export function TodaysQuestList({ quests, streak }: { quests: Quest[]; streak: n
               {cat.name}
             </div>
             {subjectQuests.length === 0 ? (
-              <div className={appStyles.card}>
+              <div className={`${appStyles.card} ${styles.subjectBox}`} style={{ "--c": cat.color } as React.CSSProperties}>
                 <div className={styles.questRow}>
                   <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "#4a5476" }}>
                     Not assigned today
@@ -38,7 +38,7 @@ export function TodaysQuestList({ quests, streak }: { quests: Quest[]; streak: n
                 </div>
               </div>
             ) : (
-              <div className={appStyles.card}>
+              <div className={`${appStyles.card} ${styles.subjectBox}`} style={{ "--c": cat.color } as React.CSSProperties}>
                 {subjectQuests.map((q) => (
                   <QuestRow key={q.id} quest={applyPracticeOverrides(q, streak)} done={q.completions.length > 0} />
                 ))}

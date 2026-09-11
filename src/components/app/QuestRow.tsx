@@ -13,10 +13,18 @@ export function QuestRow({
     <div className={styles.questRow}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className={styles.questRowTitle}>{quest.title}</div>
-        <div className={styles.questRowMeta} style={{ color: done ? "var(--green)" : "var(--amber)" }}>
-          {done ? "✓ Completed" : `● ${quest.durationMinutes} min`}
+        <div className={styles.questRowMeta} style={{ color: done ? "var(--green)" : "var(--slate)" }}>
+          {done ? (
+            "✓ Completed"
+          ) : (
+            <>
+              <span className={styles.dot} />
+              {quest.durationMinutes} min
+            </>
+          )}
         </div>
       </div>
+      {!done && <span className={styles.startPill}>▶ Start</span>}
     </div>
   );
 

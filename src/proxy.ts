@@ -24,6 +24,7 @@ const APP_PATHS = [
   "/subscription-expired",
   "/report-bug",
   "/feature-requests",
+  "/time-warning",
 ];
 
 export async function proxy(request: NextRequest) {
