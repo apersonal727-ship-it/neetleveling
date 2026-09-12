@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress } from "@/lib/rank";
 import { getTodaysQuests } from "@/lib/todays-quest";
+import { getPersonalQuests } from "@/lib/personal-quests";
 import { questDayEnd } from "@/lib/quest-day";
 import { TodaysQuestList } from "@/components/app/TodaysQuestList";
 import { QuestDropCountdown } from "@/components/app/QuestDropCountdown";
+import { PersonalQuestsPanel } from "@/components/app/PersonalQuestsPanel";
 import appStyles from "../app.module.css";
 import styles from "./quests.module.css";
 
@@ -16,8 +18,15 @@ export default async function QuestsPage() {
   const profile = await getCurrentProfile();
   const progress = getLevelProgress(profile.xp);
 
-  const todaysQuests = await getTodaysQuests(profile.id, progress.level);
-  const doneCount = todaysQuests.filter((q) => q.completions.length > 0).length;
+  const [todaysQuests, personalQuests] = await Promise.all([
+    getTodaysQuests(profile.id, progress.level),
+    getPersonalQuests(profile.id),
+  ]);
+  const mandatoryDailyPersonal = personalQuests.filter((q) => q.mandatory && q.frequency === "DAILY");
+  const doneCount =
+    todaysQuests.filter((q) => q.completions.length > 0).length +
+    mandatoryDailyPersonal.filter((q) => q.done).length;
+  const totalCount = todaysQuests.length + mandatoryDailyPersonal.length;
 
   return (
     <div className={styles.questsGrid}>
@@ -28,9 +37,9 @@ export default async function QuestsPage() {
         </span>
         <div className={styles.secTitleRow}>
           <h2>Today&apos;s Quests</h2>
-          {todaysQuests.length > 0 && (
+          {totalCount > 0 && (
             <span className={styles.prog}>
-              <b>{doneCount}</b> / {todaysQuests.length} complete
+              <b>{doneCount}</b> / {totalCount} complete
             </span>
           )}
         </div>
@@ -62,16 +71,10 @@ export default async function QuestsPage() {
         </span>
         <div className={styles.secTitleRow}>
           <h2>Your Own Grind</h2>
+          <span className={styles.prog}>{personalQuests.length} added</span>
         </div>
 
-        <div className={`${appStyles.card} ${styles.personalBox}`}>
-          <div className={styles.personalEmpty}>
-            <div className={styles.ic}>＋</div>
-            Self-tracked goals, no penalty if missed.
-            <br />
-            <span className={styles.comingSoonTag}>Coming Soon</span>
-          </div>
-        </div>
+        <PersonalQuestsPanel quests={personalQuests} />
       </div>
     </div>
   );

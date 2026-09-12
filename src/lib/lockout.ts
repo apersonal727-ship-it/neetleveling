@@ -1,13 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import type { Profile } from "@/generated/prisma/client";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
-import { questDayStart } from "@/lib/quest-day";
+import { questDayStart, questDayPlus } from "@/lib/quest-day";
 
 // QA throwaway accounts used for manual testing — never subject to the
 // lockout/penalty system, so a testing session can't get itself locked out
 // mid-verification. Not a product feature; remove alongside the accounts
 // themselves once they're no longer needed.
-const LOCKOUT_EXEMPT_EMAILS = new Set(["claude-qa-test-2@example.com"]);
+export const LOCKOUT_EXEMPT_EMAILS = new Set(["claude-qa-test-2@example.com"]);
 
 // Lazily evaluated on every app page load (no cron): if any quest assigned
 // to this hunter on a prior day was never completed, its 24h window has
@@ -51,7 +51,31 @@ export async function checkAndApplyLockout(profile: Profile) {
     take: 1,
   });
 
-  if (pastQuests.length === 0) return;
+  // Mandatory personal quests (Quests page's "Your Own Grind" column, marked
+  // Mandatory) participate here exactly like an admin-assigned Quest — an
+  // optional one never does. ONCE quests behave like a Quest row: due once,
+  // "missed" means no completion ever. DAILY ones persist indefinitely, so
+  // "missed" means no completion within yesterday's quest-day window
+  // specifically, not "ever" (they may have been cleared plenty of times
+  // before and just reset since).
+  const yesterdayStart = questDayPlus(today, -1);
+  const missedPersonalQuest = await prisma.personalQuest.findFirst({
+    where: {
+      profileId,
+      mandatory: true,
+      createdAt: { lt: today, gte: since },
+      OR: [
+        { frequency: "ONCE", completions: { none: {} } },
+        {
+          frequency: "DAILY",
+          completions: { none: { completedAt: { gte: yesterdayStart, lt: today } } },
+        },
+      ],
+    },
+    select: { id: true },
+  });
+
+  if (pastQuests.length === 0 && !missedPersonalQuest) return;
 
   const pool = await prisma.punishmentQuest.findMany({ select: { id: true } });
 

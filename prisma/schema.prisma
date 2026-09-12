@@ -53,6 +53,7 @@ model Profile {
   notifications         Notification[]
   bugReports            BugReport[]
   featureRequests       FeatureRequest[]
+  personalQuests        PersonalQuest[]
 
   @@index([referredByCode])
 }
@@ -128,9 +129,50 @@ model QuestCompletion {
   @@index([profileId, completedAt])
 }
 
+enum PersonalQuestFrequency {
+  ONCE
+  DAILY
+}
+
+// Self-added quest a hunter creates for themselves (Quests page's "Your Own
+// Grind" column) — no admin involvement, no XP reward. ONCE quests are due
+// only on the quest-day they were created and are done forever after one
+// completion; DAILY quests persist indefinitely and reset each quest-day
+// (done-today is derived from PersonalQuestCompletion rows within the
+// current quest-day window, not from a single boolean). A mandatory
+// personal quest participates in checkAndApplyLockout exactly like an
+// admin-assigned Quest — an optional one never does, matching the Quests
+// page copy's explicit promise ("no penalty, no lockout").
+model PersonalQuest {
+  id              String                  @id @default(cuid())
+  profileId       String
+  profile         Profile                 @relation(fields: [profileId], references: [id])
+  title           String
+  durationMinutes Int
+  subject         String?
+  mandatory       Boolean                 @default(false)
+  frequency       PersonalQuestFrequency  @default(ONCE)
+  createdAt       DateTime                @default(now())
+
+  completions PersonalQuestCompletion[]
+  sessions    QuestSession[]
+
+  @@index([profileId])
+}
+
+model PersonalQuestCompletion {
+  id              String        @id @default(cuid())
+  personalQuestId String
+  personalQuest   PersonalQuest @relation(fields: [personalQuestId], references: [id])
+  completedAt     DateTime      @default(now())
+
+  @@index([personalQuestId, completedAt])
+}
+
 enum SessionKind {
   QUEST
   PUNISHMENT
+  PERSONAL
 }
 
 enum SessionStatus {
@@ -148,6 +190,8 @@ model QuestSession {
   quest             Quest?           @relation(fields: [questId], references: [id])
   punishmentQuestId String?
   punishmentQuest   PunishmentQuest? @relation(fields: [punishmentQuestId], references: [id])
+  personalQuestId   String?
+  personalQuest     PersonalQuest?   @relation(fields: [personalQuestId], references: [id])
   startedAt         DateTime         @default(now())
   status            SessionStatus    @default(ACTIVE)
   completedAt       DateTime?

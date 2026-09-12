@@ -23,7 +23,7 @@ export default async function FocusLockPage({
 
   const session = await prisma.questSession.findUnique({
     where: { id: sessionId },
-    include: { quest: true, punishmentQuest: true },
+    include: { quest: true, punishmentQuest: true, personalQuest: true },
   });
 
   if (!session || session.profileId !== profile.id) redirect("/dashboard");
@@ -32,23 +32,33 @@ export default async function FocusLockPage({
   }
 
   const isPunishment = session.kind === "PUNISHMENT";
+  const isPersonal = session.kind === "PERSONAL";
   const title = isPunishment
     ? `${penaltyReps(profile.penaltyStreak)} ${session.punishmentQuest!.title}`
-    : session.quest!.title;
+    : isPersonal
+      ? session.personalQuest!.title
+      : session.quest!.title;
   const durationMinutes = isPunishment
     ? penaltyDurationMinutes(profile.penaltyStreak)
-    : isPracticeQuest(session.quest!.title)
-      ? practiceQuestDurationMinutes(profile.streak, session.quest!.subject)
-      : session.quest!.durationMinutes;
-  const category = isPunishment ? "Punishment Quest" : questSubjectLabel(session.quest!.subject);
-  const xpAwarded = isPunishment
-    ? 0
-    : (session.quest!.xpOverride ?? Math.round(session.quest!.durationMinutes * 0.67));
+    : isPersonal
+      ? session.personalQuest!.durationMinutes
+      : isPracticeQuest(session.quest!.title)
+        ? practiceQuestDurationMinutes(profile.streak, session.quest!.subject)
+        : session.quest!.durationMinutes;
+  const category = isPunishment
+    ? "Punishment Quest"
+    : isPersonal
+      ? "Personal Quest"
+      : questSubjectLabel(session.quest!.subject);
+  const xpAwarded =
+    isPunishment || isPersonal
+      ? 0
+      : (session.quest!.xpOverride ?? Math.round(session.quest!.durationMinutes * 0.67));
 
   return (
     <FocusLockView
       sessionId={session.id}
-      isPunishment={isPunishment}
+      kind={session.kind}
       title={title}
       category={category}
       durationSeconds={durationMinutes * 60}

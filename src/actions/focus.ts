@@ -48,6 +48,24 @@ export async function startPunishmentSession(punishmentQuestId: string) {
   redirect(`/focus-lock?sessionId=${session.id}`);
 }
 
+export async function startPersonalQuestSession(personalQuestId: string) {
+  const profile = await getCurrentProfile();
+
+  const existing = await prisma.questSession.findFirst({
+    where: { profileId: profile.id, kind: "PERSONAL", personalQuestId, status: "ACTIVE" },
+  });
+  if (existing) redirect(`/focus-lock?sessionId=${existing.id}`);
+
+  const quest = await prisma.personalQuest.findUniqueOrThrow({ where: { id: personalQuestId } });
+  if (quest.profileId !== profile.id) redirect("/dashboard");
+
+  const session = await prisma.questSession.create({
+    data: { profileId: profile.id, kind: "PERSONAL", personalQuestId: quest.id },
+  });
+
+  redirect(`/focus-lock?sessionId=${session.id}`);
+}
+
 export type CompleteResult =
   | { error: string }
   | { success: true; xpAwarded: number; streak: number };
@@ -157,4 +175,45 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
   });
 
   return { success: true, xpAwarded: 0, streak: 0 };
+}
+
+// Personal quests are self-tracked with no XP reward (the Quests page copy
+// never promises one) — completing one just logs a PersonalQuestCompletion.
+export async function completePersonalQuestSession(sessionId: string): Promise<CompleteResult> {
+  const profile = await getCurrentProfile();
+
+  const session = await prisma.questSession.findUnique({
+    where: { id: sessionId },
+    include: { personalQuest: true },
+  });
+
+  if (
+    !session ||
+    session.profileId !== profile.id ||
+    session.kind !== "PERSONAL" ||
+    !session.personalQuest
+  ) {
+    return { error: "Session not found." };
+  }
+  if (session.status !== "ACTIVE") {
+    return { error: "This quest is no longer active." };
+  }
+
+  const elapsedMs = Date.now() - session.startedAt.getTime();
+  const requiredMs = session.personalQuest.durationMinutes * 60 * 1000;
+  if (elapsedMs < requiredMs) {
+    return { error: "The timer hasn't finished yet." };
+  }
+
+  await prisma.$transaction([
+    prisma.questSession.update({
+      where: { id: session.id },
+      data: { status: "COMPLETED", completedAt: new Date() },
+    }),
+    prisma.personalQuestCompletion.create({
+      data: { personalQuestId: session.personalQuest.id },
+    }),
+  ]);
+
+  return { success: true, xpAwarded: 0, streak: profile.streak };
 }

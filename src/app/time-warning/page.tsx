@@ -3,10 +3,9 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress } from "@/lib/rank";
 import { prisma } from "@/lib/prisma";
-import { getTodaysQuests } from "@/lib/todays-quest";
-import { applyPracticeOverrides } from "@/lib/progressive-overload";
+import { getOpenMandatoryQuests } from "@/lib/open-quests";
 import { questDayEnd } from "@/lib/quest-day";
-import { startQuestSession } from "@/actions/focus";
+import { startQuestSession, startPersonalQuestSession } from "@/actions/focus";
 import { StartSessionButton } from "@/components/app/StartSessionButton";
 import { TimeWarningCountdown } from "@/components/app/TimeWarningCountdown";
 import styles from "./time-warning.module.css";
@@ -18,10 +17,7 @@ export const metadata: Metadata = {
 export default async function TimeWarningPage() {
   const profile = await getCurrentProfile();
   const progress = getLevelProgress(profile.xp);
-  const todaysQuests = await getTodaysQuests(profile.id, progress.level);
-  const openQuests = todaysQuests
-    .filter((q) => q.completions.length === 0)
-    .map((q) => applyPracticeOverrides(q, profile.streak));
+  const openQuests = await getOpenMandatoryQuests(profile.id, progress.level, profile.streak);
 
   if (openQuests.length === 0) redirect("/dashboard");
 
@@ -62,7 +58,11 @@ export default async function TimeWarningPage() {
                   <div className={styles.questMeta}>{q.durationMinutes} min</div>
                 </div>
                 <StartSessionButton
-                  action={startQuestSession.bind(null, q.id)}
+                  action={
+                    q.kind === "PERSONAL"
+                      ? startPersonalQuestSession.bind(null, q.id)
+                      : startQuestSession.bind(null, q.id)
+                  }
                   className={styles.startBtn}
                 >
                   ▶ Start

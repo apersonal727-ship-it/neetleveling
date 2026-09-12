@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "@/app/focus-lock/focus-lock.module.css";
-import { completeQuestSession, completePunishmentSession } from "@/actions/focus";
+import {
+  completeQuestSession,
+  completePunishmentSession,
+  completePersonalQuestSession,
+} from "@/actions/focus";
+
+type SessionKind = "QUEST" | "PUNISHMENT" | "PERSONAL";
 
 const R = 112;
 const CIRCUMFERENCE = 2 * Math.PI * R;
@@ -18,7 +24,7 @@ function fmt(totalSeconds: number) {
 
 export function FocusLockView({
   sessionId,
-  isPunishment,
+  kind,
   title,
   category,
   durationSeconds,
@@ -27,7 +33,7 @@ export function FocusLockView({
   streak,
 }: {
   sessionId: string;
-  isPunishment: boolean;
+  kind: SessionKind;
   title: string;
   category: string;
   durationSeconds: number;
@@ -35,6 +41,8 @@ export function FocusLockView({
   xpAwarded: number;
   streak: number;
 }) {
+  const isPunishment = kind === "PUNISHMENT";
+  const isPersonal = kind === "PERSONAL";
   const router = useRouter();
   const startedAtMs = useRef(new Date(startedAt).getTime()).current;
   const [remaining, setRemaining] = useState(() =>
@@ -61,7 +69,9 @@ export function FocusLockView({
     (async () => {
       const result = isPunishment
         ? await completePunishmentSession(sessionId)
-        : await completeQuestSession(sessionId);
+        : isPersonal
+          ? await completePersonalQuestSession(sessionId)
+          : await completeQuestSession(sessionId);
       if ("error" in result) {
         setCompleteError(result.error);
         completingRef.current = false;
@@ -74,7 +84,7 @@ export function FocusLockView({
   }, [remaining, completed]);
 
   useEffect(() => {
-    if (!completed || isPunishment) return;
+    if (!completed || isPunishment || isPersonal) return;
     const dur = 900;
     const start = performance.now();
     let raf = 0;
@@ -171,7 +181,13 @@ export function FocusLockView({
 
           <div className={styles.questInfo}>
             <h1>{title}</h1>
-            <p>{isPunishment ? "UNLOCKS YOUR ACCOUNT" : `+${xpAwarded} XP ON COMPLETION`}</p>
+            <p>
+            {isPunishment
+              ? "UNLOCKS YOUR ACCOUNT"
+              : isPersonal
+                ? "SELF-TRACKED · NO XP"
+                : `+${xpAwarded} XP ON COMPLETION`}
+          </p>
           </div>
 
           <div className={styles.warnCard}>
@@ -243,19 +259,19 @@ export function FocusLockView({
           </div>
         </div>
         <span className={styles.cmpEyebrow}>
-          {isPunishment ? "Punishment cleared" : "Quest closed out"}
+          {isPunishment ? "Punishment cleared" : isPersonal ? "Personal quest closed out" : "Quest closed out"}
         </span>
         <h1>{isPunishment ? "Account Unlocked" : `${category} Complete`}</h1>
         <div className={styles.cmpMeta}>
           {title.toUpperCase()} · {fmt(durationSeconds).replace(/^00:/, "")}
         </div>
-        {!isPunishment && (
+        {!isPunishment && !isPersonal && (
           <div className={styles.xpCounterWrap}>
             <div className={styles.xpCounter}>+{xpCounter}</div>
             <div className={styles.xpCounterLbl}>XP credited</div>
           </div>
         )}
-        {!isPunishment && streak > 0 && (
+        {!isPunishment && !isPersonal && streak > 0 && (
           <div className={styles.streakLine}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M12 2c0 0-5 4.5-5 10a5 5 0 0 0 10 0c0-1.2-.4-2-1-2.8.1 1-.3 1.8-1 2.3.3-2.5-1-4-1.6-5.2C13.5 4.5 13.4 3 12 2Z" />
