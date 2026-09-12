@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
-import { getLevelProgress } from "@/lib/rank";
+import { getLevelProgress, rankForLevel } from "@/lib/rank";
+import { lapsedAt, streakGraceDeadline } from "@/lib/subscription";
 import { prisma } from "@/lib/prisma";
+import { GraceCountdown } from "@/components/subscription/GraceCountdown";
 import styles from "./subscription-expired.module.css";
 
 export const metadata: Metadata = {
-  title: "Subscription Expired — NEETLeveling",
+  title: "Access Paused — NEETLeveling",
 };
 
 function fmtDate(d: Date) {
@@ -32,13 +34,18 @@ export default async function SubscriptionExpiredPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const lapseDate = lapsedAt(profile);
+  const graceDeadline = streakGraceDeadline(profile);
+  const progress = getLevelProgress(profile.xp);
+  const rank = rankForLevel(progress.level);
+
   return (
     <>
       <div className={styles.bgGrid} />
       <div className={styles.app}>
         <header className={styles.header}>
           <span className={styles.statusPill}>
-            <span className={styles.dot} /> Subscription Expired
+            <span className={styles.dot} /> Subscription Lapsed
           </span>
         </header>
 
@@ -50,11 +57,11 @@ export default async function SubscriptionExpiredPage() {
                 <path d="M2 10h20M12 15v.01" />
               </svg>
             </div>
-            <h1 className={styles.badgeTitle}>Your renewal didn&apos;t go through.</h1>
+            <h1 className={styles.badgeTitle}>Your Access Is Paused.</h1>
             <p className={styles.badgeReason}>
               {lastFailed
-                ? `The ₹${lastFailed.amount} charge was declined on ${fmtDate(lastFailed.createdAt)}. Update your payment method to pick up right where you left off.`
-                : "Your subscription has lapsed. Renew to pick up right where you left off."}
+                ? `The ₹${lastFailed.amount} charge was declined on ${fmtDate(lastFailed.createdAt)}. The System is waiting — nothing has been lost.`
+                : `Your ₹99/month billing cycle ended${lapseDate ? ` on ${fmtDate(lapseDate)}` : ""} and wasn't renewed. The System is waiting — nothing has been lost.`}
             </p>
           </div>
 
@@ -62,32 +69,44 @@ export default async function SubscriptionExpiredPage() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z" />
             </svg>
-            Level {getLevelProgress(profile.xp).level}, your {profile.streak}-day streak, and all
-            XP are saved — nothing is lost while access is paused.
+            Your rank, XP, streak, and history are saved exactly as they were. Reactivate anytime
+            and pick up right where you left off.
           </div>
 
+          {profile.streak > 0 && graceDeadline && (
+            <div className={styles.streakWarn}>
+              <span className={styles.ic}>🔥</span>
+              <span className={styles.txt}>
+                Your <b>{profile.streak}-day streak</b> is on hold, not broken — but it resets to
+                zero if you don&apos;t reactivate within <b>7 days</b>.
+              </span>
+            </div>
+          )}
+
           <section>
-            <span className={styles.secLabel}>What&apos;s on hold</span>
-            <div className={`${styles.card} ${styles.planCard}`}>
-              <div className={styles.planRow}>
-                <span>Plan</span>
-                <b>Hunter Access — ₹99/mo</b>
+            <span className={styles.secLabel}>Status</span>
+            <div className={styles.statusBox}>
+              <div className={styles.statusRow}>
+                <div className={styles.statusK}>Last Active</div>
+                <div className={styles.statusVDim}>{lapseDate ? fmtDate(lapseDate) : "—"}</div>
               </div>
-              {lastFailed && (
-                <div className={styles.planRow}>
-                  <span>Failed charge</span>
-                  <b>{fmtDate(lastFailed.createdAt)}</b>
+              <div className={styles.statusRow}>
+                <div className={styles.statusK}>Rank On Hold</div>
+                <div className={styles.statusV}>
+                  {rank.code}-Rank · LVL {progress.level}
+                </div>
+              </div>
+              {profile.streak > 0 && graceDeadline && (
+                <div className={styles.statusRow}>
+                  <div className={styles.statusK}>Streak Grace Period</div>
+                  <GraceCountdown deadline={graceDeadline.toISOString()} />
                 </div>
               )}
-              <div className={styles.planRow}>
-                <span>Status</span>
-                <b style={{ color: "var(--amber-2)" }}>Payment required</b>
-              </div>
             </div>
           </section>
 
           <Link href="/checkout" className={`${styles.btn} ${styles.btnRenew}`}>
-            Update Payment &amp; Resume
+            Reactivate — ₹99/month
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
@@ -99,8 +118,8 @@ export default async function SubscriptionExpiredPage() {
               <circle cx="12" cy="12" r="9" />
             </svg>
             <span>
-              This is a billing pause, not a penalty — no punishment quest, no streak reset.
-              Quests simply won&apos;t resume until access does.
+              This is a billing pause, not a penalty — no punishment quest. Quests simply
+              won&apos;t resume until access does.
             </span>
           </div>
         </main>
