@@ -68,6 +68,45 @@ export default async function ProfilePage() {
       </section>
 
       <section>
+        <span className={styles.secTag} style={{ color: "var(--violet)" }}>
+          <span className={styles.dot} />
+          Hunter Info
+        </span>
+        <div className={`${appStyles.card} ${styles.infoBox}`}>
+          <div className={styles.infoRow}>
+            <div className={styles.infoK}>
+              <span className={styles.infoIc}>📍</span>Location
+            </div>
+            <div className={styles.infoV}>{profile.location ?? "—"}</div>
+          </div>
+          <div className={styles.infoRow}>
+            <div className={styles.infoK}>
+              <span className={styles.infoIc}>🏫</span>Coaching / Batch
+            </div>
+            <div className={styles.infoV}>{profile.coaching ?? "—"}</div>
+          </div>
+          <div className={styles.infoRow}>
+            <div className={styles.infoK}>
+              <span className={styles.infoIc}>📘</span>Attempt Status
+            </div>
+            {profile.attemptStatus ? (
+              <div className={`${styles.infoV} ${styles.tag}`}>{profile.attemptStatus}</div>
+            ) : (
+              <div className={styles.infoV}>—</div>
+            )}
+          </div>
+          <div className={styles.infoRow}>
+            <div className={styles.infoK}>
+              <span className={styles.infoIc}>🗓</span>Hunter Since
+            </div>
+            <div className={styles.infoV}>
+              {profile.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
         <span className={styles.secTag} style={{ color: "var(--blue-2)" }}>
           <span className={styles.dot} />
           Hunter Stats

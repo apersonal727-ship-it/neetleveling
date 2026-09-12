@@ -28,6 +28,15 @@ export async function updateTargetExamYear(formData: FormData): Promise<ActionRe
   return { success: true };
 }
 
+export async function updateHunterInfo(formData: FormData): Promise<ActionResult> {
+  const location = String(formData.get("location") ?? "").trim() || null;
+  const coaching = String(formData.get("coaching") ?? "").trim() || null;
+  const attemptStatus = String(formData.get("attemptStatus") ?? "").trim() || null;
+  const profile = await getCurrentProfile();
+  await prisma.profile.update({ where: { id: profile.id }, data: { location, coaching, attemptStatus } });
+  return { success: true };
+}
+
 export async function updateNotificationPref(
   key: "questReminders" | "streakWarnings" | "penaltyAlerts" | "timerWarnings" | "walletUpdates",
   value: boolean,

@@ -44,6 +44,9 @@ model Profile {
   timerWarnings  Boolean @default(true)
   walletUpdates  Boolean @default(false)
   targetExamYear String?
+  location       String?
+  coaching       String?
+  attemptStatus  String?
 
   createdQuests         Quest[]              @relation("QuestCreatedBy")
   assignedQuests        Quest[]              @relation("QuestAssignedTo")

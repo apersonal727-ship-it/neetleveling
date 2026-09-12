@@ -6,6 +6,7 @@ import {
   updateHunterName,
   updateClass,
   updateTargetExamYear,
+  updateHunterInfo,
   updateNotificationPref,
   cancelSubscription,
 } from "@/actions/settings";
@@ -70,6 +71,9 @@ export function SettingsForm({
     email: string;
     hunterClass: string;
     targetExamYear: string | null;
+    location: string | null;
+    coaching: string | null;
+    attemptStatus: string | null;
     questReminders: boolean;
     streakWarnings: boolean;
     penaltyAlerts: boolean;
@@ -92,6 +96,11 @@ export function SettingsForm({
   const [nameSaved, setNameSaved] = useState(false);
   const [savingExamYear, startSavingExamYear] = useTransition();
   const [examYearSaved, setExamYearSaved] = useState(false);
+  const [location, setLocation] = useState(profile.location ?? "");
+  const [coaching, setCoaching] = useState(profile.coaching ?? "");
+  const [attemptStatus, setAttemptStatus] = useState(profile.attemptStatus ?? "");
+  const [savingHunterInfo, startSavingHunterInfo] = useTransition();
+  const [hunterInfoSaved, setHunterInfoSaved] = useState(false);
   const [canceling, startCanceling] = useTransition();
   const [canceled, setCanceled] = useState(profile.subscriptionStatus === "CANCELED");
 
@@ -112,6 +121,18 @@ export function SettingsForm({
       await updateTargetExamYear(fd);
       setExamYearSaved(true);
       setTimeout(() => setExamYearSaved(false), 1500);
+    });
+  }
+
+  function saveHunterInfo() {
+    const fd = new FormData();
+    fd.set("location", location);
+    fd.set("coaching", coaching);
+    fd.set("attemptStatus", attemptStatus);
+    startSavingHunterInfo(async () => {
+      await updateHunterInfo(fd);
+      setHunterInfoSaved(true);
+      setTimeout(() => setHunterInfoSaved(false), 1500);
     });
   }
 
@@ -196,6 +217,54 @@ export function SettingsForm({
               disabled={savingExamYear}
             >
               {savingExamYear ? "Saving…" : examYearSaved ? "Saved" : "Save"}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <span className={appStyles.secLabel}>Hunter Info</span>
+        <div className={`${appStyles.card} ${styles.fieldCard}`}>
+          <span className={styles.fieldLabel}>Location</span>
+          <div className={styles.fieldRow}>
+            <input
+              className={styles.fieldInput}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Kolkata, West Bengal"
+              maxLength={48}
+            />
+          </div>
+        </div>
+        <div className={`${appStyles.card} ${styles.fieldCard}`} style={{ marginTop: "8px" }}>
+          <span className={styles.fieldLabel}>Coaching / Batch</span>
+          <div className={styles.fieldRow}>
+            <input
+              className={styles.fieldInput}
+              value={coaching}
+              onChange={(e) => setCoaching(e.target.value)}
+              placeholder="e.g. Aakash Institute — NEET 2027"
+              maxLength={64}
+            />
+          </div>
+        </div>
+        <div className={`${appStyles.card} ${styles.fieldCard}`} style={{ marginTop: "8px" }}>
+          <span className={styles.fieldLabel}>Attempt Status</span>
+          <div className={styles.fieldRow}>
+            <input
+              className={styles.fieldInput}
+              value={attemptStatus}
+              onChange={(e) => setAttemptStatus(e.target.value)}
+              placeholder="e.g. Dropper · 2nd Attempt"
+              maxLength={32}
+            />
+            <button
+              type="button"
+              className={styles.fieldBtn}
+              onClick={saveHunterInfo}
+              disabled={savingHunterInfo}
+            >
+              {savingHunterInfo ? "Saving…" : hunterInfoSaved ? "Saved" : "Save"}
             </button>
           </div>
         </div>
