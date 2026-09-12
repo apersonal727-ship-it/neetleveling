@@ -14,6 +14,14 @@ type SessionKind = "QUEST" | "PUNISHMENT" | "PERSONAL";
 const R = 112;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
+const SUBJECT_COLOR: Record<string, string> = {
+  PHYSICS: "#8fe8ff",
+  CHEMISTRY: "#ffb84f",
+  BIOLOGY: "#3ddc84",
+  DISCIPLINE: "#8fe8ff",
+  SECRET: "#8b5cf6",
+};
+
 function fmt(totalSeconds: number) {
   const s = Math.max(0, Math.round(totalSeconds));
   const h = Math.floor(s / 3600);
@@ -27,6 +35,7 @@ export function FocusLockView({
   kind,
   title,
   category,
+  subject,
   durationSeconds,
   startedAt,
   xpAwarded,
@@ -36,6 +45,7 @@ export function FocusLockView({
   kind: SessionKind;
   title: string;
   category: string;
+  subject: string | null;
   durationSeconds: number;
   startedAt: string;
   xpAwarded: number;
@@ -45,21 +55,28 @@ export function FocusLockView({
   const isPersonal = kind === "PERSONAL";
   const router = useRouter();
   const startedAtMs = useRef(new Date(startedAt).getTime()).current;
-  const [remaining, setRemaining] = useState(() =>
-    Math.max(0, durationSeconds - (Date.now() - startedAtMs) / 1000),
-  );
-  const [showAlert, setShowAlert] = useState(false);
+  // Seeded with the full duration (a value the server can compute too) so
+  // the first client render matches SSR exactly — Date.now() would differ
+  // between server-render time and hydration time and produce a hydration
+  // mismatch on this timer (and on the ring's strokeDashoffset) every
+  // single time this page loads. The real elapsed-adjusted value is set
+  // right after mount instead, same pattern as DailyCountdown.
+  const [remaining, setRemaining] = useState(durationSeconds);
+  const [shaking, setShaking] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [xpCounter, setXpCounter] = useState(0);
   const [returnHref, setReturnHref] = useState("/dashboard");
+  const [questsLeftToday, setQuestsLeftToday] = useState<number | null>(null);
   const completingRef = useRef(false);
 
   useEffect(() => {
-    const iv = setInterval(() => {
+    function tick() {
       setRemaining(Math.max(0, durationSeconds - (Date.now() - startedAtMs) / 1000));
-    }, 1000);
+    }
+    tick();
+    const iv = setInterval(tick, 1000);
     return () => clearInterval(iv);
   }, [durationSeconds, startedAtMs]);
 
@@ -86,6 +103,7 @@ export function FocusLockView({
       } else if (result.dayCleared) {
         setReturnHref("/day-clear");
       }
+      setQuestsLeftToday(result.questsLeftToday);
       setCompleted(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,7 +177,16 @@ export function FocusLockView({
         </header>
 
         <main className={styles.main}>
-          <span className={styles.questCat}>{category}</span>
+          {subject ? (
+            <span
+              className={styles.subjBadge}
+              style={{ "--sc": SUBJECT_COLOR[subject] ?? "var(--blue-2)" } as React.CSSProperties}
+            >
+              {category}
+            </span>
+          ) : (
+            <span className={styles.questCat}>{category}</span>
+          )}
 
           <div className={styles.ringWrap}>
             <svg viewBox="0 0 250 250">
@@ -171,7 +198,7 @@ export function FocusLockView({
               </defs>
               <circle className={styles.ringTrack} cx="125" cy="125" r={R} />
               <circle
-                className={styles.ringFill}
+                className={`${styles.ringFill} ${completing || completed ? styles.ringFillComplete : ""}`}
                 cx="125"
                 cy="125"
                 r={R}
@@ -203,55 +230,25 @@ export function FocusLockView({
               <path d="M12 9v4M12 17h.01" />
               <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
             </svg>
-            <p>
-              The System does not allow you to abandon a quest mid-way. Leaving this screen or
-              closing the tab will not stop the timer.
-            </p>
+            <p>&quot;No pausing, no early exit — the timer decides when you&apos;re free.&quot;</p>
           </div>
+
+          {!completed && (
+            <div>
+              <button
+                type="button"
+                className={`${styles.exitLockedBtn} ${shaking ? styles.shake : ""}`}
+                onClick={() => {
+                  setShaking(false);
+                  requestAnimationFrame(() => setShaking(true));
+                }}
+              >
+                🔒 Exit Locked
+              </button>
+              <div className={styles.exitNote}>Unlocks automatically when the timer hits zero.</div>
+            </div>
+          )}
         </main>
-
-        <footer style={{ padding: "20px", display: "flex", justifyContent: "center", gap: "24px" }}>
-          <button
-            type="button"
-            onClick={() => setShowAlert(true)}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "5px",
-              color: "#4a5476",
-              opacity: 0.55,
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="20" height="20">
-              <rect x="3" y="3" width="18" height="18" rx="4" />
-              <path d="M8 13l2.5 2.5L16 9" />
-            </svg>
-            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "9px" }}>
-              STATUS
-            </span>
-          </button>
-        </footer>
-      </div>
-
-      <div className={`${styles.modalOverlay} ${showAlert ? styles.modalOverlayShow : ""}`}>
-        <div className={styles.modalCard}>
-          <svg className={styles.modalIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-            <path d="M12 9v4M12 17h.01" />
-            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
-          </svg>
-          <h2>System Alert</h2>
-          <p>
-            The System does not allow you to abandon a quest mid-way. Your Focus Lock stays
-            active until the timer ends.
-          </p>
-          <button type="button" className={styles.modalBtn} onClick={() => setShowAlert(false)}>
-            Understood
-          </button>
-        </div>
       </div>
 
       <div className={styles.completeOverlay} style={{ display: completed ? "flex" : "none" }}>
@@ -287,12 +284,19 @@ export function FocusLockView({
             Streak day {streak}
           </div>
         )}
+        {!isPunishment && questsLeftToday !== null && (
+          <div className={styles.cmpRemaining}>
+            {questsLeftToday === 0
+              ? "All quests cleared today"
+              : `${questsLeftToday} quest${questsLeftToday === 1 ? "" : "s"} left today`}
+          </div>
+        )}
         <button
           type="button"
           className={styles.btnReturn}
           onClick={() => router.push(returnHref)}
         >
-          Return to Status
+          Return To Dashboard
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>

@@ -79,6 +79,7 @@ export type CompleteResult =
       rankedUp: boolean;
       fromRank: string;
       dayCleared: boolean;
+      questsLeftToday: number;
     };
 
 export async function completeQuestSession(sessionId: string): Promise<CompleteResult> {
@@ -143,6 +144,7 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
     rankedUp: toRank !== fromRank,
     fromRank,
     dayCleared: openQuests.length === 0,
+    questsLeftToday: openQuests.length,
   };
 }
 
@@ -212,6 +214,7 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
     rankedUp: false,
     fromRank: rank,
     dayCleared: false,
+    questsLeftToday: 0,
   };
 }
 
@@ -266,5 +269,6 @@ export async function completePersonalQuestSession(sessionId: string): Promise<C
     rankedUp: false,
     fromRank: rank,
     dayCleared: openQuests.length === 0,
+    questsLeftToday: openQuests.length,
   };
 }

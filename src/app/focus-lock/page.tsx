@@ -61,6 +61,7 @@ export default async function FocusLockPage({
       kind={session.kind}
       title={title}
       category={category}
+      subject={isPunishment || isPersonal ? null : session.quest!.subject}
       durationSeconds={durationMinutes * 60}
       startedAt={session.startedAt.toISOString()}
       xpAwarded={xpAwarded}
