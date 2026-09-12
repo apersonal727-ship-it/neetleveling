@@ -16,9 +16,11 @@ declare global {
 export function CashfreeCheckoutButton({
   amountDue,
   mode,
+  disabled = false,
 }: {
   amountDue: number;
   mode: "sandbox" | "production";
+  disabled?: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -53,9 +55,15 @@ export function CashfreeCheckoutButton({
           <span>{error}</span>
         </div>
       )}
-      <button type="button" className={styles.btnPrimary} onClick={handlePay} disabled={pending || !sdkReady}>
-        <span>{pending ? "Redirecting to payment…" : !sdkReady ? "Loading…" : `Pay ₹${amountDue} securely`}</span>
-        {!pending && sdkReady && (
+      <button type="button" className={styles.btnPrimary} onClick={handlePay} disabled={pending || !sdkReady || disabled}>
+        <span>
+          {pending
+            ? "Redirecting to payment…"
+            : !sdkReady
+              ? "Loading…"
+              : `🔒 Proceed to pay ₹${amountDue}`}
+        </span>
+        {!pending && sdkReady && !disabled && (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
             <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>

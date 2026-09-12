@@ -444,6 +444,51 @@
   font-weight: 600;
 }
 
+.gatewayNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: var(--sp-5) 0;
+  padding: var(--sp-3) var(--sp-4);
+  background: rgba(79, 216, 255, 0.05);
+  border: 1px solid var(--border);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--slate);
+  line-height: 1.6;
+}
+.gatewayBadge {
+  flex-shrink: 0;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--blue-2);
+  border: 1px solid var(--blue-dim);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.termsRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: var(--sp-5);
+  font-size: 12.5px;
+  color: var(--slate);
+  line-height: 1.6;
+}
+.termsRow input {
+  margin-top: 3px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--blue-2);
+}
+.termsRow b {
+  color: var(--ice);
+}
+
 .methodRow {
   display: flex;
   gap: var(--sp-3);

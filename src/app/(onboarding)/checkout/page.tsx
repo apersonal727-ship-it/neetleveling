@@ -3,7 +3,7 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { MONTHLY_PRICE, finalizeSuccessfulPayment, markFailedPayment } from "@/lib/payment";
 import { fetchCashfreeOrder, CASHFREE_CHECKOUT_MODE } from "@/lib/cashfree";
-import { CashfreeCheckoutButton } from "@/components/checkout/CashfreeCheckoutButton";
+import { PaymentPanel } from "@/components/checkout/PaymentPanel";
 import styles from "../onboarding.module.css";
 
 function nextRenewalLabel() {
@@ -64,64 +64,53 @@ export default async function CheckoutPage({
         </header>
 
         <main className={styles.main}>
-          <div className={styles.pageHead}>
-            <h1>One plan. Fully premium.</h1>
-            <p>This is the only step between you and Level 1.</p>
-          </div>
+          <div className={styles.panel}>
+            <span className={styles.panelEyebrow}>
+              <span className={styles.dot} /> Activate The System
+            </span>
+            <h1 className={styles.panelTitle}>One plan. Fully premium.</h1>
+            <p className={styles.panelSub}>This is the only step between you and Level 1.</p>
 
-          <div className={`${styles.card} ${styles.summaryCard}`}>
-            <div className={styles.summaryTop}>
-              <div>
-                <div className={styles.summaryTitle}>Hunter Access</div>
-                <div className={styles.summarySub}>Billed monthly · cancel anytime</div>
+            <div className={`${styles.card} ${styles.summaryCard}`} style={{ marginTop: "24px" }}>
+              <div className={styles.summaryTop}>
+                <div>
+                  <div className={styles.summaryTitle}>Hunter Access</div>
+                  <div className={styles.summarySub}>Billed monthly · cancel anytime</div>
+                </div>
+                <div className={styles.summaryPrice}>
+                  ₹99<span>/month</span>
+                </div>
               </div>
-              <div className={styles.summaryPrice}>
-                ₹99<span>/month</span>
+              <div className={styles.summaryDivider} />
+              {creditToApply > 0 && (
+                <div className={styles.summaryRow}>
+                  <span>Wallet credit applied</span>
+                  <b>−₹{creditToApply}</b>
+                </div>
+              )}
+              <div className={styles.summaryRow}>
+                <span>Amount due today</span>
+                <b>₹{amountDue}</b>
+              </div>
+              <div className={styles.summaryRow}>
+                <span>Next renewal</span>
+                <b>{nextRenewalLabel()}</b>
               </div>
             </div>
-            <div className={styles.summaryDivider} />
-            {creditToApply > 0 && (
-              <div className={styles.summaryRow}>
-                <span>Wallet credit applied</span>
-                <b>−₹{creditToApply}</b>
+
+            {paymentFailed && (
+              <div className={styles.formError} style={{ marginTop: "20px" }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M12 9v4M12 17h.01" />
+                  <circle cx="12" cy="12" r="9" />
+                </svg>
+                <span>That payment didn&apos;t go through. No charge was made — try again below.</span>
               </div>
             )}
-            <div className={styles.summaryRow}>
-              <span>Amount due today</span>
-              <b>₹{amountDue}</b>
-            </div>
-            <div className={styles.summaryRow}>
-              <span>Next renewal</span>
-              <b>{nextRenewalLabel()}</b>
-            </div>
-          </div>
 
-          {paymentFailed && (
-            <div className={styles.formError}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M12 9v4M12 17h.01" />
-                <circle cx="12" cy="12" r="9" />
-              </svg>
-              <span>That payment didn&apos;t go through. No charge was made — try again below.</span>
+            <div style={{ marginTop: "24px" }}>
+              <PaymentPanel amountDue={amountDue} mode={CASHFREE_CHECKOUT_MODE} />
             </div>
-          )}
-
-          <section>
-            <span className={styles.sectionLabel}>Pay securely</span>
-            <div className={styles.card} style={{ padding: "24px 20px", textAlign: "center" }}>
-              <p style={{ fontSize: "12.5px", color: "var(--slate)", marginBottom: "16px", lineHeight: 1.6 }}>
-                You&apos;ll be taken to a secure Cashfree checkout to pay via UPI, card, or netbanking.
-                Access unlocks automatically the moment payment is confirmed.
-              </p>
-              <CashfreeCheckoutButton amountDue={amountDue} mode={CASHFREE_CHECKOUT_MODE} />
-            </div>
-          </section>
-
-          <div className={styles.trustLine}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-            Payments processed by Cashfree — verified automatically, no manual review
           </div>
         </main>
       </div>
