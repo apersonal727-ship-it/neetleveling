@@ -80,6 +80,10 @@ export type CompleteResult =
       fromRank: string;
       dayCleared: boolean;
       questsLeftToday: number;
+      // Only meaningful for a PUNISHMENT completion — null for QUEST/PERSONAL.
+      // A lockout can require more than one punishment quest, so completing
+      // one doesn't necessarily mean the account is actually unlocked yet.
+      punishmentsRemaining: number | null;
     };
 
 export async function completeQuestSession(sessionId: string): Promise<CompleteResult> {
@@ -145,6 +149,7 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
     fromRank,
     dayCleared: openQuests.length === 0,
     questsLeftToday: openQuests.length,
+    punishmentsRemaining: null,
   };
 }
 
@@ -174,7 +179,7 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
     return { error: "The timer hasn't finished yet." };
   }
 
-  await prisma.$transaction(async (tx) => {
+  const punishmentsRemaining = await prisma.$transaction(async (tx) => {
     await tx.questSession.update({
       where: { id: session.id },
       data: { status: "COMPLETED", completedAt: new Date() },
@@ -184,7 +189,7 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
       where: { profileId: profile.id, resolved: false },
       orderBy: { lockedAt: "desc" },
     });
-    if (!lockoutEvent) return;
+    if (!lockoutEvent) return 0;
 
     await tx.lockoutPunishment.updateMany({
       where: { lockoutEventId: lockoutEvent.id, punishmentQuestId: session.punishmentQuestId!, completed: false },
@@ -202,6 +207,8 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
         data: { resolved: true, unlockedAt: new Date() },
       });
     }
+
+    return remaining;
   });
 
   const rank = rankForLevel(getLevelProgress(profile.xp).level).code;
@@ -215,6 +222,7 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
     fromRank: rank,
     dayCleared: false,
     questsLeftToday: 0,
+    punishmentsRemaining,
   };
 }
 
@@ -270,5 +278,6 @@ export async function completePersonalQuestSession(sessionId: string): Promise<C
     fromRank: rank,
     dayCleared: openQuests.length === 0,
     questsLeftToday: openQuests.length,
+    punishmentsRemaining: null,
   };
 }

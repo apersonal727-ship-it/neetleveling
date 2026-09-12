@@ -69,6 +69,7 @@ export function FocusLockView({
   const [xpCounter, setXpCounter] = useState(0);
   const [returnHref, setReturnHref] = useState("/dashboard");
   const [questsLeftToday, setQuestsLeftToday] = useState<number | null>(null);
+  const [punishmentsRemaining, setPunishmentsRemaining] = useState<number | null>(null);
   const completingRef = useRef(false);
 
   useEffect(() => {
@@ -96,13 +97,20 @@ export function FocusLockView({
         setCompleting(false);
         return;
       }
-      if (result.rankedUp) {
+      if (isPunishment && (result.punishmentsRemaining ?? 0) > 0) {
+        // More punishment quests still open — this lockout isn't actually
+        // resolved yet, so don't show "Account Unlocked" or route to the
+        // dashboard (the account is still locked; that would just bounce
+        // straight back to /locked).
+        setReturnHref("/locked");
+      } else if (result.rankedUp) {
         setReturnHref(`/rank-up?from=${result.fromRank}`);
       } else if (result.leveledUp) {
         setReturnHref(`/level-up?xp=${xpAwarded}`);
       } else if (result.dayCleared) {
         setReturnHref("/day-clear");
       }
+      setPunishmentsRemaining(result.punishmentsRemaining);
       setQuestsLeftToday(result.questsLeftToday);
       setCompleted(true);
     })();
@@ -264,12 +272,23 @@ export function FocusLockView({
           </div>
         </div>
         <span className={styles.cmpEyebrow}>
-          {isPunishment ? "Punishment cleared" : isPersonal ? "Personal quest closed out" : "Quest closed out"}
+          {isPunishment ? "Protocol cleared" : isPersonal ? "Personal quest closed out" : "Quest closed out"}
         </span>
-        <h1>{isPunishment ? "Account Unlocked" : `${category} Complete`}</h1>
+        <h1>
+          {isPunishment
+            ? punishmentsRemaining === 0
+              ? "Access Regained."
+              : `${title} Cleared.`
+            : `${category} Complete`}
+        </h1>
         <div className={styles.cmpMeta}>
           {title.toUpperCase()} · {fmt(durationSeconds).replace(/^00:/, "")}
         </div>
+        {isPunishment && punishmentsRemaining !== null && punishmentsRemaining > 0 && (
+          <div className={styles.cmpRemaining}>
+            {punishmentsRemaining} more protocol{punishmentsRemaining === 1 ? "" : "s"} to go
+          </div>
+        )}
         {!isPunishment && !isPersonal && (
           <div className={styles.xpCounterWrap}>
             <div className={styles.xpCounter}>+{xpCounter}</div>
@@ -296,7 +315,7 @@ export function FocusLockView({
           className={styles.btnReturn}
           onClick={() => router.push(returnHref)}
         >
-          Return To Dashboard
+          {isPunishment && (punishmentsRemaining ?? 0) > 0 ? "Continue Protocols" : "Return To Dashboard"}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>

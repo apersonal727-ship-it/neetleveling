@@ -57,6 +57,7 @@ export default async function LockedPage() {
               Yesterday&apos;s quests weren&apos;t completed in time. The System has locked this
               account.
             </p>
+            <span className={styles.escNote}>⚠ Lockout #{tier} — reps escalate each time</span>
           </div>
 
           {previousStreak && (
