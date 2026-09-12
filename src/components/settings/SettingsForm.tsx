@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   updateHunterName,
   updateClass,
+  updateTargetExamYear,
   updateNotificationPref,
   cancelSubscription,
 } from "@/actions/settings";
@@ -66,23 +67,31 @@ export function SettingsForm({
 }: {
   profile: {
     name: string;
+    email: string;
     hunterClass: string;
+    targetExamYear: string | null;
     questReminders: boolean;
     streakWarnings: boolean;
     penaltyAlerts: boolean;
+    timerWarnings: boolean;
+    walletUpdates: boolean;
     subscriptionStatus: string;
     subscriptionRenewsAt: Date | null;
   };
 }) {
   const [name, setName] = useState(profile.name);
   const [hunterClass, setHunterClass] = useState(profile.hunterClass);
+  const [targetExamYear, setTargetExamYear] = useState(profile.targetExamYear ?? "");
   const [prefs, setPrefs] = useState({
-    questReminders: profile.questReminders,
     streakWarnings: profile.streakWarnings,
     penaltyAlerts: profile.penaltyAlerts,
+    timerWarnings: profile.timerWarnings,
+    walletUpdates: profile.walletUpdates,
   });
   const [savingName, startSavingName] = useTransition();
   const [nameSaved, setNameSaved] = useState(false);
+  const [savingExamYear, startSavingExamYear] = useTransition();
+  const [examYearSaved, setExamYearSaved] = useState(false);
   const [canceling, startCanceling] = useTransition();
   const [canceled, setCanceled] = useState(profile.subscriptionStatus === "CANCELED");
 
@@ -93,6 +102,16 @@ export function SettingsForm({
       await updateHunterName(fd);
       setNameSaved(true);
       setTimeout(() => setNameSaved(false), 1500);
+    });
+  }
+
+  function saveExamYear() {
+    const fd = new FormData();
+    fd.set("targetExamYear", targetExamYear);
+    startSavingExamYear(async () => {
+      await updateTargetExamYear(fd);
+      setExamYearSaved(true);
+      setTimeout(() => setExamYearSaved(false), 1500);
     });
   }
 
@@ -154,6 +173,32 @@ export function SettingsForm({
             </button>
           </div>
         </div>
+        <div className={`${appStyles.card} ${styles.fieldCard}`} style={{ marginTop: "8px" }}>
+          <span className={styles.fieldLabel}>Email</span>
+          <div className={styles.fieldRow}>
+            <input className={styles.fieldInput} value={profile.email} disabled style={{ opacity: 0.6 }} />
+          </div>
+        </div>
+        <div className={`${appStyles.card} ${styles.fieldCard}`} style={{ marginTop: "8px" }}>
+          <span className={styles.fieldLabel}>Target Exam Year</span>
+          <div className={styles.fieldRow}>
+            <input
+              className={styles.fieldInput}
+              value={targetExamYear}
+              onChange={(e) => setTargetExamYear(e.target.value)}
+              placeholder="e.g. NEET UG 2027"
+              maxLength={24}
+            />
+            <button
+              type="button"
+              className={styles.fieldBtn}
+              onClick={saveExamYear}
+              disabled={savingExamYear}
+            >
+              {savingExamYear ? "Saving…" : examYearSaved ? "Saved" : "Save"}
+            </button>
+          </div>
+        </div>
       </section>
 
       <section>
@@ -188,24 +233,42 @@ export function SettingsForm({
         <div className={appStyles.card}>
           <div className={styles.toggleRow}>
             <div>
-              <div className={styles.toggleLabel}>Quest reminders</div>
-              <div className={styles.toggleSub}>Nudge before a quest window closes</div>
+              <div className={styles.toggleLabel}>Daily Quest Drop (5 AM)</div>
+              <div className={styles.toggleSub}>🔒 Required — this is how quests reach you.</div>
+            </div>
+            <button type="button" className={`${styles.switch} ${styles.switchOn}`} disabled style={{ opacity: 0.6, cursor: "default" }} />
+          </div>
+          <div className={styles.toggleRow}>
+            <div>
+              <div className={styles.toggleLabel}>Timer Running Out Warning</div>
+              <div className={styles.toggleSub}>Nudge in the last hour before reset</div>
             </div>
             <button
               type="button"
-              className={`${styles.switch} ${prefs.questReminders ? styles.switchOn : ""}`}
-              onClick={() => togglePref("questReminders")}
+              className={`${styles.switch} ${prefs.timerWarnings ? styles.switchOn : ""}`}
+              onClick={() => togglePref("timerWarnings")}
             />
           </div>
           <div className={styles.toggleRow}>
             <div>
-              <div className={styles.toggleLabel}>Streak warnings</div>
+              <div className={styles.toggleLabel}>Streak Reminder</div>
               <div className={styles.toggleSub}>Alert when a streak is at risk</div>
             </div>
             <button
               type="button"
               className={`${styles.switch} ${prefs.streakWarnings ? styles.switchOn : ""}`}
               onClick={() => togglePref("streakWarnings")}
+            />
+          </div>
+          <div className={styles.toggleRow}>
+            <div>
+              <div className={styles.toggleLabel}>Referral &amp; Wallet Updates</div>
+              <div className={styles.toggleSub}>When a referral credits your wallet</div>
+            </div>
+            <button
+              type="button"
+              className={`${styles.switch} ${prefs.walletUpdates ? styles.switchOn : ""}`}
+              onClick={() => togglePref("walletUpdates")}
             />
           </div>
           <div className={styles.toggleRow}>

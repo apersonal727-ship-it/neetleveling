@@ -50,6 +50,7 @@ export default async function ProfilePage() {
         </div>
         <div className={styles.profileName}>{profile.name}</div>
         <div className={styles.profileTitle}>◆ {rank.title} ◆</div>
+        {profile.targetExamYear && <div className={styles.profileTarget}>Target: {profile.targetExamYear}</div>}
         <div className={styles.profileLevel}>⚡ LV {progress.level}</div>
 
         <div className={styles.xpBlock}>

@@ -41,6 +41,9 @@ model Profile {
   questReminders Boolean @default(true)
   streakWarnings Boolean @default(true)
   penaltyAlerts  Boolean @default(true)
+  timerWarnings  Boolean @default(true)
+  walletUpdates  Boolean @default(false)
+  targetExamYear String?
 
   createdQuests         Quest[]              @relation("QuestCreatedBy")
   assignedQuests        Quest[]              @relation("QuestAssignedTo")

@@ -21,8 +21,15 @@ export async function updateClass(hunterClass: string): Promise<ActionResult> {
   return { success: true };
 }
 
+export async function updateTargetExamYear(formData: FormData): Promise<ActionResult> {
+  const targetExamYear = String(formData.get("targetExamYear") ?? "").trim() || null;
+  const profile = await getCurrentProfile();
+  await prisma.profile.update({ where: { id: profile.id }, data: { targetExamYear } });
+  return { success: true };
+}
+
 export async function updateNotificationPref(
-  key: "questReminders" | "streakWarnings" | "penaltyAlerts",
+  key: "questReminders" | "streakWarnings" | "penaltyAlerts" | "timerWarnings" | "walletUpdates",
   value: boolean,
 ): Promise<ActionResult> {
   const profile = await getCurrentProfile();
