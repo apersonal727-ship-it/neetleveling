@@ -49,6 +49,7 @@ model Profile {
   questSessions         QuestSession[]
   lockoutEvents         LockoutEvent[]
   walletTransactions    WalletTransaction[]
+  withdrawalRequests    WithdrawalRequest[]
   paymentTransactions   PaymentTransaction[]
   notifications         Notification[]
   bugReports            BugReport[]
@@ -252,6 +253,7 @@ enum WalletTransactionKind {
   REFERRAL_CREDIT
   BILL_APPLIED
   ADMIN_ADJUSTMENT
+  WITHDRAWAL_REQUESTED
 }
 
 model WalletTransaction {
@@ -264,6 +266,29 @@ model WalletTransaction {
   createdAt   DateTime              @default(now())
 
   @@index([profileId, createdAt])
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PAID
+}
+
+// A manual cash-out request, not an automated payout — the hunter submits
+// their UPI ID here, an admin pays them by hand outside the system (real
+// UPI/bank transfer, on the admin's own initiative), then marks it PAID in
+// /admin/withdrawals. No payment-provider payout API is involved.
+model WithdrawalRequest {
+  id        String           @id @default(cuid())
+  profileId String
+  profile   Profile          @relation(fields: [profileId], references: [id])
+  amount    Int
+  upiId     String
+  status    WithdrawalStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  paidAt    DateTime?
+
+  @@index([profileId])
+  @@index([status])
 }
 
 enum PaymentStatus {

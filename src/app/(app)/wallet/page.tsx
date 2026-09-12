@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getWalletData } from "@/lib/wallet";
+import { WITHDRAWAL_MIN_BALANCE } from "@/lib/wallet-constants";
 import { REFERRAL_CREDIT_AMOUNT } from "@/lib/payment";
 import { ReferralCard } from "@/components/wallet/ReferralCard";
+import { WithdrawBlock } from "@/components/wallet/WithdrawBlock";
 import appStyles from "../app.module.css";
 import styles from "./wallet.module.css";
 
@@ -27,6 +29,7 @@ const TX_LABEL: Record<string, string> = {
   REFERRAL_CREDIT: "Referral credit",
   BILL_APPLIED: "Applied to renewal",
   ADMIN_ADJUSTMENT: "Admin adjustment",
+  WITHDRAWAL_REQUESTED: "Withdrawal requested",
 };
 
 export default async function WalletPage() {
@@ -44,10 +47,25 @@ export default async function WalletPage() {
         <p>Credit from referrals — never cash, always toward your bill.</p>
       </div>
 
+      <div className={styles.freeCallout}>
+        <h3>
+          Refer <span className={styles.goldPart}>5 Hunters</span> — Use The System{" "}
+          <span className={styles.goldPart}>Free</span> Next Month.
+          <br />
+          Refer More — Start <span className={styles.cyanPart}>Earning</span>.
+        </h3>
+        <p>
+          5 credited referrals (₹{REFERRAL_CREDIT_AMOUNT * 5}) covers your entire ₹99 bill.
+          Everything past that goes straight to your wallet.
+        </p>
+      </div>
+
       <section className={`${appStyles.card} ${styles.balCard}`}>
-        <div className={styles.balLabel}>Available credit</div>
+        <div className={styles.balLabel}>Available Balance</div>
         <div className={styles.balAmount}>₹{wallet.balance}</div>
-        <p className={styles.balNote}>Applied automatically at your next renewal. Nothing to withdraw, nothing to request.</p>
+        <p className={styles.balNote}>
+          Applied automatically to your next <b>₹99</b> bill — or withdraw manually below.
+        </p>
         <div className={styles.balDivider} />
         <div className={styles.balNext}>
           <span className={styles.balNextLbl}>
@@ -57,6 +75,7 @@ export default async function WalletPage() {
             {wallet.dueNextBill === 0 ? "₹0 due — fully covered" : `₹${wallet.dueNextBill} due`}
           </span>
         </div>
+        <WithdrawBlock balance={wallet.balance} hasPendingWithdrawal={!!wallet.pendingWithdrawal} />
       </section>
 
       <section>
@@ -75,7 +94,11 @@ export default async function WalletPage() {
           <path d="M12 9v4M12 17h.01" />
           <circle cx="12" cy="12" r="9" />
         </svg>
-        <span>Credit only ever offsets your own subscription — it can&apos;t be withdrawn, sent, or exchanged for cash.</span>
+        <span>
+          Credit auto-applies to your own subscription first. Once your balance crosses ₹
+          {WITHDRAWAL_MIN_BALANCE}, you can request a manual UPI payout instead — it can&apos;t be
+          sent to anyone else or exchanged for anything but ₹ credit.
+        </span>
       </div>
 
       <section>

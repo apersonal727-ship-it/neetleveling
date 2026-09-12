@@ -15,7 +15,7 @@
 .balAmount {
   font-family: var(--font-rajdhani), sans-serif;
   font-weight: 700;
-  font-size: 46px;
+  font-size: clamp(44px, 9vw, 60px);
   margin: var(--sp-2) 0;
   color: var(--blue-2);
   text-shadow: 0 0 24px rgba(143, 232, 255, 0.5);
@@ -47,6 +47,204 @@
 }
 .balNextValGreen {
   color: var(--green);
+}
+
+.freeCallout {
+  text-align: center;
+  padding: 22px 20px;
+  margin-bottom: var(--sp-6);
+  border: 1px solid rgba(245, 197, 66, 0.35);
+  background: linear-gradient(135deg, rgba(245, 197, 66, 0.06), rgba(79, 216, 255, 0.04));
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+.freeCallout h3 {
+  font-size: clamp(17px, 3.4vw, 22px);
+  line-height: 1.35;
+}
+.goldPart {
+  color: var(--gold);
+  text-shadow: 0 0 14px rgba(245, 197, 66, 0.35);
+}
+.cyanPart {
+  color: var(--blue-2);
+  text-shadow: 0 0 14px rgba(79, 216, 255, 0.35);
+}
+.freeCallout p {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--slate);
+  margin-top: 10px;
+}
+
+/* Withdraw */
+.withdrawBlock {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-4);
+  border-top: 1px dashed var(--border);
+}
+.withdrawRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.withdrawRow b {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gold);
+  text-transform: none;
+}
+.withdrawTrack {
+  height: 6px;
+  background: var(--border);
+  overflow: hidden;
+  max-width: 280px;
+  margin: 0 auto;
+}
+.withdrawFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue-dim), var(--gold));
+  transition: width 1.2s cubic-bezier(0.16, 0.84, 0.44, 1);
+}
+.withdrawBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 22px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.03em;
+  color: var(--slate);
+  border: 1px solid var(--border);
+  background: transparent;
+  text-transform: uppercase;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.withdrawBtnUnlocked {
+  color: var(--void);
+  background: var(--blue-2);
+  border: none;
+  cursor: pointer;
+  opacity: 1;
+  box-shadow: 0 0 20px rgba(79, 216, 255, 0.4);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.withdrawBtnUnlocked:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px rgba(79, 216, 255, 0.55);
+}
+.withdrawHint {
+  margin-top: 8px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  color: var(--slate);
+}
+.withdrawHintUnlocked {
+  color: var(--blue-2);
+}
+.withdrawPending {
+  margin-top: 14px;
+  padding: 12px 16px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--gold);
+  border: 1px solid rgba(245, 197, 66, 0.35);
+  background: rgba(245, 197, 66, 0.06);
+}
+
+/* Withdraw modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+  background: rgba(3, 4, 8, 0.75);
+  backdrop-filter: blur(6px);
+}
+.modalCard {
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border-strong);
+  clip-path: polygon(0 14px, 14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  padding: var(--sp-6) var(--sp-5);
+}
+.modalCard h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.modalCard p {
+  font-size: 12.5px;
+  color: var(--slate);
+  line-height: 1.6;
+  margin-bottom: var(--sp-4);
+}
+.modalActions {
+  display: flex;
+  gap: 10px;
+  margin-top: var(--sp-5);
+}
+.modalInput {
+  width: 100%;
+  background: var(--void);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+  color: var(--ice);
+}
+.modalInput:focus {
+  outline: none;
+  border-color: var(--blue-2);
+}
+.modalError {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--red-2);
+  margin-top: 8px;
+}
+.modalBtnPrimary {
+  flex: 1;
+  height: 46px;
+  border-radius: 10px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  background: linear-gradient(135deg, var(--blue), var(--blue-2));
+  color: var(--void);
+  border: none;
+  cursor: pointer;
+}
+.modalBtnPrimary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.modalBtnCancel {
+  padding: 0 18px;
+  height: 46px;
+  border-radius: 10px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--slate);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
 }
 
 .refCard {

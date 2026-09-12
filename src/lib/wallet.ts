@@ -3,12 +3,18 @@ import { prisma } from "@/lib/prisma";
 const MONTHLY_PRICE = 99;
 
 export async function getWalletData(profileId: string) {
-  const profile = await prisma.profile.findUniqueOrThrow({ where: { id: profileId } });
-  const transactions = await prisma.walletTransaction.findMany({
-    where: { profileId },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
+  const [profile, transactions, pendingWithdrawal] = await Promise.all([
+    prisma.profile.findUniqueOrThrow({ where: { id: profileId } }),
+    prisma.walletTransaction.findMany({
+      where: { profileId },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+    prisma.withdrawalRequest.findFirst({
+      where: { profileId, status: "PENDING" },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   const dueNextBill = Math.max(0, MONTHLY_PRICE - profile.walletCredit);
 
@@ -18,5 +24,6 @@ export async function getWalletData(profileId: string) {
     subscriptionRenewsAt: profile.subscriptionRenewsAt,
     dueNextBill,
     transactions,
+    pendingWithdrawal,
   };
 }
