@@ -1,3 +1,9 @@
+.shareRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--sp-3);
+}
+
 .hero {
   position: relative;
   text-align: center;

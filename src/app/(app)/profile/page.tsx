@@ -3,6 +3,7 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel, RANKS, RANK_FLAVOR, cumulativeXpForLevel, type RankCode } from "@/lib/rank";
 import { getHunterProgressStats } from "@/lib/stats";
 import { prisma } from "@/lib/prisma";
+import { ShareCardButton } from "@/components/profile/ShareCardButton";
 import appStyles from "../app.module.css";
 import styles from "./profile.module.css";
 
@@ -42,6 +43,20 @@ export default async function ProfilePage() {
 
   return (
     <>
+      <div className={styles.shareRow}>
+        <ShareCardButton
+          name={profile.name}
+          rankCode={rank.code}
+          rankTitle={rank.title}
+          level={progress.level}
+          xp={profile.xp}
+          streak={profile.streak}
+          questsCompleted={questsCompleted}
+          questionsSolved={hunterStats.questionsSolved}
+          targetExamYear={profile.targetExamYear}
+        />
+      </div>
+
       <section className={`${appStyles.card} ${styles.hero}`}>
         <div className={styles.auraWrap} style={{ "--rc": rank.color } as React.CSSProperties}>
           <div className={styles.auraRing} />
