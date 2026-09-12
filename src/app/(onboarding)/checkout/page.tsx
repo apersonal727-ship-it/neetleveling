@@ -26,12 +26,12 @@ export default async function CheckoutPage({
     const tx = await prisma.paymentTransaction.findUnique({ where: { cashfreeOrderId: order_id } });
     if (tx && tx.profileId === profile.id) {
       if (tx.status === "SUCCESS") {
-        redirect("/dashboard");
+        redirect("/awakened");
       } else if (tx.status === "PENDING") {
         const liveOrder = await fetchCashfreeOrder(order_id).catch(() => null);
         if (liveOrder?.order_status === "PAID") {
           await finalizeSuccessfulPayment(order_id, "");
-          redirect("/dashboard");
+          redirect("/awakened");
         } else if (liveOrder?.order_status === "EXPIRED" || liveOrder?.order_status === "TERMINATED") {
           await markFailedPayment(order_id);
           paymentFailed = true;

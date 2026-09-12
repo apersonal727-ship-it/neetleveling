@@ -1,0 +1,238 @@
+.body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  position: relative;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes chipRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes textRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes badgeEmerge {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+    filter: brightness(0.3);
+  }
+  60% {
+    transform: scale(1.06);
+    opacity: 1;
+    filter: brightness(1.4);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+@keyframes ringExpand {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 440px;
+  width: 100%;
+}
+
+.awakenTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+  padding: 7px 18px;
+  text-transform: uppercase;
+  background: rgba(79, 216, 255, 0.08);
+  opacity: 0;
+  animation: chipRise 0.6s ease 0.2s forwards;
+}
+.awakenTag .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue);
+  animation: pulse 1.3s infinite;
+}
+
+.genesisLine {
+  margin-top: 18px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12.5px;
+  color: var(--slate);
+  letter-spacing: 0.04em;
+  opacity: 0;
+  animation: textRise 0.6s ease 0.5s forwards;
+}
+.genesisLine b {
+  color: var(--ice);
+}
+
+.badgeWrap {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 28px auto 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.awakenRing {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--slate);
+  opacity: 0;
+  animation: ringExpand 1.8s ease-out 1s forwards;
+}
+.awakenRing.r2 {
+  animation-delay: 1.35s;
+}
+.rankBadge {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--slate);
+  background: linear-gradient(160deg, rgba(138, 151, 184, 0.14), rgba(138, 151, 184, 0.04));
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 54px;
+  color: var(--slate);
+  text-shadow: 0 0 18px rgba(138, 151, 184, 0.4);
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+  opacity: 0;
+  animation: badgeEmerge 0.9s ease 1s forwards;
+}
+
+.rankTitle {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: clamp(24px, 5.5vw, 30px);
+  opacity: 0;
+  animation: textRise 0.6s ease 1.8s forwards;
+}
+.rankLine {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+  color: var(--blue);
+  margin-top: 8px;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  animation: textRise 0.6s ease 1.95s forwards;
+}
+.rankFlavor {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--slate);
+  margin-top: 14px;
+  line-height: 1.6;
+  opacity: 0;
+  animation: textRise 0.6s ease 2.1s forwards;
+}
+
+.journeyNote {
+  margin-top: 18px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--blue);
+  padding: 12px 16px;
+  border: 1px dashed var(--blue-dim);
+  display: inline-block;
+  background: rgba(79, 216, 255, 0.04);
+  opacity: 0;
+  animation: textRise 0.6s ease 2.25s forwards;
+}
+
+.targetRow {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 24px;
+  opacity: 0;
+  animation: textRise 0.6s ease 2.4s forwards;
+}
+.targetPill {
+  padding: 11px 17px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+.targetPill .num {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--blue);
+}
+.targetPill .lbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 8.5px;
+  color: var(--slate);
+  text-transform: uppercase;
+  margin-top: 3px;
+  letter-spacing: 0.03em;
+}
+
+.continueBtn {
+  display: inline-block;
+  margin-top: 28px;
+  padding: 15px 36px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  color: var(--void);
+  background: var(--blue);
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 0 24px rgba(79, 216, 255, 0.4);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  opacity: 0;
+  animation: textRise 0.6s ease 2.6s forwards;
+}
