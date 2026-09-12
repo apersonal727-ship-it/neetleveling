@@ -15,12 +15,6 @@ export async function updateHunterName(formData: FormData): Promise<ActionResult
   return { success: true };
 }
 
-export async function updateAura(auraColor: string): Promise<ActionResult> {
-  const profile = await getCurrentProfile();
-  await prisma.profile.update({ where: { id: profile.id }, data: { auraColor } });
-  return { success: true };
-}
-
 export async function updateClass(hunterClass: string): Promise<ActionResult> {
   const profile = await getCurrentProfile();
   await prisma.profile.update({ where: { id: profile.id }, data: { hunterClass } });

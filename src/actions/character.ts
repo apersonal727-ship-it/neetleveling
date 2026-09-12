@@ -9,7 +9,6 @@ export type ActionResult = { error: string } | { success: true };
 
 export async function updateCharacter(formData: FormData): Promise<ActionResult> {
   const name = String(formData.get("name") ?? "").trim();
-  const auraColor = String(formData.get("auraColor") ?? "blue");
   const hunterClass = String(formData.get("hunterClass") ?? "Scholar");
 
   if (!name) return { error: "Pick a Hunter Name." };
@@ -26,7 +25,7 @@ export async function updateCharacter(formData: FormData): Promise<ActionResult>
   if (existing) {
     await prisma.profile.update({
       where: { authUserId: user.id },
-      data: { name, auraColor, hunterClass },
+      data: { name, hunterClass },
     });
   } else {
     // Recovery path: the Supabase auth user exists but its Profile row
@@ -38,7 +37,7 @@ export async function updateCharacter(formData: FormData): Promise<ActionResult>
     if (!user.email) return { error: "Your account has no email on file. Please contact support." };
     const [hunterId, referralCode] = await Promise.all([generateHunterId(), generateReferralCode()]);
     await prisma.profile.create({
-      data: { authUserId: user.id, email: user.email, name, auraColor, hunterClass, hunterId, referralCode },
+      data: { authUserId: user.id, email: user.email, name, hunterClass, hunterId, referralCode },
     });
   }
 

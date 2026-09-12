@@ -4,26 +4,20 @@ import { useState, useTransition } from "react";
 import { updateCharacter } from "@/actions/character";
 import styles from "../onboarding.module.css";
 
-const AURAS = [
-  { color: "red", hex: "#ff5c4d" },
-  { color: "blue", hex: "#4f9dff" },
-  { color: "green", hex: "#3ddc84" },
-  { color: "gold", hex: "#ffc94f" },
-];
-
-const CLASSES: { name: string; icon: React.ReactNode }[] = [
+const CLASSES: { name: string; desc: string; icon: React.ReactNode }[] = [
   {
     name: "Guardian",
-    icon: (
-      <path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z" />
-    ),
+    desc: "Protects the streak above all. Never misses a day.",
+    icon: <path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z" />,
   },
   {
     name: "Scholar",
+    desc: "Reads deep, not fast. Every concept, fully understood.",
     icon: <path d="M12 2v20M4 7l8-5 8 5M4 17l8 5 8-5" />,
   },
   {
     name: "Monk",
+    desc: "Discipline over motivation. Shows up whether it feels right or not.",
     icon: (
       <>
         <circle cx="12" cy="12" r="9" />
@@ -33,31 +27,33 @@ const CLASSES: { name: string; icon: React.ReactNode }[] = [
   },
   {
     name: "Strategist",
-    icon: (
-      <path d="M12 2v6M12 22v-6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2" />
-    ),
+    desc: "Plans every session in advance. Never studies without a target.",
+    icon: <path d="M12 2v6M12 22v-6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2" />,
   },
   {
     name: "Warrior",
+    desc: "Grinds for hours without breaking. Built for endurance, not speed.",
     icon: <path d="M14 2 4 14h7l-1 8 10-12h-7l1-8Z" />,
   },
   {
     name: "Assassin",
+    desc: "Strikes weak subjects first. Precise, fast, no wasted motion.",
     icon: <path d="M17 3a2.8 2.8 0 0 1 2 4.8L7 20l-4 1 1-4L16.2 5A2.8 2.8 0 0 1 17 3Z" />,
   },
   {
     name: "Mage",
+    desc: "Finds the shortcut through hard topics. Efficient over exhaustive.",
     icon: <path d="M9 3h6M10 3v6l-5 9a1.6 1.6 0 0 0 1.4 2.4h11.2A1.6 1.6 0 0 0 19 18l-5-9V3" />,
   },
   {
     name: "Healer",
+    desc: "Recovers fast from bad days. Never lets one miss become two.",
     icon: <path d="M12 21S4 14.5 4 8.8A4.8 4.8 0 0 1 12 5a4.8 4.8 0 0 1 8 3.8C20 14.5 12 21 12 21Z" />,
   },
 ];
 
 export default function CharacterCreationPage() {
   const [name, setName] = useState("");
-  const [aura, setAura] = useState("red");
   const [hunterClass, setHunterClass] = useState("Scholar");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -82,9 +78,15 @@ export default function CharacterCreationPage() {
         </header>
 
         <main className={styles.main}>
-          <div className={styles.pageHead}>
-            <h1>Choose your Hunter identity.</h1>
-            <p>You can change your aura and class anytime in Settings.</p>
+          <div className={styles.panel}>
+            <span className={styles.panelEyebrow}>
+              <span className={styles.dot} /> Hunter Registration
+            </span>
+            <h1 className={styles.panelTitle}>Choose your Hunter identity.</h1>
+            <p className={styles.panelSub}>
+              Your class is flavor, not a handicap — every class runs the same quests. You can
+              change it anytime in Settings.
+            </p>
           </div>
 
           <form action={handleSubmit}>
@@ -94,7 +96,6 @@ export default function CharacterCreationPage() {
               </div>
             )}
 
-            <input type="hidden" name="auraColor" value={aura} />
             <input type="hidden" name="hunterClass" value={hunterClass} />
 
             <div className={styles.field}>
@@ -116,47 +117,13 @@ export default function CharacterCreationPage() {
             </div>
 
             <section>
-              <span className={styles.sectionLabel}>Aura</span>
-              <div className={`${styles.card} ${styles.auraRow}`}>
-                {AURAS.map((a) => (
-                  <button
-                    key={a.color}
-                    type="button"
-                    className={`${styles.auraOpt} ${aura === a.color ? styles.auraOptSelected : ""}`}
-                    onClick={() => setAura(a.color)}
-                  >
-                    <div className={styles.auraDiamond} />
-                    <svg
-                      className={styles.auraFlame}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      style={{
-                        color: a.hex,
-                        filter: `drop-shadow(0 0 8px ${a.hex}b3)`,
-                      }}
-                    >
-                      <path
-                        d="M12 2C12 2 7 7.5 7 13a5 5 0 0 0 10 0c0-1.2-.4-2-1-2.8.1 1-.3 1.8-1 2.3.3-2.5-1-4-1.6-5.2C13 6 13.4 4 12 2Z"
-                        fill="currentColor"
-                        stroke="currentColor"
-                        strokeWidth="0.6"
-                      />
-                    </svg>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section>
               <span className={styles.sectionLabel}>Class</span>
-              <div className={`${styles.card} ${styles.classGrid}`}>
+              <div className={styles.classList}>
                 {CLASSES.map((c) => (
                   <button
                     key={c.name}
                     type="button"
-                    className={`${styles.classItem} ${
-                      hunterClass === c.name ? styles.classItemSelected : ""
-                    }`}
+                    className={`${styles.classCard} ${hunterClass === c.name ? styles.classCardSelected : ""}`}
                     onClick={() => setHunterClass(c.name)}
                   >
                     <div className={styles.classIcon}>
@@ -164,7 +131,11 @@ export default function CharacterCreationPage() {
                         {c.icon}
                       </svg>
                     </div>
-                    <span className={styles.className}>{c.name}</span>
+                    <div className={styles.classInfo}>
+                      <div className={styles.className}>{c.name}</div>
+                      <div className={styles.classDesc}>{c.desc}</div>
+                    </div>
+                    <div className={styles.classCheck} />
                   </button>
                 ))}
               </div>
