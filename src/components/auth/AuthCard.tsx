@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { FlameIcon } from "@/components/icons/FlameIcon";
 import { signIn, signUp, verifySignupOtp, resendSignupOtp } from "@/actions/auth";
 import styles from "@/app/(auth)/auth.module.css";
 
@@ -11,6 +10,20 @@ type Mode = "login" | "signup";
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
+
+// 0-4: length + character-class variety. Purely a UX nudge — the real
+// minimum (8 chars) is still enforced by handleSignup below regardless of
+// what this shows.
+function passwordStrength(password: string): number {
+  if (!password) return 0;
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[0-9]/.test(password) && /[a-zA-Z]/.test(password)) score++;
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+  return Math.min(4, score);
+}
+const STRENGTH_COLOR = ["var(--red)", "var(--red)", "var(--amber)", "var(--blue-2)", "var(--green)"];
 
 const AlertIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -39,6 +52,7 @@ export function AuthCard({
   const [verifyingEmail, setVerifyingEmail] = useState<string | null>(null);
   const [otp, setOtp] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [signupPassword, setSignupPassword] = useState("");
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -131,7 +145,7 @@ export function AuthCard({
       <div className={styles.app}>
         <div className={styles.top}>
           <div className={styles.brand}>
-            <FlameIcon className={styles.flame} />
+            <span className={styles.logoMark} />
             NEETLEVELING
           </div>
           <span className={styles.eyebrow}>
@@ -140,6 +154,12 @@ export function AuthCard({
         </div>
 
         <main className={styles.main}>
+        <div className={styles.panel}>
+          <div className={styles.panelTitlebar}>
+            <span>System // Access</span>
+            <span className={styles.live}>● System Online</span>
+          </div>
+          <div className={styles.panelBody}>
           {verifyingEmail ? (
             <>
               <div className={styles.signupNote}>
@@ -266,6 +286,14 @@ export function AuthCard({
                   <span>{error}</span>
                 </div>
               )}
+              <div className={styles.rankPreview}>
+                <div className={styles.badge}>E</div>
+                <div className={styles.txt}>
+                  You start here. <b>E-Rank, Level 1, 0 XP.</b>
+                  <br />
+                  Every Hunter begins at zero.
+                </div>
+              </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Hunter Name</span>
                 <input
@@ -297,7 +325,22 @@ export function AuthCard({
                   type="password"
                   placeholder="At least 8 characters"
                   autoComplete="new-password"
+                  value={signupPassword}
+                  onChange={(e) => setSignupPassword(e.target.value)}
                 />
+                <div className={styles.strengthBar}>
+                  {[0, 1, 2, 3].map((i) => {
+                    const strength = passwordStrength(signupPassword);
+                    const active = i < strength;
+                    return (
+                      <span
+                        key={i}
+                        data-active={active}
+                        style={active ? ({ "--strength-color": STRENGTH_COLOR[strength] } as React.CSSProperties) : undefined}
+                      />
+                    );
+                  })}
+                </div>
                 {fieldErrors.password && (
                   <div className={styles.fieldHintError}>
                     Password must be at least 8 characters.
@@ -352,6 +395,8 @@ export function AuthCard({
           </div>
             </>
           )}
+          </div>
+        </div>
         </main>
       </div>
     </>

@@ -26,8 +26,23 @@
   gap: 9px;
   font-family: var(--font-rajdhani), sans-serif;
   font-weight: 700;
-  font-size: 18px;
-  letter-spacing: 0.03em;
+  font-size: 20px;
+  letter-spacing: 0.06em;
+}
+.logoMark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--blue);
+  transform: rotate(45deg);
+  position: relative;
+  flex-shrink: 0;
+}
+.logoMark::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: var(--blue);
+  box-shadow: 0 0 10px var(--blue);
 }
 .flame {
   width: 22px;
@@ -54,6 +69,12 @@
   border-radius: 50%;
   background: var(--blue-2);
   box-shadow: 0 0 6px var(--blue-2);
+  animation: authPulse 1.6s infinite;
+}
+@keyframes authPulse {
+  50% {
+    opacity: 0.35;
+  }
 }
 
 .main {
@@ -62,6 +83,82 @@
   flex-direction: column;
   justify-content: center;
   padding: var(--sp-6) 0 var(--sp-7);
+}
+
+/* ===== SYSTEM ACCESS PANEL ===== */
+.panel {
+  border: 1px solid var(--blue-dim);
+  background: linear-gradient(180deg, rgba(79, 216, 255, 0.05), var(--panel-2) 40%);
+  box-shadow:
+    0 0 50px rgba(79, 216, 255, 0.08),
+    inset 0 0 30px rgba(79, 216, 255, 0.03);
+  clip-path: polygon(0 16px, 16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+}
+.panelTitlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--slate);
+  text-transform: uppercase;
+}
+.panelTitlebar .live {
+  color: var(--blue-2);
+}
+.panelBody {
+  padding: var(--sp-6) var(--sp-6) var(--sp-6);
+}
+
+.rankPreview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--sp-5);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  background: var(--void);
+}
+.rankPreview .badge {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--blue-dim);
+  color: var(--blue-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+}
+.rankPreview .txt {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  line-height: 1.5;
+}
+.rankPreview .txt b {
+  color: var(--ice);
+}
+
+.strengthBar {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+.strengthBar span {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  transition: background 0.2s ease;
+}
+.strengthBar span[data-active="true"] {
+  background: var(--strength-color, var(--blue-2));
 }
 
 /* Back header (forgot/change-password/delete-account style) */
@@ -93,19 +190,16 @@
 /* Mode toggle (login/signup) */
 .modeToggle {
   display: flex;
-  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 4px;
   margin-bottom: var(--sp-6);
 }
 .modeBtn {
   flex: 1;
-  height: 42px;
-  border-radius: 9px;
+  height: 44px;
   font-family: var(--font-rajdhani), sans-serif;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
+  letter-spacing: 0.02em;
   color: var(--slate);
   display: flex;
   align-items: center;
@@ -113,9 +207,9 @@
   transition: all 0.18s ease;
 }
 .modeBtnActive {
-  background: rgba(79, 216, 255, 0.14);
+  background: rgba(79, 216, 255, 0.1);
   color: var(--blue-2);
-  box-shadow: 0 0 0 1px var(--border-strong) inset;
+  box-shadow: inset 0 -2px 0 var(--blue-2);
 }
 
 .field {

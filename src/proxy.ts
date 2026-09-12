@@ -13,6 +13,7 @@ const APP_PATHS = [
   "/achievements",
   "/wallet",
   "/settings",
+  "/profile",
   "/notifications",
   "/billing",
   "/locked",

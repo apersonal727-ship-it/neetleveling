@@ -1,0 +1,286 @@
+.hero {
+  position: relative;
+  text-align: center;
+  padding: var(--sp-6) var(--sp-4);
+  overflow: hidden;
+}
+.auraWrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin: 0 auto var(--sp-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auraRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--rc, var(--blue-2));
+  opacity: 0.5;
+}
+.auraRing.r2 {
+  inset: 12px;
+}
+.profileBadge {
+  position: relative;
+  z-index: 1;
+  width: 76px;
+  height: 76px;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  color: var(--rc, var(--blue-2));
+  border: 1.5px solid var(--rc, var(--blue-2));
+  background: rgba(79, 216, 255, 0.06);
+  box-shadow: 0 0 30px -4px var(--rc, var(--blue-2));
+}
+.profileName {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.02em;
+}
+.profileTitle {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+  color: var(--blue-2);
+  margin-top: 4px;
+  letter-spacing: 0.03em;
+}
+.profileLevel {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--gold);
+  border: 1px solid rgba(245, 197, 66, 0.4);
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: rgba(245, 197, 66, 0.06);
+}
+
+.xpBlock {
+  max-width: 320px;
+  margin: var(--sp-5) auto 0;
+  text-align: left;
+}
+.xpRow {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.xpRow b {
+  color: var(--ice);
+}
+.xpTrack {
+  height: 6px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.xpFill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--violet), var(--blue));
+  box-shadow: 0 0 10px rgba(143, 232, 255, 0.5);
+}
+
+.secTag {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+}
+.secTag .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+@media (min-width: 640px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.statTile {
+  background: var(--panel);
+  padding: 16px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.statIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.statNum {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--ice);
+}
+.statLbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9px;
+  color: var(--slate);
+  text-transform: uppercase;
+  margin-top: 2px;
+  letter-spacing: 0.03em;
+}
+
+.journeyCard {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+}
+.journeyRingWrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+.journeyRingSvg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+.journeyTrack {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 6;
+}
+.journeyProgress {
+  fill: none;
+  stroke: var(--violet);
+  stroke-width: 6;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.6));
+}
+.journeyPct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--violet);
+}
+.journeyTitle {
+  font-size: 15.5px;
+  font-weight: 700;
+}
+.journeySub {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.journeySub b {
+  color: var(--ice);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.tRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.tNode {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  border: 1.5px solid var(--border);
+  color: var(--slate);
+  background: var(--panel);
+  position: relative;
+}
+.tRow.achieved .tNode {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(61, 220, 132, 0.08);
+}
+.tRow.current .tNode {
+  border-color: var(--blue-2);
+  color: var(--blue-2);
+  background: rgba(79, 216, 255, 0.1);
+  box-shadow: 0 0 16px -2px var(--blue-2);
+}
+.tLockIcon {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  font-size: 10px;
+}
+.tCard {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+.tRow.current .tCard {
+  border-color: var(--border-strong);
+}
+.tTitle {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+}
+.tSub {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+  margin-top: 2px;
+}
+.tStatus {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 5px;
+  color: #4a5476;
+}
+.tRow.achieved .tStatus {
+  color: var(--green);
+}
+.tRow.current .tStatus {
+  color: var(--blue-2);
+}

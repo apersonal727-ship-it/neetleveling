@@ -116,6 +116,17 @@ export function SettingsForm({
       </div>
 
       <section>
+        <Link href="/profile" className={`${appStyles.card} ${styles.rowLink}`}>
+          <div className={styles.rlTitle}>View Hunter Profile</div>
+          <div className={styles.rlArrow}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </div>
+        </Link>
+      </section>
+
+      <section>
         <span className={appStyles.secLabel}>Profile</span>
         <div className={`${appStyles.card} ${styles.fieldCard}`}>
           <span className={styles.fieldLabel}>Hunter Name</span>

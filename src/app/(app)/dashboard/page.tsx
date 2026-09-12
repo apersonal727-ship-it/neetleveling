@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { getSystemNetworkStats } from "@/lib/stats";
@@ -54,7 +55,7 @@ export default async function DashboardPage({
             </div>
 
             <div className={styles.titlebarBody}>
-              <div className={styles.statusTop}>
+              <Link href="/profile" className={styles.statusTop} style={{ textDecoration: "none", color: "inherit" }}>
                 <div className={styles.rankOrb} style={{ "--rc": rank.color } as React.CSSProperties}>
                   {rank.code}
                 </div>
@@ -65,7 +66,7 @@ export default async function DashboardPage({
                     Rank {rank.code} · Level {progress.level} of 100
                   </div>
                 </div>
-              </div>
+              </Link>
 
               <div className={styles.xpDetail}>
                 <span className={styles.xpDetailLbl}>XP to next level</span>
