@@ -339,13 +339,14 @@ enum BugReportStatus {
 }
 
 model BugReport {
-  id          String          @id @default(cuid())
-  profileId   String
-  profile     Profile         @relation(fields: [profileId], references: [id])
-  title       String
-  description String
-  status      BugReportStatus @default(OPEN)
-  createdAt   DateTime        @default(now())
+  id            String          @id @default(cuid())
+  profileId     String
+  profile       Profile         @relation(fields: [profileId], references: [id])
+  title         String
+  description   String
+  screenshotUrl String?
+  status        BugReportStatus @default(OPEN)
+  createdAt     DateTime        @default(now())
 
   @@index([profileId])
   @@index([status])

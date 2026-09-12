@@ -267,15 +267,7 @@ export function SettingsForm({
         <span className={appStyles.secLabel}>Support</span>
         <div className={appStyles.card}>
           <Link href="/report-bug" className={styles.rowLink}>
-            <div className={styles.rlTitle}>Report a bug</div>
-            <div className={styles.rlArrow}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 6l6 6-6 6" />
-              </svg>
-            </div>
-          </Link>
-          <Link href="/feature-requests" className={styles.rowLink}>
-            <div className={styles.rlTitle}>Feature requests</div>
+            <div className={styles.rlTitle}>Report an issue</div>
             <div className={styles.rlArrow}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 6l6 6-6 6" />

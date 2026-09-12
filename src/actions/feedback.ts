@@ -3,23 +3,57 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { requireAdminSession } from "@/lib/admin-auth";
+import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import type { BugReportStatus, FeatureRequestStatus } from "@/generated/prisma/client";
 
 export type FeedbackResult = { error: string } | { success: true };
 export type ActionResult = { error: string } | { success: true };
 
+const SCREENSHOT_BUCKET = "report-screenshots";
+const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+
+// Uploads to a Supabase Storage bucket named "report-screenshots" — create
+// it in the Supabase dashboard (Storage → New bucket, public) before this
+// can succeed; until then this just returns an error and the report still
+// submits without a screenshot (see submitBugReport below).
+export async function uploadReportScreenshot(
+  file: File,
+): Promise<{ error: string } | { url: string }> {
+  const profile = await getCurrentProfile();
+
+  if (!file || file.size === 0) return { error: "No file provided." };
+  if (file.size > MAX_SCREENSHOT_BYTES) return { error: "Screenshot must be under 5MB." };
+  if (!file.type.startsWith("image/")) return { error: "Only image files are supported." };
+
+  const supabase = await createClient();
+  const ext = file.name.split(".").pop() ?? "png";
+  const path = `${profile.id}/${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(SCREENSHOT_BUCKET)
+    .upload(path, file, { contentType: file.type });
+
+  if (uploadError) {
+    return { error: `Couldn't upload screenshot: ${uploadError.message}` };
+  }
+
+  const { data } = supabase.storage.from(SCREENSHOT_BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
 export async function submitBugReport(formData: FormData): Promise<FeedbackResult> {
   const profile = await getCurrentProfile();
 
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
+  const screenshotUrl = String(formData.get("screenshotUrl") ?? "").trim() || null;
 
   if (!title) return { error: "Give the bug a short title." };
   if (!description) return { error: "Describe what happened." };
 
   await prisma.bugReport.create({
-    data: { profileId: profile.id, title, description },
+    data: { profileId: profile.id, title, description, screenshotUrl },
   });
 
   revalidatePath("/report-bug");
