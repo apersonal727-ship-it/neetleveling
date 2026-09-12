@@ -682,6 +682,119 @@
   color: #ff8a94;
 }
 
+/* Character-creation step wizard */
+.stepDots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: var(--sp-6);
+}
+.stepDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.stepDotActive {
+  background: var(--blue-2);
+  box-shadow: 0 0 8px var(--blue-2);
+}
+.stepDotDone {
+  background: var(--blue-dim);
+}
+.stepLine {
+  width: 26px;
+  height: 1px;
+  background: var(--border);
+}
+.stepLineDone {
+  background: var(--blue-dim);
+}
+
+.stepNav {
+  display: flex;
+  gap: 12px;
+  margin-top: var(--sp-7);
+}
+.btnNext {
+  flex: 1;
+  padding: 15px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--void);
+  background: var(--blue-2);
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 0 0 22px rgba(79, 216, 255, 0.4);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition: opacity 0.2s ease;
+}
+.btnNext:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.btnBack {
+  flex-shrink: 0;
+  padding: 15px 22px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--slate);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.summaryBox {
+  border: 1px solid var(--border);
+  background: var(--void);
+  margin-top: var(--sp-7);
+}
+.summaryBoxRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px dashed var(--border);
+}
+.summaryBoxRow:last-child {
+  border-bottom: none;
+}
+.summaryK {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.summaryV {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+.summaryNote {
+  text-align: center;
+  margin-top: var(--sp-6);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  padding: 14px;
+  border: 1px dashed var(--border);
+  line-height: 1.6;
+}
+
 .trustLine {
   display: flex;
   align-items: center;
