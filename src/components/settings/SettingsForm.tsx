@@ -112,6 +112,10 @@ export function SettingsForm({
   return (
     <>
       <div className={appStyles.pageHead}>
+        <span className={appStyles.pageEyebrow}>
+          <span className={appStyles.dot} />
+          Account
+        </span>
         <h1>Settings</h1>
       </div>
 

@@ -36,6 +36,10 @@ export default async function WalletPage() {
   return (
     <>
       <div className={appStyles.pageHead}>
+        <span className={appStyles.pageEyebrow}>
+          <span className={appStyles.dot} />
+          Bring A Friend
+        </span>
         <h1>Wallet</h1>
         <p>Credit from referrals — never cash, always toward your bill.</p>
       </div>

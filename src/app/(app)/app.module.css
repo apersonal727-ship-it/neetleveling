@@ -148,6 +148,24 @@
   color: var(--slate);
   margin-top: 6px;
 }
+.pageEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--violet);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.pageEyebrow .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 7px var(--violet);
+}
 
 /* ===== BOTTOM NAV ===== */
 .tabbar {

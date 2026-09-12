@@ -41,6 +41,10 @@ export default async function HistoryPage() {
   return (
     <>
       <div className={appStyles.pageHead}>
+        <span className={appStyles.pageEyebrow}>
+          <span className={appStyles.dot} />
+          The Record
+        </span>
         <h1>History</h1>
         <p>Every quest, logged. This is the receipt for the arc.</p>
       </div>
