@@ -31,8 +31,36 @@ function fmtRelative(date: Date) {
 
 export default async function HistoryPage() {
   const profile = await getCurrentProfile();
-  const [summary, subjectHours, heatmap, activity] = await Promise.all([
-    getHistorySummary(profile.id),
+  const summary = await getHistorySummary(profile.id);
+
+  const pageHead = (
+    <div className={appStyles.pageHead}>
+      <span className={appStyles.pageEyebrow}>
+        <span className={appStyles.dot} />
+        The Record
+      </span>
+      <h1>History</h1>
+      <p>Every quest, logged. This is the receipt for the arc.</p>
+    </div>
+  );
+
+  if (summary.questsCompleted === 0) {
+    return (
+      <>
+        {pageHead}
+        <div className={styles.histEmpty}>
+          <div className={styles.histEmptyIcon}>📜</div>
+          <div className={styles.histEmptyTitle}>Nothing Logged Yet.</div>
+          <div className={styles.histEmptySub}>
+            Your History fills in the moment you clear your first quest. Every cleared day, every
+            streak, every lockout — it all starts showing up here.
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const [subjectHours, heatmap, activity] = await Promise.all([
     getSubjectHours(profile.id),
     getHeatmap(profile.id),
     getRecentActivity(profile.id),
@@ -40,32 +68,25 @@ export default async function HistoryPage() {
 
   return (
     <>
-      <div className={appStyles.pageHead}>
-        <span className={appStyles.pageEyebrow}>
-          <span className={appStyles.dot} />
-          The Record
-        </span>
-        <h1>History</h1>
-        <p>Every quest, logged. This is the receipt for the arc.</p>
-      </div>
+      {pageHead}
 
       <section>
         <div className={styles.chipGrid}>
-          <div className={`${appStyles.card} ${styles.chip}`}>
-            <div className={styles.chipVal}>{summary.questsCompleted}</div>
-            <div className={styles.chipLbl}>Quests completed</div>
+          <div className={styles.chip}>
+            <div className={`${styles.chipVal} ${styles.gold}`}>{summary.currentStreak}</div>
+            <div className={styles.chipLbl}>Day Streak</div>
           </div>
-          <div className={`${appStyles.card} ${styles.chip}`}>
-            <div className={styles.chipVal}>{summary.completionRate}%</div>
-            <div className={styles.chipLbl}>Completion rate</div>
-          </div>
-          <div className={`${appStyles.card} ${styles.chip}`}>
-            <div className={styles.chipVal}>{summary.currentStreak}</div>
-            <div className={styles.chipLbl}>Current streak</div>
-          </div>
-          <div className={`${appStyles.card} ${styles.chip}`}>
+          <div className={styles.chip}>
             <div className={styles.chipVal}>{summary.longestStreak}</div>
-            <div className={styles.chipLbl}>Longest streak</div>
+            <div className={styles.chipLbl}>Best Streak</div>
+          </div>
+          <div className={styles.chip}>
+            <div className={`${styles.chipVal} ${styles.cyan}`}>{summary.questsCompleted}</div>
+            <div className={styles.chipLbl}>Quests Cleared</div>
+          </div>
+          <div className={styles.chip}>
+            <div className={`${styles.chipVal} ${styles.danger}`}>{summary.lockoutsTotal}</div>
+            <div className={styles.chipLbl}>Lockouts Total</div>
           </div>
         </div>
       </section>
@@ -75,14 +96,14 @@ export default async function HistoryPage() {
         <div className={`${appStyles.card} ${styles.heatmapCard}`}>
           <HeatmapScroller cells={heatmap} />
           <div className={styles.heatLegend}>
-            <span>Less</span>
-            <span className={styles.hcell} />
-            <span className={`${styles.hcell} ${styles.hcellL1}`} />
-            <span className={`${styles.hcell} ${styles.hcellL2}`} />
-            <span className={`${styles.hcell} ${styles.hcellL3}`} />
-            <span>More</span>
-            <span style={{ marginLeft: "10px", display: "inline-flex", alignItems: "center", gap: "5px" }}>
-              <span className={`${styles.hcell} ${styles.hcellMiss}`} /> Penalty
+            <span className={styles.lgItem}>
+              <span className={`${styles.hcell} ${styles.hcellL3}`} /> Cleared
+            </span>
+            <span className={styles.lgItem}>
+              <span className={`${styles.hcell} ${styles.hcellMiss}`} /> Locked
+            </span>
+            <span className={styles.lgItem}>
+              <span className={styles.hcell} /> No Data
             </span>
           </div>
         </div>
@@ -105,32 +126,26 @@ export default async function HistoryPage() {
 
       <section>
         <span className={appStyles.secLabel}>Recent activity</span>
-        {activity.length === 0 ? (
-          <div className={appStyles.card} style={{ padding: "20px", textAlign: "center", color: "var(--slate)", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12.5px" }}>
-            No activity yet — complete your first quest to start the log.
-          </div>
-        ) : (
-          <div className={`${appStyles.card} ${styles.logList}`}>
-            {activity.map((entry, i) => (
-              <div key={i} className={styles.logItem}>
-                <div className={`${styles.logDot} ${entry.kind === "penalty" ? styles.logDotPenalty : ""}`} />
-                <div className={styles.logBody}>
-                  <div className={styles.logTitle}>
-                    {entry.kind === "penalty" ? `Punishment — ${entry.title}` : entry.title}
-                  </div>
-                  <div className={styles.logMeta}>
-                    {fmtRelative(entry.at)} · {fmtDuration(entry.durationMinutes)}
-                    {entry.kind === "quest" && ` · ${questSubjectLabel(entry.subject)}`}
-                    {entry.kind === "penalty" && !entry.resolved && " · UNRESOLVED"}
-                  </div>
+        <div className={`${appStyles.card} ${styles.logList}`}>
+          {activity.map((entry, i) => (
+            <div key={i} className={styles.logItem}>
+              <div className={`${styles.logDot} ${entry.kind === "penalty" ? styles.logDotPenalty : ""}`} />
+              <div className={styles.logBody}>
+                <div className={styles.logTitle}>
+                  {entry.kind === "penalty" ? `Punishment — ${entry.title}` : entry.title}
                 </div>
-                <div className={`${styles.logXp} ${entry.kind === "penalty" ? styles.logXpPenalty : ""}`}>
-                  {entry.kind === "quest" ? `+${entry.xp}` : "—"}
+                <div className={styles.logMeta}>
+                  {fmtRelative(entry.at)} · {fmtDuration(entry.durationMinutes)}
+                  {entry.kind === "quest" && ` · ${questSubjectLabel(entry.subject)}`}
+                  {entry.kind === "penalty" && !entry.resolved && " · UNRESOLVED"}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+              <div className={`${styles.logXp} ${entry.kind === "penalty" ? styles.logXpPenalty : ""}`}>
+                {entry.kind === "quest" ? `+${entry.xp}` : "—"}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     </>
   );

@@ -12,22 +12,14 @@ function dayKey(d: Date) {
 
 export async function getHistorySummary(profileId: string) {
   const profile = await prisma.profile.findUniqueOrThrow({ where: { id: profileId } });
-  const totalCompleted = await prisma.questCompletion.count({ where: { profileId } });
-
-  const totalAssigned = await prisma.quest.count({
-    where: {
-      OR: [
-        { assignScope: "ALL" },
-        { assignScope: "SPECIFIC_HUNTER", assignedToId: profileId },
-      ],
-    },
-  });
-
-  const completionRate = totalAssigned > 0 ? Math.round((totalCompleted / totalAssigned) * 100) : 0;
+  const [totalCompleted, lockoutsTotal] = await Promise.all([
+    prisma.questCompletion.count({ where: { profileId } }),
+    prisma.lockoutEvent.count({ where: { profileId } }),
+  ]);
 
   return {
     questsCompleted: totalCompleted,
-    completionRate,
+    lockoutsTotal,
     currentStreak: profile.streak,
     longestStreak: profile.bestStreak,
   };
