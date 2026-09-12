@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
-import { getWalletData } from "@/lib/wallet";
+import { getWalletData, getReferralData, getWithdrawalHistory } from "@/lib/wallet";
 import { WITHDRAWAL_MIN_BALANCE } from "@/lib/wallet-constants";
 import { REFERRAL_CREDIT_AMOUNT } from "@/lib/payment";
 import { ReferralCard } from "@/components/wallet/ReferralCard";
@@ -35,6 +35,10 @@ const TX_LABEL: Record<string, string> = {
 export default async function WalletPage() {
   const profile = await getCurrentProfile();
   const wallet = await getWalletData(profile.id);
+  const [referral, withdrawals] = await Promise.all([
+    getReferralData(profile.id, wallet.referralCode),
+    getWithdrawalHistory(profile.id),
+  ]);
 
   return (
     <>
@@ -88,6 +92,75 @@ export default async function WalletPage() {
           <ReferralCard referralCode={wallet.referralCode} />
         </div>
       </section>
+
+      <section>
+        <div className={styles.refStats}>
+          <div className={styles.refTile}>
+            <div className={`${styles.refNum} ${styles.violet}`}>{referral.invited}</div>
+            <div className={styles.refLbl}>Invited</div>
+          </div>
+          <div className={styles.refTile}>
+            <div className={`${styles.refNum} ${styles.gold}`}>{referral.credited}</div>
+            <div className={styles.refLbl}>Credited</div>
+          </div>
+          <div className={styles.refTile}>
+            <div className={styles.refNum}>{referral.notYetJoined}</div>
+            <div className={styles.refLbl}>Not Yet Joined</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <span className={appStyles.secLabel}>Your recruits</span>
+        {referral.recruits.length === 0 ? (
+          <div className={styles.recruitEmpty}>
+            <div className={styles.recruitEmptyIcon}>📡</div>
+            <div className={styles.recruitEmptyTitle}>No Recruits Yet.</div>
+            <div className={styles.recruitEmptySub}>
+              Share your referral code above. The moment someone joins and pays, they&apos;ll show
+              up here — and so will your ₹{REFERRAL_CREDIT_AMOUNT}.
+            </div>
+          </div>
+        ) : (
+          <div className={styles.recruitBox}>
+            {referral.recruits.map((r, i) => (
+              <div key={i} className={styles.recruitRow}>
+                <div className={styles.recruitAvatar}>{r.name.charAt(0).toUpperCase()}</div>
+                <div className={styles.recruitInfo}>
+                  <div className={styles.recruitName}>{r.name}</div>
+                  <div className={styles.recruitMeta}>
+                    {r.rankCode}-Rank · LVL {r.level}
+                  </div>
+                </div>
+                <div className={`${styles.recruitBadge} ${r.credited ? styles.credited : styles.pending}`}>
+                  {r.credited ? `+₹${REFERRAL_CREDIT_AMOUNT} Earned` : "Not Paid Yet"}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {withdrawals.length > 0 && (
+        <section>
+          <span className={appStyles.secLabel}>Withdrawal requests</span>
+          <div className={styles.wdBox}>
+            {withdrawals.map((w) => (
+              <div key={w.id} className={styles.wdRow}>
+                <div>
+                  <div className={styles.wdAmt}>₹{w.amount}</div>
+                  <div className={styles.wdMeta}>
+                    Requested {fmtDate(w.createdAt)} · QR code uploaded
+                  </div>
+                </div>
+                <div className={`${styles.wdStatus} ${w.status === "PAID" ? styles.completed : styles.pending}`}>
+                  {w.status === "PAID" ? "Completed" : "Pending"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className={styles.infoLine}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">

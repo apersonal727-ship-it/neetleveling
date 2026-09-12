@@ -361,6 +361,174 @@
   clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
+.refStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+}
+.refTile {
+  padding: 16px 8px;
+  text-align: center;
+  border-right: 1px dashed var(--border);
+}
+.refTile:last-child {
+  border-right: none;
+}
+.refNum {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--ice);
+}
+.refNum.violet {
+  color: var(--violet);
+}
+.refNum.gold {
+  color: var(--gold);
+}
+.refLbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9px;
+  color: var(--slate);
+  text-transform: uppercase;
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+
+.recruitBox {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+}
+.recruitRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px dashed var(--border);
+}
+.recruitRow:last-child {
+  border-bottom: none;
+}
+.recruitAvatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid var(--violet);
+  color: var(--violet);
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+.recruitInfo {
+  flex: 1;
+  min-width: 0;
+}
+.recruitName {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+}
+.recruitMeta {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+  margin-top: 3px;
+}
+.recruitBadge {
+  flex-shrink: 0;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 5px 11px;
+  text-transform: uppercase;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.recruitBadge.credited {
+  color: var(--blue-2);
+  border-color: var(--blue-dim);
+}
+.recruitBadge.pending {
+  color: var(--slate);
+  border-color: var(--border);
+}
+
+.recruitEmpty {
+  text-align: center;
+  padding: 36px 22px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+.recruitEmptyIcon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+.recruitEmptyTitle {
+  font-size: 17px;
+}
+.recruitEmptySub {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 8px;
+  line-height: 1.7;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wdBox {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+}
+.wdRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 18px;
+  border-bottom: 1px dashed var(--border);
+}
+.wdRow:last-child {
+  border-bottom: none;
+}
+.wdAmt {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+.wdMeta {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+.wdStatus {
+  flex-shrink: 0;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 6px 12px;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+.wdStatus.completed {
+  color: var(--blue-2);
+  border-color: var(--blue-dim);
+}
+.wdStatus.pending {
+  color: var(--violet);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
 .refCard {
   padding: var(--sp-5);
   display: flex;
