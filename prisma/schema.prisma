@@ -53,6 +53,7 @@ model Profile {
   lockoutEvents         LockoutEvent[]
   walletTransactions    WalletTransaction[]
   withdrawalRequests    WithdrawalRequest[]
+  recruitmentMilestones RecruitmentMilestone[]
   paymentTransactions   PaymentTransaction[]
   notifications         Notification[]
   bugReports            BugReport[]
@@ -269,6 +270,21 @@ model WalletTransaction {
   createdAt   DateTime              @default(now())
 
   @@index([profileId, createdAt])
+}
+
+// One row per referral-milestone tier a hunter has claimed (see
+// lib/recruitment.ts for the tier table) — the unique constraint is what
+// makes checkRecruitmentMilestones's lazy per-tier check idempotent, so it
+// can safely re-run on every Wallet page load without double-awarding XP.
+model RecruitmentMilestone {
+  id         String   @id @default(cuid())
+  profileId  String
+  profile    Profile  @relation(fields: [profileId], references: [id])
+  tier       Int
+  xpAwarded  Int
+  claimedAt  DateTime @default(now())
+
+  @@unique([profileId, tier])
 }
 
 enum WithdrawalStatus {

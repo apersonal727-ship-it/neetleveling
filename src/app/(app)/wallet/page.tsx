@@ -3,8 +3,10 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { getWalletData, getReferralData, getWithdrawalHistory } from "@/lib/wallet";
 import { WITHDRAWAL_MIN_BALANCE } from "@/lib/wallet-constants";
 import { REFERRAL_CREDIT_AMOUNT } from "@/lib/payment";
+import { getRecruitmentQuestList, checkRecruitmentMilestones } from "@/lib/recruitment";
 import { ReferralCard } from "@/components/wallet/ReferralCard";
 import { WithdrawBlock } from "@/components/wallet/WithdrawBlock";
+import { AchievementOverlay } from "@/components/wallet/AchievementOverlay";
 import appStyles from "../app.module.css";
 import styles from "./wallet.module.css";
 
@@ -35,9 +37,14 @@ const TX_LABEL: Record<string, string> = {
 export default async function WalletPage() {
   const profile = await getCurrentProfile();
   const wallet = await getWalletData(profile.id);
-  const [referral, withdrawals] = await Promise.all([
+  // checkRecruitmentMilestones must resolve before getRecruitmentQuestList
+  // reads claimed tiers, or a just-claimed tier would still show as
+  // "In Progress" for this one page load.
+  const newMilestone = await checkRecruitmentMilestones(profile);
+  const [referral, withdrawals, recruitmentQuests] = await Promise.all([
     getReferralData(profile.id, wallet.referralCode),
     getWithdrawalHistory(profile.id),
+    getRecruitmentQuestList(profile),
   ]);
 
   return (
@@ -80,6 +87,34 @@ export default async function WalletPage() {
           </span>
         </div>
         <WithdrawBlock balance={wallet.balance} hasPendingWithdrawal={!!wallet.pendingWithdrawal} />
+      </section>
+
+      <section>
+        <span className={appStyles.secLabel} style={{ color: "var(--gold)" }}>
+          Recruitment Quests
+        </span>
+        <p className={styles.rqNote}>
+          XP from these goes straight into <b>your Hunter profile</b> — same level, same rank, no
+          separate track.
+        </p>
+        <div className={styles.rqBox}>
+          {recruitmentQuests.map((rq) => (
+            <div key={rq.count} className={styles.rqRow}>
+              <div>
+                <div className={styles.rqName}>
+                  Recruit {rq.count} Hunter{rq.count === 1 ? "" : "s"}
+                </div>
+                <div className={styles.rqMeta}>
+                  <span className={styles.d} />+{rq.xp} XP · ₹{rq.cashTotal.toLocaleString("en-IN")} total
+                  {rq.status === "progress" && ` · ${rq.creditedCount} / ${rq.count} credited`}
+                </div>
+              </div>
+              <div className={`${styles.rqStatus} ${styles[rq.status]}`}>
+                {rq.status === "cleared" ? "✓ Cleared" : rq.status === "progress" ? "In Progress" : "Locked"}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section>
@@ -204,6 +239,14 @@ export default async function WalletPage() {
           </div>
         )}
       </section>
+
+      {newMilestone && (
+        <AchievementOverlay
+          count={newMilestone.count}
+          xp={newMilestone.xp}
+          cashTotal={newMilestone.cashTotal}
+        />
+      )}
     </>
   );
 }

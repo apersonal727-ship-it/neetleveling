@@ -361,6 +361,203 @@
   clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
+.rqNote {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--slate);
+  margin-bottom: var(--sp-3);
+  line-height: 1.6;
+}
+.rqNote b {
+  color: var(--gold);
+}
+.rqBox {
+  border: 1px solid rgba(245, 197, 66, 0.3);
+  background: var(--panel-2);
+}
+.rqRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-bottom: 1px dashed var(--border);
+}
+.rqRow:last-child {
+  border-bottom: none;
+}
+.rqName {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+}
+.rqMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--slate);
+}
+.rqMeta .d {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.rqStatus {
+  flex-shrink: 0;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  padding: 7px 13px;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+.rqStatus.cleared {
+  color: var(--blue-2);
+  border-color: var(--blue-dim);
+}
+.rqStatus.progress {
+  color: var(--gold);
+  border-color: rgba(245, 197, 66, 0.4);
+}
+.rqStatus.locked {
+  color: var(--slate);
+  border-color: var(--border);
+}
+
+/* Achievement unlock overlay */
+.achOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+  background: rgba(5, 3, 10, 0.72);
+  backdrop-filter: blur(3px);
+}
+.achCard {
+  position: relative;
+  text-align: center;
+  padding: 40px 32px 34px;
+  max-width: 380px;
+  border: 1px solid var(--gold);
+  background: linear-gradient(180deg, rgba(245, 197, 66, 0.08), var(--panel-2));
+  box-shadow: 0 0 70px rgba(245, 197, 66, 0.2);
+  clip-path: polygon(0 16px, 16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+}
+.achBadgeWrap {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.achRing {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: achRing 1.6s ease-out infinite;
+}
+.achRing.d2 {
+  animation-delay: 0.5s;
+}
+@keyframes achRing {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.achBadge {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--gold);
+  background: rgba(245, 197, 66, 0.1);
+  color: var(--gold);
+  font-size: 32px;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+  box-shadow: 0 0 30px rgba(245, 197, 66, 0.5);
+}
+.achTag {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.achTitle {
+  font-size: 23px;
+  margin-top: 10px;
+}
+.achQuest {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12.5px;
+  color: var(--slate);
+  margin-top: 6px;
+}
+.achRewards {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: var(--sp-6);
+}
+.achRewardPill {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  background: var(--void);
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+.achRewardPill.xp {
+  color: var(--blue-2);
+}
+.achRewardPill.cash {
+  color: var(--gold);
+}
+.achRewardPill span {
+  display: block;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 8.5px;
+  color: var(--slate);
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+.achContinue {
+  display: inline-block;
+  margin-top: var(--sp-6);
+  padding: 13px 30px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--void);
+  background: var(--gold);
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 0 0 22px rgba(245, 197, 66, 0.4);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
 .refStats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
