@@ -9,7 +9,8 @@ type Pending = {
   hunterName: string;
   email: string;
   amount: number;
-  upiId: string;
+  payeeName: string;
+  qrCodeUrl: string;
   requestedAt: string;
 };
 
@@ -18,7 +19,7 @@ export function WithdrawalsReview({ initialPending }: { initialPending: Pending[
   const [, startTransition] = useTransition();
 
   function handleMarkPaid(id: string) {
-    if (!confirm("Confirm you've paid this hunter via UPI outside the system?")) return;
+    if (!confirm("Confirm you've scanned their QR code and paid this hunter outside the system?")) return;
     setPending((p) => p.filter((x) => x.id !== id));
     startTransition(() => {
       markWithdrawalPaid(id);
@@ -65,11 +66,21 @@ export function WithdrawalsReview({ initialPending }: { initialPending: Pending[
                     marginTop: "6px",
                   }}
                 >
-                  UPI: {p.upiId}
+                  Pay to: {p.payeeName}
                 </div>
               </div>
-              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "15px", fontWeight: 600, flexShrink: 0 }}>
-                ₹{p.amount}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", flexShrink: 0 }}>
+                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "15px", fontWeight: 600 }}>
+                  ₹{p.amount}
+                </div>
+                <a href={p.qrCodeUrl} target="_blank" rel="noreferrer">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.qrCodeUrl}
+                    alt="UPI QR code"
+                    style={{ width: "56px", height: "56px", objectFit: "cover", border: "1px solid var(--border)" }}
+                  />
+                </a>
               </div>
             </div>
 

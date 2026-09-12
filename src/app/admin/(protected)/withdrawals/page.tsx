@@ -37,7 +37,8 @@ export default async function AdminWithdrawalsPage() {
           hunterName: p.profile.name,
           email: p.profile.email,
           amount: p.amount,
-          upiId: p.upiId,
+          payeeName: p.payeeName,
+          qrCodeUrl: p.qrCodeUrl,
           requestedAt: fmtDate(p.createdAt),
         }))}
       />
@@ -63,7 +64,7 @@ export default async function AdminWithdrawalsPage() {
                 <div>
                   <div style={{ fontSize: "13px", fontWeight: 600 }}>{p.profile.name}</div>
                   <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10.5px", color: "var(--slate)", marginTop: "3px" }}>
-                    {p.upiId} · paid {p.paidAt ? fmtDate(p.paidAt) : "—"}
+                    {p.payeeName} · paid {p.paidAt ? fmtDate(p.paidAt) : "—"}
                   </div>
                 </div>
                 <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "13px", color: "var(--green)" }}>
