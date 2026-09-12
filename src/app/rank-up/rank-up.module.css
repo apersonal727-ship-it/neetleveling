@@ -1,0 +1,191 @@
+.bgGrid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 55% at 50% 30%, rgba(139, 92, 246, 0.14), transparent 65%);
+}
+
+.app {
+  --gutter: 20px;
+  --app-max: 480px;
+  max-width: var(--app-max);
+  margin-inline: auto;
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--sp-6) var(--gutter);
+  text-align: center;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--violet);
+  text-transform: uppercase;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  padding: 7px 16px;
+  border-radius: 100px;
+  background: rgba(139, 92, 246, 0.08);
+  margin-bottom: var(--sp-6);
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--violet);
+  box-shadow: 0 0 8px var(--violet);
+}
+
+.transitionLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--slate);
+  margin-bottom: var(--sp-6);
+}
+.transitionLine .old {
+  opacity: 0.6;
+}
+.transitionLine .arrow {
+  color: var(--violet);
+}
+.transitionLine .new {
+  color: var(--ice);
+  font-weight: 700;
+}
+
+.auraWrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto var(--sp-5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auraRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--rc, var(--violet));
+  opacity: 0;
+  animation: ringOut 2s ease-out infinite;
+}
+.auraRing.r2 {
+  animation-delay: 0.7s;
+}
+@keyframes ringOut {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.rankBadge {
+  position: relative;
+  z-index: 1;
+  width: 96px;
+  height: 96px;
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 42px;
+  color: var(--rc, var(--violet));
+  border: 2px solid var(--rc, var(--violet));
+  background: rgba(139, 92, 246, 0.08);
+  box-shadow: 0 0 40px -4px var(--rc, var(--violet));
+}
+
+.rankTitle {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+.rankLine {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--slate);
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+.rankFlavor {
+  font-size: 14px;
+  color: var(--blue-2);
+  font-style: italic;
+  margin-bottom: var(--sp-6);
+}
+
+.crown {
+  font-size: 34px;
+  margin-bottom: 4px;
+}
+.maxNote {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--gold);
+  margin: -20px auto var(--sp-6);
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: var(--sp-6);
+}
+.statPill {
+  background: var(--panel-2);
+  padding: 16px 8px;
+  text-align: center;
+}
+.statPill .num {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  color: var(--violet);
+}
+.statPill .lbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9px;
+  color: var(--slate);
+  text-transform: uppercase;
+  margin-top: 4px;
+  letter-spacing: 0.03em;
+}
+
+.continueBtn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--void);
+  background: linear-gradient(135deg, var(--violet), #a78bfa);
+  border: none;
+  text-transform: uppercase;
+  box-shadow: 0 0 26px rgba(139, 92, 246, 0.4);
+  text-align: center;
+}

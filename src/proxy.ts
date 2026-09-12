@@ -25,6 +25,9 @@ const APP_PATHS = [
   "/report-bug",
   "/feature-requests",
   "/time-warning",
+  "/day-clear",
+  "/level-up",
+  "/rank-up",
 ];
 
 export async function proxy(request: NextRequest) {

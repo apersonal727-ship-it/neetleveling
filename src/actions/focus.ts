@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { maybeIncrementStreak } from "@/lib/streaks";
 import { penaltyDurationMinutes } from "@/lib/penalty";
 import { isPracticeQuest, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
+import { getLevelProgress, rankForLevel } from "@/lib/rank";
+import { getOpenMandatoryQuests } from "@/lib/open-quests";
 
 export async function startQuestSession(questId: string) {
   const profile = await getCurrentProfile();
@@ -68,7 +70,16 @@ export async function startPersonalQuestSession(personalQuestId: string) {
 
 export type CompleteResult =
   | { error: string }
-  | { success: true; xpAwarded: number; streak: number };
+  | {
+      success: true;
+      xpAwarded: number;
+      streak: number;
+      leveledUp: boolean;
+      newLevel: number;
+      rankedUp: boolean;
+      fromRank: string;
+      dayCleared: boolean;
+    };
 
 export async function completeQuestSession(sessionId: string): Promise<CompleteResult> {
   const profile = await getCurrentProfile();
@@ -98,6 +109,8 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
   const xpAwarded =
     session.quest.xpOverride ?? Math.round(session.quest.durationMinutes * 0.67);
 
+  const beforeProgress = getLevelProgress(profile.xp);
+
   await prisma.$transaction([
     prisma.questSession.update({
       where: { id: session.id },
@@ -115,7 +128,22 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
   await maybeIncrementStreak(profile.id);
   const updated = await prisma.profile.findUniqueOrThrow({ where: { id: profile.id } });
 
-  return { success: true, xpAwarded, streak: updated.streak };
+  const afterProgress = getLevelProgress(updated.xp);
+  const fromRank = rankForLevel(beforeProgress.level).code;
+  const toRank = rankForLevel(afterProgress.level).code;
+
+  const openQuests = await getOpenMandatoryQuests(profile.id, afterProgress.level, updated.streak);
+
+  return {
+    success: true,
+    xpAwarded,
+    streak: updated.streak,
+    leveledUp: afterProgress.level > beforeProgress.level,
+    newLevel: afterProgress.level,
+    rankedUp: toRank !== fromRank,
+    fromRank,
+    dayCleared: openQuests.length === 0,
+  };
 }
 
 export async function completePunishmentSession(sessionId: string): Promise<CompleteResult> {
@@ -174,7 +202,17 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
     }
   });
 
-  return { success: true, xpAwarded: 0, streak: 0 };
+  const rank = rankForLevel(getLevelProgress(profile.xp).level).code;
+  return {
+    success: true,
+    xpAwarded: 0,
+    streak: 0,
+    leveledUp: false,
+    newLevel: getLevelProgress(profile.xp).level,
+    rankedUp: false,
+    fromRank: rank,
+    dayCleared: false,
+  };
 }
 
 // Personal quests are self-tracked with no XP reward (the Quests page copy
@@ -215,5 +253,18 @@ export async function completePersonalQuestSession(sessionId: string): Promise<C
     }),
   ]);
 
-  return { success: true, xpAwarded: 0, streak: profile.streak };
+  const level = getLevelProgress(profile.xp).level;
+  const rank = rankForLevel(level).code;
+  const openQuests = await getOpenMandatoryQuests(profile.id, level, profile.streak);
+
+  return {
+    success: true,
+    xpAwarded: 0,
+    streak: profile.streak,
+    leveledUp: false,
+    newLevel: level,
+    rankedUp: false,
+    fromRank: rank,
+    dayCleared: openQuests.length === 0,
+  };
 }

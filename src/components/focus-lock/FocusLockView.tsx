@@ -53,6 +53,7 @@ export function FocusLockView({
   const [completed, setCompleted] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [xpCounter, setXpCounter] = useState(0);
+  const [returnHref, setReturnHref] = useState("/dashboard");
   const completingRef = useRef(false);
 
   useEffect(() => {
@@ -77,6 +78,13 @@ export function FocusLockView({
         completingRef.current = false;
         setCompleting(false);
         return;
+      }
+      if (result.rankedUp) {
+        setReturnHref(`/rank-up?from=${result.fromRank}`);
+      } else if (result.leveledUp) {
+        setReturnHref(`/level-up?xp=${xpAwarded}`);
+      } else if (result.dayCleared) {
+        setReturnHref("/day-clear");
       }
       setCompleted(true);
     })();
@@ -282,7 +290,7 @@ export function FocusLockView({
         <button
           type="button"
           className={styles.btnReturn}
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push(returnHref)}
         >
           Return to Status
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

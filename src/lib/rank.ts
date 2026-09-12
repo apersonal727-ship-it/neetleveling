@@ -1,5 +1,15 @@
 export type RankCode = "E" | "D" | "C" | "B" | "A" | "S";
 
+// Flavor line shown on the Rank Up celebration screen. No entry for E since
+// nothing ranks up into it — E is the starting rank everyone begins at.
+export const RANK_FLAVOR: Partial<Record<RankCode, string>> = {
+  D: "Consistency begins to compound.",
+  C: "Showing up becomes routine.",
+  B: "You no longer negotiate with the habit.",
+  A: "Discipline starts running on its own.",
+  S: "Elite-level consistency.",
+};
+
 export const RANKS: {
   code: RankCode;
   title: string;
