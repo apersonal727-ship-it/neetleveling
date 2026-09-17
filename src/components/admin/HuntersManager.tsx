@@ -94,105 +94,91 @@ export function HuntersManager({ hunters: initial }: { hunters: Hunter[] }) {
 
   return (
     <>
-      <section>
-        <span className={styles.secLabel}>Search hunters</span>
-        <div style={{ position: "relative" }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "var(--slate)" }}>
-            <circle cx="11" cy="11" r="7" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input
-            className={styles.fieldInput}
-            style={{ paddingLeft: "42px" }}
-            placeholder="Search by name or email…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </section>
+      <div className={styles.controlsRow}>
+        <input
+          className={styles.searchBox}
+          placeholder="Search by name or email…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
-      <section>
-        <span className={styles.secLabel}>
-          All hunters ({filtered.length})
-        </span>
-        <div className={styles.card}>
-          {filtered.length === 0 ? (
-            <div style={{ padding: "20px", textAlign: "center", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12.5px", color: "var(--slate)" }}>
-              No hunters found
-            </div>
-          ) : (
-            filtered.map((h) => {
-              const progress = getLevelProgress(h.xp);
-              const rank = rankForLevel(progress.level);
-              return (
-                <div
-                  key={h.id}
-                  onClick={() => openDetail(h.id)}
-                  style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px", borderBottom: "1px solid var(--border)", cursor: "pointer" }}
-                >
-                  <div style={{ width: "36px", height: "36px", borderRadius: "9px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-rajdhani), sans-serif", fontWeight: 700, fontSize: "14px", border: `1.5px solid ${rank.color}`, color: rank.color }}>
-                    {rank.code}
+      <div className={styles.hunterTable}>
+        <div className={styles.tableHead}>
+          <div>Hunter</div>
+          <div>Level</div>
+          <div>Streak</div>
+          <div>Status</div>
+          <div>Wallet</div>
+        </div>
+        {filtered.length === 0 ? (
+          <div style={{ padding: "20px", textAlign: "center", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12.5px", color: "var(--slate)" }}>
+            No hunters found
+          </div>
+        ) : (
+          filtered.map((h) => {
+            const progress = getLevelProgress(h.xp);
+            const rank = rankForLevel(progress.level);
+            return (
+              <div key={h.id} className={styles.hunterRow} onClick={() => openDetail(h.id)}>
+                <div className={styles.hunterId}>
+                  <div className={styles.hunterAvatar}>{h.name[0]}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className={styles.hunterName}>{h.name}</div>
+                    <div className={styles.hunterEmail}>{h.email}</div>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "13.5px", fontWeight: 600 }}>{h.name}</div>
-                    <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10.5px", color: "var(--slate)", marginTop: "3px" }}>
-                      LVL {progress.level} · {h.streak}D STREAK · {h.email}
-                    </div>
-                  </div>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-jetbrains-mono), monospace",
-                      fontSize: "9.5px",
-                      padding: "3px 8px",
-                      borderRadius: "100px",
-                      flexShrink: 0,
-                      color: h.locked ? "var(--red)" : "var(--green)",
-                      background: h.locked ? "rgba(255,77,94,.1)" : "rgba(61,220,132,.1)",
-                      border: `1px solid ${h.locked ? "rgba(255,77,94,.35)" : "rgba(61,220,132,.35)"}`,
-                    }}
-                  >
-                    {h.locked ? "LOCKED" : "ACTIVE"}
+                </div>
+                <div className={styles.colRank} style={{ color: rank.color }}>
+                  {rank.code}-Rank · LVL {progress.level}
+                </div>
+                <div className={styles.colStreak}>{h.streak > 0 ? <b>🔥 {h.streak}d</b> : "—"}</div>
+                <div>
+                  <span className={`${styles.statusTag} ${h.locked ? styles.locked : styles.active}`}>
+                    {h.locked ? "Locked" : "Active"}
                   </span>
                 </div>
-              );
-            })
-          )}
-        </div>
-      </section>
+                <div className={styles.colStreak}>₹{h.walletCredit}</div>
+              </div>
+            );
+          })
+        )}
+      </div>
 
       {selected && (
         <div
-          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(3,4,8,.8)", backdropFilter: "blur(6px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+          className={styles.drawerOverlay}
           onClick={(e) => {
             if (e.target === e.currentTarget) setSelectedId(null);
           }}
         >
-          <div style={{ width: "100%", maxWidth: "680px", maxHeight: "88vh", overflowY: "auto", background: "var(--panel-2)", border: "1px solid var(--border-strong)", borderBottom: "none", borderRadius: "20px 20px 0 0", padding: "20px 20px 40px" }}>
-            <div style={{ width: "36px", height: "4px", borderRadius: "100px", background: "var(--border-strong)", margin: "0 auto 16px" }} />
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-              {(() => {
-                const progress = getLevelProgress(selected.xp);
-                const rank = rankForLevel(progress.level);
-                return (
-                  <>
-                    <div style={{ width: "50px", height: "50px", borderRadius: "12px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-rajdhani), sans-serif", fontWeight: 700, fontSize: "20px", border: `1.5px solid ${rank.color}`, color: rank.color, boxShadow: `0 0 16px -4px ${rank.color}` }}>
-                      {rank.code}
-                    </div>
-                    <div>
-                      <div style={{ fontFamily: "var(--font-rajdhani), sans-serif", fontWeight: 700, fontSize: "18px" }}>{selected.name}</div>
-                      <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "var(--slate)", marginTop: "3px" }}>
-                        {selected.email} · {rank.title}
-                      </div>
-                    </div>
-                    <button type="button" onClick={() => setSelectedId(null)} style={{ marginLeft: "auto", width: "32px", height: "32px", borderRadius: "9px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.05)", color: "var(--slate)", border: "none", cursor: "pointer", flexShrink: 0 }}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
-                        <path d="M18 6 6 18M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </>
-                );
-              })()}
+          <div className={styles.drawerPanel}>
+            <div className={styles.drawerClose} onClick={() => setSelectedId(null)}>
+              ← Close
             </div>
+
+            {(() => {
+              const progress = getLevelProgress(selected.xp);
+              const rank = rankForLevel(progress.level);
+              return (
+                <div className={styles.hunterHeader}>
+                  <div
+                    className={styles.hunterAvatarLg}
+                    style={{ color: rank.color, border: `1px solid ${rank.color}`, background: "rgba(79,216,255,0.1)" }}
+                  >
+                    {rank.code}
+                  </div>
+                  <div>
+                    <div className={styles.hunterHeaderName}>{selected.name}</div>
+                    <div className={styles.hunterHeaderEmail}>
+                      {selected.email} · {rank.title}
+                    </div>
+                    <span className={`${styles.statusTag} ${selected.locked ? styles.locked : styles.active}`} style={{ marginTop: "6px" }}>
+                      {selected.locked ? "Locked" : "Active"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
 
             {(() => {
               const progress = getLevelProgress(selected.xp);
@@ -200,46 +186,48 @@ export function HuntersManager({ hunters: initial }: { hunters: Hunter[] }) {
                 { v: progress.level, l: "Level" },
                 { v: selected.streak, l: "Streak" },
                 { v: selected.xp.toLocaleString("en-IN"), l: "Total XP" },
-                { v: selected.questCount, l: "Quests done" },
-                { v: `₹${selected.walletCredit}`, l: "Wallet credit" },
+                { v: selected.questCount, l: "Quests Done" },
+                { v: `₹${selected.walletCredit}`, l: "Wallet" },
               ];
               return (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "20px" }}>
+                <div className={styles.statsRow} style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "var(--sp-5)" }}>
                   {chips.map((c) => (
-                    <div key={c.l} style={{ background: "var(--panel)", border: "1px solid var(--border)", borderRadius: "10px", padding: "12px", textAlign: "center" }}>
-                      <div style={{ fontFamily: "var(--font-rajdhani), sans-serif", fontWeight: 700, fontSize: "16px" }}>{c.v}</div>
-                      <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "8.5px", color: "var(--slate)", letterSpacing: "0.04em", textTransform: "uppercase", marginTop: "3px" }}>{c.l}</div>
+                    <div key={c.l} className={styles.statCard} style={{ textAlign: "center" }}>
+                      <div className={styles.statNum} style={{ fontSize: "17px" }}>{c.v}</div>
+                      <div className={styles.statLbl}>{c.l}</div>
                     </div>
                   ))}
                 </div>
               );
             })()}
 
-            <span className={styles.secLabel}>Actions</span>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-              <button type="button" onClick={() => setPanel(panel === "xp" ? "none" : "xp")} style={actionBtnStyle()}>
+            <span className={styles.secLabel}>
+              <span className={styles.dot} />Actions
+            </span>
+            <div className={styles.actionGrid}>
+              <button type="button" onClick={() => setPanel(panel === "xp" ? "none" : "xp")} className={styles.actionBtn}>
                 Adjust XP / Level
               </button>
-              <button type="button" onClick={loadHistory} style={actionBtnStyle()}>
-                View quest history
+              <button type="button" onClick={loadHistory} className={styles.actionBtn}>
+                View Quest History
               </button>
-              <button type="button" onClick={doToggleLock} style={actionBtnStyle("warn")}>
-                {selected.locked ? "Force unlock account" : "Manually lock account"}
+              <button type="button" onClick={doToggleLock} className={`${styles.actionBtn} ${styles.warn}`}>
+                {selected.locked ? "Force Unlock Account" : "Manually Lock Account"}
               </button>
-              <button type="button" onClick={doResetStreak} style={actionBtnStyle("warn")}>
-                Reset streak
+              <button type="button" onClick={doResetStreak} className={`${styles.actionBtn} ${styles.warn}`}>
+                Reset Streak
               </button>
             </div>
 
             {note && (
-              <div style={{ marginTop: "12px", padding: "10px 13px", borderRadius: "9px", background: "rgba(255,77,94,.08)", border: "1px solid rgba(255,77,94,.35)", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11.5px", color: "#ffb3ba" }}>
+              <div style={{ marginTop: "12px", padding: "10px 13px", background: "rgba(255,77,94,.08)", border: "1px solid rgba(255,77,94,.35)", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11.5px", color: "#ffb3ba" }}>
                 {note}
               </div>
             )}
 
             {panel === "xp" && (
               <div style={{ marginTop: "12px" }}>
-                <div className={styles.card} style={{ padding: "16px" }}>
+                <div className={styles.panelBox} style={{ padding: "16px" }}>
                   <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
                     <div style={{ flex: 1 }}>
                       <span className={styles.fieldLabel}>Level</span>
@@ -259,16 +247,16 @@ export function HuntersManager({ hunters: initial }: { hunters: Hunter[] }) {
 
             {panel === "history" && (
               <div style={{ marginTop: "12px" }}>
-                <div className={styles.card} style={{ padding: "16px" }}>
+                <div className={styles.panelBox} style={{ padding: "16px" }}>
                   {history.length === 0 ? (
                     <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11.5px", color: "var(--slate)" }}>
                       No completions yet.
                     </div>
                   ) : (
                     history.map((h) => (
-                      <div key={h.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px" }}>
+                      <div key={h.id} className={styles.rowDashed} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0" }}>
                         <span style={{ color: "var(--ice)", fontFamily: "var(--font-body), sans-serif", fontSize: "12.5px" }}>{h.title}</span>
-                        <span style={{ color: "var(--blue-2)", flexShrink: 0 }}>+{h.xpAwarded}</span>
+                        <span style={{ color: "var(--blue)", flexShrink: 0 }}>+{h.xpAwarded}</span>
                       </div>
                     ))
                   )}
@@ -280,19 +268,4 @@ export function HuntersManager({ hunters: initial }: { hunters: Hunter[] }) {
       )}
     </>
   );
-}
-
-function actionBtnStyle(variant?: "warn"): React.CSSProperties {
-  return {
-    padding: "12px 10px",
-    borderRadius: "10px",
-    border: `1px solid ${variant === "warn" ? "rgba(255,184,79,.4)" : "var(--border-strong)"}`,
-    fontFamily: "var(--font-rajdhani), sans-serif",
-    fontWeight: 600,
-    fontSize: "12.5px",
-    textAlign: "center",
-    background: variant === "warn" ? "rgba(255,184,79,.06)" : "rgba(79,157,255,.06)",
-    color: variant === "warn" ? "var(--amber)" : "var(--ice)",
-    cursor: "pointer",
-  };
 }

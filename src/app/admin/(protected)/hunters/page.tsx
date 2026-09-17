@@ -45,22 +45,29 @@ export default async function AdminHuntersPage() {
 
   return (
     <>
-      <div className={styles.metricGrid}>
-        <div className={`${styles.card} ${styles.metric}`} style={{ textAlign: "center" }}>
-          <div className={styles.metricVal}>{hunters.length}</div>
-          <div className={styles.metricLbl}>Total Hunters</div>
+      <div className={styles.topbar}>
+        <div>
+          <div className={styles.topbarTitle}>Hunters</div>
+          <div className={styles.topbarSub}>{hunters.length.toLocaleString("en-IN")} registered · search and manage accounts</div>
         </div>
-        <div className={`${styles.card} ${styles.metric}`} style={{ textAlign: "center" }}>
-          <div className={styles.metricVal}>{activeCount}</div>
-          <div className={styles.metricLbl}>Active</div>
+      </div>
+
+      <div className={styles.statsRow}>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.cyan}`}>{hunters.length}</div>
+          <div className={styles.statLbl}>Total Hunters</div>
         </div>
-        <div className={`${styles.card} ${styles.metric}`} style={{ textAlign: "center" }}>
-          <div className={styles.metricVal}>{lockedCount}</div>
-          <div className={styles.metricLbl}>Currently locked</div>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.green}`}>{activeCount}</div>
+          <div className={styles.statLbl}>Active</div>
         </div>
-        <div className={`${styles.card} ${styles.metric}`} style={{ textAlign: "center" }}>
-          <div className={styles.metricVal}>{avgStreak}</div>
-          <div className={styles.metricLbl}>Avg streak (days)</div>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.danger}`}>{lockedCount}</div>
+          <div className={styles.statLbl}>Locked</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.gold}`}>{avgStreak}</div>
+          <div className={styles.statLbl}>Avg Streak (Days)</div>
         </div>
       </div>
 
