@@ -479,6 +479,116 @@
   background: rgba(255, 184, 79, 0.12);
 }
 
+.breqRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 20px;
+  border-bottom: 1px dashed var(--border);
+}
+.breqRow:last-child {
+  border-bottom: none;
+}
+.breqInfo {
+  flex: 1;
+  min-width: 0;
+}
+.breqTitle {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.breqDesc {
+  font-family: var(--font-body), sans-serif;
+  font-size: 12.5px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+.breqMeta {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+  margin-top: 6px;
+}
+.statusSelect {
+  flex: 0 0 auto;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  padding: 8px 10px;
+  background: var(--void);
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.statusSelect.open {
+  color: var(--gold);
+  border-color: rgba(245, 197, 66, 0.4);
+}
+.statusSelect.progress {
+  color: var(--violet);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+.statusSelect.fixed {
+  color: var(--green);
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+.lowerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-6);
+}
+@media (max-width: 900px) {
+  .lowerGrid {
+    grid-template-columns: 1fr;
+  }
+}
+.breakdownRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px dashed var(--border);
+}
+.breakdownRow:last-child {
+  border-bottom: none;
+}
+.breakdownK {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+}
+.breakdownDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.breakdownDot.green {
+  background: var(--green);
+}
+.breakdownDot.amber {
+  background: var(--amber);
+}
+.breakdownDot.danger {
+  background: var(--red);
+}
+.breakdownV {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12.5px;
+  color: var(--slate);
+}
+.breakdownV b {
+  color: var(--ice);
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+
 .metricGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

@@ -25,10 +25,19 @@ export default async function AdminBroadcastPage() {
 
   return (
     <>
+      <div className={styles.topbar}>
+        <div>
+          <div className={styles.topbarTitle}>Broadcast</div>
+          <div className={styles.topbarSub}>Send a notification to a hunter segment</div>
+        </div>
+      </div>
+
       <BroadcastForm />
 
       <section>
-        <span className={styles.secLabel}>Sent recently</span>
+        <span className={styles.secLabel}>
+          <span className={styles.dot} />Sent Recently
+        </span>
         {sent.length === 0 ? (
           <div className={styles.card} style={{ padding: "20px", textAlign: "center", color: "var(--slate)", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px" }}>
             No broadcasts sent yet.

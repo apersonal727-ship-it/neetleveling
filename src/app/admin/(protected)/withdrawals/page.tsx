@@ -15,7 +15,10 @@ function fmtDate(d: Date) {
 export default async function AdminWithdrawalsPage() {
   await requireAdminSession();
 
-  const [pending, paidHistory] = await Promise.all([
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [pending, paidHistory, paidThisMonthCount, totalPaidSum] = await Promise.all([
     prisma.withdrawalRequest.findMany({
       where: { status: "PENDING" },
       include: { profile: { select: { name: true, email: true } } },
@@ -27,10 +30,34 @@ export default async function AdminWithdrawalsPage() {
       orderBy: { paidAt: "desc" },
       take: 30,
     }),
+    prisma.withdrawalRequest.count({ where: { status: "PAID", paidAt: { gte: startOfMonth } } }),
+    prisma.withdrawalRequest.aggregate({ where: { status: "PAID" }, _sum: { amount: true } }),
   ]);
 
   return (
     <>
+      <div className={styles.topbar}>
+        <div>
+          <div className={styles.topbarTitle}>Withdrawals</div>
+          <div className={styles.topbarSub}>Every payout request — pending or paid</div>
+        </div>
+      </div>
+
+      <div className={styles.statsRow} style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.violet}`}>{pending.length}</div>
+          <div className={styles.statLbl}>Pending</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.cyan}`}>{paidThisMonthCount}</div>
+          <div className={styles.statLbl}>Paid This Month</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.gold}`}>₹{(totalPaidSum._sum.amount ?? 0).toLocaleString("en-IN")}</div>
+          <div className={styles.statLbl}>Total Paid Out</div>
+        </div>
+      </div>
+
       <WithdrawalsReview
         initialPending={pending.map((p) => ({
           id: p.id,
@@ -44,25 +71,19 @@ export default async function AdminWithdrawalsPage() {
       />
 
       <section>
-        <span className={styles.secLabel}>Paid history</span>
+        <span className={styles.secLabel}>
+          <span className={styles.dot} />Paid History
+        </span>
         {paidHistory.length === 0 ? (
-          <div className={styles.card} style={{ padding: "20px", textAlign: "center", color: "var(--slate)" }}>
+          <div className={styles.panelBox} style={{ padding: "20px", textAlign: "center", color: "var(--slate)" }}>
             No withdrawals paid yet.
           </div>
         ) : (
-          <div className={styles.card}>
+          <div className={styles.panelBox}>
             {paidHistory.map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "14px 16px",
-                  borderBottom: "1px solid var(--border)",
-                }}
-              >
+              <div key={p.id} className={styles.rowDashed} style={{ display: "flex", justifyContent: "space-between" }}>
                 <div>
-                  <div style={{ fontSize: "13px", fontWeight: 600 }}>{p.profile.name}</div>
+                  <div style={{ fontFamily: "var(--font-rajdhani), sans-serif", fontWeight: 700, fontSize: "14.5px" }}>{p.profile.name}</div>
                   <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10.5px", color: "var(--slate)", marginTop: "3px" }}>
                     {p.payeeName} · paid {p.paidAt ? fmtDate(p.paidAt) : "—"}
                   </div>

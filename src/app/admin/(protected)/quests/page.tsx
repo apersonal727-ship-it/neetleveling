@@ -39,8 +39,17 @@ export default async function AdminQuestsPage() {
 
   return (
     <>
+      <div className={styles.topbar}>
+        <div>
+          <div className={styles.topbarTitle}>Quests</div>
+          <div className={styles.topbarSub}>Deploy quests and manage the default daily templates</div>
+        </div>
+      </div>
+
       <section>
-        <span className={styles.secLabel}>Deploy a quest</span>
+        <span className={styles.secLabel}>
+          <span className={styles.dot} />Deploy A Quest
+        </span>
         <DeployQuestForm hunters={hunters} />
       </section>
 

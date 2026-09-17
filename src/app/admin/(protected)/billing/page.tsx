@@ -43,6 +43,32 @@ export default async function AdminBillingPage() {
 
   return (
     <>
+      <div className={styles.topbar}>
+        <div>
+          <div className={styles.topbarTitle}>Billing</div>
+          <div className={styles.topbarSub}>Automated Cashfree payments and transaction history</div>
+        </div>
+      </div>
+
+      <div className={styles.statsRow}>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.green}`}>₹{(collected._sum.amount ?? 0).toLocaleString("en-IN")}</div>
+          <div className={styles.statLbl}>Collected</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statNum}>{successCount}</div>
+          <div className={styles.statLbl}>Successful Charges</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.danger}`}>{failedCount}</div>
+          <div className={styles.statLbl}>Failed Payments</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={`${styles.statNum} ${styles.gold}`}>{refundedCount}</div>
+          <div className={styles.statLbl}>Refunds Issued</div>
+        </div>
+      </div>
+
       <PendingPaymentsReview
         initialPending={pendingPayments.map((p) => ({
           id: p.id,
@@ -55,31 +81,9 @@ export default async function AdminBillingPage() {
       />
 
       <section>
-        <span className={styles.secLabel}>This month</span>
-        <div className={styles.metricGrid}>
-          <div className={`${styles.card} ${styles.metric}`}>
-            <div className={styles.metricVal} style={{ color: "var(--green)" }}>
-              ₹{(collected._sum.amount ?? 0).toLocaleString("en-IN")}
-            </div>
-            <div className={styles.metricLbl}>Collected</div>
-          </div>
-          <div className={`${styles.card} ${styles.metric}`}>
-            <div className={styles.metricVal}>{successCount}</div>
-            <div className={styles.metricLbl}>Successful charges</div>
-          </div>
-          <div className={`${styles.card} ${styles.metric}`}>
-            <div className={styles.metricVal} style={{ color: "var(--red)" }}>{failedCount}</div>
-            <div className={styles.metricLbl}>Failed payments</div>
-          </div>
-          <div className={`${styles.card} ${styles.metric}`}>
-            <div className={styles.metricVal} style={{ color: "var(--amber)" }}>{refundedCount}</div>
-            <div className={styles.metricLbl}>Refunds issued</div>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <span className={styles.secLabel}>Transactions</span>
+        <span className={styles.secLabel}>
+          <span className={styles.dot} />Transactions
+        </span>
         <AdminTransactionList
           transactions={transactions.map((t) => ({
             id: t.id,

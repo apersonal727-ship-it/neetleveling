@@ -77,6 +77,38 @@ export async function getCompletionRateTrend(days = 30) {
   return results;
 }
 
+export async function getSubscriptionBreakdown() {
+  const [active, lapsed, cancelled] = await Promise.all([
+    prisma.profile.count({ where: { subscriptionStatus: "ACTIVE" } }),
+    prisma.profile.count({ where: { subscriptionStatus: "EXPIRED" } }),
+    prisma.profile.count({ where: { subscriptionStatus: "CANCELED" } }),
+  ]);
+  const total = active + lapsed + cancelled;
+  const pct = (n: number) => (total > 0 ? Math.round((n / total) * 1000) / 10 : 0);
+  return {
+    active: { count: active, pct: pct(active) },
+    lapsed: { count: lapsed, pct: pct(lapsed) },
+    cancelled: { count: cancelled, pct: pct(cancelled) },
+  };
+}
+
+// Sums existing WalletTransaction rows by kind — no new schema, just a
+// different grouping of data the referral/withdrawal flows already write.
+export async function getReferralProgramCost() {
+  const [issued, withdrawn, applied, referredCount] = await Promise.all([
+    prisma.walletTransaction.aggregate({ where: { kind: "REFERRAL_CREDIT" }, _sum: { amount: true } }),
+    prisma.walletTransaction.aggregate({ where: { kind: "WITHDRAWAL_REQUESTED" }, _sum: { amount: true } }),
+    prisma.walletTransaction.aggregate({ where: { kind: "BILL_APPLIED" }, _sum: { amount: true } }),
+    prisma.profile.count({ where: { referredByCode: { not: null } } }),
+  ]);
+  return {
+    totalIssued: issued._sum.amount ?? 0,
+    totalWithdrawn: Math.abs(withdrawn._sum.amount ?? 0),
+    totalApplied: Math.abs(applied._sum.amount ?? 0),
+    referredCount,
+  };
+}
+
 export async function getSignupFunnel() {
   const totalProfiles = await prisma.profile.count();
   const everUnlocked = await prisma.profile.count({
