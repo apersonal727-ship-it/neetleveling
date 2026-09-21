@@ -27,6 +27,17 @@ const FEED_CITIES = [
   "Coimbatore", "Nashik", "Varanasi", "Amritsar", "Raipur",
 ];
 
+// The homepage's "hunters have already joined" counter is entirely fake —
+// real signups are still ~0 pre-launch. This is the single formula behind
+// it (see the "hunter counter" effect below): a fixed baseline that climbs
+// by a steady tick, computed purely from wall-clock time so it's always
+// identical across every device/tab with zero chance of it "freezing" —
+// there's nothing here that can fail. If this number is ever shown
+// anywhere else on the site, reuse this exact formula rather than a new one.
+const VANITY_BASE = 10_483;
+const VANITY_EPOCH = new Date("2026-09-21T08:56:19Z").getTime();
+const VANITY_MS_PER_INCREMENT = 15_000; // ~1 new "hunter" every 15s
+
 const QUEST_STEPS = [
   {
     num: "01 // QUEST",
@@ -307,25 +318,24 @@ export function HomeContent() {
     }
 
     // ---- hunter counter ----
-    // The number itself (unlike the feed above) is never faked client-side.
-    // It comes from /api/hunter-count, a single deterministic source shared
-    // by anything else on the site that ever needs to show this same
-    // figure, so it can never disagree with itself from one place to
-    // another — see that route for how the number is derived.
+    // Entirely fake, on purpose — real signups are still ~0 pre-launch, and
+    // this number exists purely to read as active/growing (FOMO). It's a
+    // pure function of wall-clock time (no fetch, no DB, nothing that can
+    // fail or "freeze"), so it's automatically identical on every device
+    // and every tab at any given instant, and if this same figure is ever
+    // shown anywhere else on the site later, that spot should compute it
+    // with this exact formula rather than invent its own number.
     const counterEl = root.querySelector<HTMLSpanElement>("#feedCounter");
     if (counterEl) {
-      async function pollHunterCount() {
-        try {
-          const res = await fetch("/api/hunter-count");
-          if (!res.ok) return;
-          const data: { total: number } = await res.json();
-          if (counterEl) counterEl.textContent = data.total.toLocaleString("en-IN");
-        } catch {
-          // network hiccup on a marketing page — keep the last known value
-        }
+      function currentVanityCount() {
+        const elapsed = Math.max(0, Math.floor((Date.now() - VANITY_EPOCH) / VANITY_MS_PER_INCREMENT));
+        return VANITY_BASE + elapsed;
       }
-      pollHunterCount();
-      const countInterval = window.setInterval(pollHunterCount, 6000);
+      const renderCount = () => {
+        if (counterEl) counterEl.textContent = currentVanityCount().toLocaleString("en-IN");
+      };
+      renderCount();
+      const countInterval = window.setInterval(renderCount, 1000);
       track(() => window.clearInterval(countInterval));
     }
 
