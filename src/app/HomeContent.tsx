@@ -28,15 +28,11 @@ const FEED_CITIES = [
 ];
 
 // The homepage's "hunters have already joined" counter is entirely fake —
-// real signups are still ~0 pre-launch. This is the single formula behind
-// it (see the "hunter counter" effect below): a fixed baseline that climbs
-// by a steady tick, computed purely from wall-clock time so it's always
-// identical across every device/tab with zero chance of it "freezing" —
-// there's nothing here that can fail. If this number is ever shown
-// anywhere else on the site, reuse this exact formula rather than a new one.
+// real signups are still ~0 pre-launch. It starts here and climbs by
+// exactly 1 every time a new row appears in the live feed below (see the
+// "hunter counter" / "live activity feed" effects), so the two can never
+// visibly drift out of sync with each other.
 const VANITY_BASE = 10_483;
-const VANITY_EPOCH = new Date("2026-09-21T08:56:19Z").getTime();
-const VANITY_MS_PER_INCREMENT = 15_000; // ~1 new "hunter" every 15s
 
 const QUEST_STEPS = [
   {
@@ -241,12 +237,30 @@ export function HomeContent() {
     const timeouts: number[] = [];
     const track = (fn: () => void) => cleanups.push(fn);
 
+    // ---- hunter counter ----
+    // Entirely fake, on purpose — real signups are still ~0 pre-launch, and
+    // this number exists purely to read as active/growing (FOMO). It's
+    // deliberately coupled 1:1 to the feed below: every time a new
+    // (non-backdated) row appears there, this bumps by exactly 1 at that
+    // same instant, so the two can never visibly drift apart the way they
+    // did when each ran on its own independent clock.
+    const counterEl = root.querySelector<HTMLSpanElement>("#feedCounter");
+    let liveCount = VANITY_BASE;
+    function renderCount() {
+      if (counterEl) counterEl.textContent = liveCount.toLocaleString("en-IN");
+    }
+    function bumpCounter() {
+      liveCount += 1;
+      renderCount();
+    }
+    renderCount();
+
     // ---- live activity feed ----
     // Every row is anonymized on purpose — a real hunter's join is never
     // distinguishable from a simulated one here, so nobody can tell whether
-    // their own signup did or didn't show up. Only the counter above (see
-    // the hunter-count poll below) carries an honest, real-derived number;
-    // this list is pure ambient motion.
+    // their own signup did or didn't show up. The 8 backdated rows seeded
+    // below represent joins already folded into VANITY_BASE, so only rows
+    // added afterward (see scheduleFeed) bump the counter.
     function maskToken(token: string) {
       return token[0] + "•".repeat(Math.max(2, token.length - 1));
     }
@@ -301,6 +315,7 @@ export function HomeContent() {
       let feedTimeoutId: number;
       const scheduleFeed = () => {
         addFeedRow(false);
+        bumpCounter();
         feedTimeoutId = window.setTimeout(scheduleFeed, 2200 + Math.random() * 2600);
       };
       feedTimeoutId = window.setTimeout(scheduleFeed, 1800);
@@ -315,28 +330,6 @@ export function HomeContent() {
         });
       }, 15000);
       track(() => window.clearInterval(labelInterval));
-    }
-
-    // ---- hunter counter ----
-    // Entirely fake, on purpose — real signups are still ~0 pre-launch, and
-    // this number exists purely to read as active/growing (FOMO). It's a
-    // pure function of wall-clock time (no fetch, no DB, nothing that can
-    // fail or "freeze"), so it's automatically identical on every device
-    // and every tab at any given instant, and if this same figure is ever
-    // shown anywhere else on the site later, that spot should compute it
-    // with this exact formula rather than invent its own number.
-    const counterEl = root.querySelector<HTMLSpanElement>("#feedCounter");
-    if (counterEl) {
-      function currentVanityCount() {
-        const elapsed = Math.max(0, Math.floor((Date.now() - VANITY_EPOCH) / VANITY_MS_PER_INCREMENT));
-        return VANITY_BASE + elapsed;
-      }
-      const renderCount = () => {
-        if (counterEl) counterEl.textContent = currentVanityCount().toLocaleString("en-IN");
-      };
-      renderCount();
-      const countInterval = window.setInterval(renderCount, 1000);
-      track(() => window.clearInterval(countInterval));
     }
 
     // ---- typewriter system window ----
