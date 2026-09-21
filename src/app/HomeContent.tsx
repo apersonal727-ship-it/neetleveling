@@ -26,7 +26,6 @@ const FEED_CITIES = [
   "Nagpur", "Jaipur", "Kolkata", "Surat", "Delhi", "Chandigarh", "Bhubaneswar",
   "Coimbatore", "Nashik", "Varanasi", "Amritsar", "Raipur",
 ];
-const FEED_TIMES = ["Just now", "2m ago", "6m ago", "14m ago", "23m ago", "41m ago", "1h ago"];
 
 const QUEST_STEPS = [
   {
@@ -129,13 +128,16 @@ const PRICE_HIGHLIGHTS = [
   },
 ];
 
-const UPCOMING_FEATURES = [
-  { title: "Hunter Profiles", desc: "Public profiles showing another Hunter's rank, level, XP, streak, and prep stats." },
-  { title: "Follow & Following", desc: "Follow other Hunters and keep track of the ones you follow. No friend requests." },
-  { title: "Hunter Chat", desc: "A social feed to share updates, discuss prep, and celebrate progress with other Hunters." },
-  { title: "Global Rankings", desc: "A leaderboard showing where you stand worldwide on System progression." },
-  { title: "Hunter-to-Hunter Messaging", desc: "Simple direct messages between Hunters. No groups, no clutter." },
-  { title: "Backlog Slayer", desc: "A systematic approach to absolutely slay your backlogs — down to the last task." },
+const RECRUIT_LADDER = [
+  { n: 1, lbl: "Hunter", amt: "₹20" },
+  { n: 5, lbl: "Hunters", amt: "₹100" },
+  { n: 10, lbl: "Hunters", amt: "₹200" },
+  { n: 25, lbl: "Hunters", amt: "₹500" },
+  { n: 50, lbl: "Hunters", amt: "₹1,000" },
+  { n: 100, lbl: "Hunters", amt: "₹2,000" },
+  { n: 200, lbl: "Hunters", amt: "₹4,000" },
+  { n: 500, lbl: "Hunters", amt: "₹10,000" },
+  { n: 1000, lbl: "Hunters", amt: "₹20,000" },
 ];
 
 const FAQS = [
@@ -187,12 +189,12 @@ const FAQS = [
     ),
   },
   {
-    q: "Why is the price changing to ₹129 from Nov 1?",
+    q: "Is the price going up when Hunter's World launches?",
     a: (
       <>
-        ₹129/month becomes the <b>one and only price</b> starting Nov 1, 2026 — not a second bill on top of ₹99.
-        It&apos;s the same one plan, full System access, with <span className={styles.cyan}>The Hunter&apos;s World</span> included.
-        ₹99/month is available only until the switch.
+        No. <b>₹99/month stays ₹99/month</b> — <span className={styles.cyan}>The Hunter&apos;s World</span> launches
+        Nov 1, 2026 as part of the same plan you&apos;re already on. No second bill, no price change, no extra
+        payment.
       </>
     ),
   },
@@ -238,14 +240,35 @@ export function HomeContent() {
       };
     }
 
+    // Each row stores a real timestamp; its label is recomputed from actual
+    // elapsed time (see the interval below), so "Just now" is only ever true
+    // for the first minute, then it ages naturally instead of staying stuck.
+    const BACKDATE_OPTIONS_MS = [
+      2 * 3600_000, 5 * 3600_000, 9 * 3600_000, 15 * 3600_000,
+      22 * 3600_000, 30 * 3600_000, 38 * 3600_000, 46 * 3600_000,
+    ];
+    function formatTimeLabel(ts: number) {
+      const diffMs = Date.now() - ts;
+      const mins = Math.floor(diffMs / 60000);
+      if (mins < 1) return "Just now";
+      if (mins < 60) return `${mins}m ago`;
+      const d = new Date(ts);
+      const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const timeStr = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+      return `${dateStr} · ${timeStr}`;
+    }
+
     const feedList = root.querySelector<HTMLDivElement>("#feedList");
     function addFeedRow(initial: boolean) {
       if (!feedList) return;
       const ev = genFeedEvent();
       const row = document.createElement("div");
       row.className = `${styles.feedRow} ${styles.typeJoin}`;
-      const t = initial ? FEED_TIMES[Math.floor(Math.random() * FEED_TIMES.length)] : "Just now";
-      row.innerHTML = `<span class="${styles.fdot}"></span><span class="${styles.ftext}">${ev.html}</span><span class="${styles.ftime}">${t}</span>`;
+      const ts = initial
+        ? Date.now() - BACKDATE_OPTIONS_MS[Math.floor(Math.random() * BACKDATE_OPTIONS_MS.length)]
+        : Date.now();
+      row.dataset.ts = String(ts);
+      row.innerHTML = `<span class="${styles.fdot}"></span><span class="${styles.ftext}">${ev.html}</span><span class="${styles.ftime}">${formatTimeLabel(ts)}</span>`;
       feedList.prepend(row);
       while (feedList.children.length > 8) {
         feedList.removeChild(feedList.lastChild as ChildNode);
@@ -260,6 +283,16 @@ export function HomeContent() {
       };
       feedTimeoutId = window.setTimeout(scheduleFeed, 1800);
       track(() => window.clearTimeout(feedTimeoutId));
+
+      // periodically re-render every visible row's label from its real
+      // stored timestamp, so times keep aging instead of staying fixed
+      const labelInterval = window.setInterval(() => {
+        feedList.querySelectorAll<HTMLElement>(`.${styles.feedRow}`).forEach((row) => {
+          const timeEl = row.querySelector<HTMLElement>(`.${styles.ftime}`);
+          if (timeEl && row.dataset.ts) timeEl.textContent = formatTimeLabel(Number(row.dataset.ts));
+        });
+      }, 15000);
+      track(() => window.clearInterval(labelInterval));
     }
 
     // ---- typewriter system window ----
@@ -304,27 +337,8 @@ export function HomeContent() {
       track(() => window.clearTimeout(typeTimeoutId));
     }
 
-    // ---- live counter tick ----
-    const counterEl = root.querySelector<HTMLSpanElement>("#feedCounter");
-    if (counterEl) {
-      let base = 11270;
-      const counterInterval = window.setInterval(() => {
-        base += Math.floor(Math.random() * 3);
-        counterEl.textContent = base.toLocaleString();
-      }, 4200);
-      track(() => window.clearInterval(counterInterval));
-    }
-
-    // ---- upcoming feature-request counter ----
-    const upcomingEl = root.querySelector<HTMLSpanElement>("#upcomingCounter");
-    if (upcomingEl) {
-      let base = 8270;
-      const upcomingInterval = window.setInterval(() => {
-        base += Math.floor(Math.random() * 2);
-        upcomingEl.textContent = base.toLocaleString();
-      }, 5000);
-      track(() => window.clearInterval(upcomingInterval));
-    }
+    // Hunter count is static for now — no backend event stream to drive real
+    // increments yet, and a fake incrementing counter would be dishonest.
 
     // ---- countdown clock ----
     const clockEl = root.querySelector<HTMLDivElement>("#clockDisplay");
@@ -764,7 +778,13 @@ export function HomeContent() {
         <nav className={styles.nav}>
           <div className={styles.logo}>
             <span className={styles.logoMark} />
-            NEETLEVELING
+            <div className={styles.logoTextBlock}>
+              <div className={styles.logoMain}>
+                <span>NEETLeveling.in</span>
+                <span className={styles.logoTag}>— THE SYSTEM</span>
+              </div>
+              <div className={styles.logoSub}>A Discipline Mastery System</div>
+            </div>
           </div>
           <button type="button" className={styles.navCta} onClick={() => scrollToId("pricing")}>
             <span className={styles.navCtaFull}>Activate System — ₹99/mo</span>
@@ -808,15 +828,11 @@ export function HomeContent() {
                 </span>
               </div>
               <div className={styles.feedStat}>
-                <div className={styles.feedStatNum}>
-                  <span id="feedCounter">11,270</span>+
+                <div className={`${styles.feedStatNum} ${styles.liveBlink}`}>
+                  <span className={styles.liveDot} />
+                  <span id="feedCounter">10,483</span>
                 </div>
                 <div className={styles.feedStatLabel}>Hunters have already entered the System</div>
-                <div className={styles.feedStatRate}>
-                  ≈ 2–8 new Hunters are joining the System every hour.
-                  <br />
-                  What are you waiting for? ⚔️🔥
-                </div>
               </div>
               <div className={styles.feedList} id="feedList" />
             </div>
@@ -1201,8 +1217,9 @@ export function HomeContent() {
               Full System.
             </h2>
           </div>
-          <div className={styles.pricingGrid}>
-            <div className={styles.priceCard}>
+
+          <div className={styles.priceCardH}>
+            <div className={styles.priceCardHLeft}>
               <div className={styles.plan}>
                 <span className={styles.priceLiveDot} />
                 Active Now
@@ -1211,11 +1228,22 @@ export function HomeContent() {
                 ₹99<span>/month</span>
               </div>
               <div className={styles.priceTagline}>One plan. Full System access.</div>
-              <ul>
+              <Link href="/signup" className={styles.btnPrimary} style={{ width: "100%", display: "block" }}>
+                Activate The System
+              </Link>
+              <div className={styles.priceFine}>
+                No complicated plans. No content library you don&apos;t need. Just the System.
+              </div>
+            </div>
+
+            <div className={styles.priceCardHDivider} />
+
+            <div className={styles.priceCardHRight}>
+              <div className={styles.priceFeaturesGrid}>
                 {PRICE_FEATURES.map((f) => (
-                  <li key={f}>{f}</li>
+                  <div key={f}>{f}</div>
                 ))}
-              </ul>
+              </div>
               <div className={styles.priceHighlights}>
                 {PRICE_HIGHLIGHTS.map((h, i) => (
                   <div key={h.title} className={styles.phItem}>
@@ -1227,132 +1255,68 @@ export function HomeContent() {
                   </div>
                 ))}
               </div>
-              <Link href="/signup" className={styles.btnPrimary} style={{ width: "100%", display: "block" }}>
-                Activate The System
-              </Link>
-              <div className={styles.priceFine}>
-                No complicated plans. No content library you don&apos;t need. Just the System.
-              </div>
-            </div>
-
-            <div className={styles.upcomingCard}>
-              <div className={styles.plan}>
-                <span className={styles.upcomingLiveDot} />
-                Here&apos;s What&apos;s Upcoming
-              </div>
-              <div className={styles.upcomingTitle}>
-                <span className={styles.accent}>
-                  <span id="upcomingCounter">8,270</span>+
-                </span>{" "}
-                Hunters Asked.
-                <br />
-                The System Listened.
-              </div>
-              <div className={styles.upcomingTagline}>
-                Out of thousands of <b>feature requests</b>, these are the ones the majority asked to see next.
-              </div>
-              <div className={styles.upcomingList}>
-                {UPCOMING_FEATURES.map((f, i) => (
-                  <div key={f.title} className={styles.ufItem}>
-                    <span className={styles.ufNum}>{String(i + 1).padStart(2, "0")}</span>
-                    <div>
-                      <div className={styles.ufTitle}>{f.title}</div>
-                      <div className={styles.ufDesc}>{f.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className={styles.upcomingFoot}>
-                <div className={styles.ufStatus}>
-                  <span className={styles.ufStatusDot} />
-                  Currently in development
-                </div>
-                <div className={styles.ufMeta}>
-                  <span>
-                    Launches <b>Nov 1, 2026</b>
-                  </span>
-                  <span className={styles.ufDivider} />
-                  <span>
-                    <b>₹129</b>/month
-                  </span>
-                </div>
-                <div className={styles.ufPerday}>That&apos;s basically, ₹4.30 a day. Less than your evening chai.</div>
-                <div className={styles.ufVote}>
-                  Priced at what the majority of Hunters voted they&apos;d happily pay for it — not a number we
-                  picked ourselves.
-                </div>
-                <div className={styles.ufCodename}>
-                  System Codename: <b>The Hunter&apos;s World</b>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.priceTransition}>
-            <div className={styles.ptBadge}>Quick Clarification</div>
-            <h3>
-              A Lot Of You Asked
-              <br />
-              About This.
-            </h3>
-            <p className={styles.ptSub}>No, ₹129 isn&apos;t a second bill alongside ₹99.</p>
-
-            <div className={styles.ptFlow}>
-              <div className={`${styles.ptFlowItem} ${styles.old}`}>
-                <div className={styles.ptFlowAmount}>₹99</div>
-                <div className={styles.ptFlowLabel}>Current Price</div>
-              </div>
-              <div className={styles.ptFlowArrow}>→</div>
-              <div className={`${styles.ptFlowItem} ${styles.new}`}>
-                <div className={styles.ptFlowAmount}>₹129</div>
-                <div className={styles.ptFlowLabel}>From Nov 1, 2026</div>
-              </div>
-            </div>
-
-            <div className={styles.ptExplain}>
-              <p>The System has always been one plan with full access — the current price is ₹99/month.</p>
-              <p>
-                From <b>Nov 1, 2026</b>, the price becomes ₹129/month, with <b>The Hunter&apos;s World</b>{" "}
-                included.
-              </p>
-            </div>
-
-            <div className={styles.ptOneline}>One plan. Full System access. One price.</div>
-
-            <div className={styles.ptNochange}>
-              <span>No add-ons</span>
-              <span className={styles.ptNcDot} />
-              <span>No second subscription</span>
-              <span className={styles.ptNcDot} />
-              <span>No extra payment</span>
             </div>
           </div>
         </section>
 
-        {/* REFERRAL */}
-        <section className={styles.section}>
+        {/* RECRUITMENT */}
+        <section className={`${styles.section} ${styles.recruitSection}`}>
           <div className={styles.secHead}>
-            <span className={styles.tag}>Bring A Friend</span>
-            <h2>Every Hunter You Refer Pays Toward Your Bill.</h2>
+            <span className={styles.tag}>Recruitment</span>
+            <h2>
+              Bring Hunters.
+              <br />
+              Get Paid.
+            </h2>
             <p>
-              Real feature, not a gimmick — refer someone, and the moment they activate the System for the
-              first time, you get credited automatically.
+              Every Hunter you recruit puts ₹20 in your wallet — credited the moment they sign up. No free tier
+              to abuse, no waiting period.
             </p>
           </div>
-          <div className={styles.referralCard}>
-            <div className={styles.referralAmount}>
-              ₹20<span>credit per referral</span>
+
+          <div className={styles.recruitCallout}>
+            <span className={styles.rcBadge}>Milestone Bonus</span>
+            <div className={styles.rcText}>
+              Refer <b>5 Hunters</b> — use the System free next month. Refer more, and you start actually
+              earning.
             </div>
-            <ul className={styles.referralList}>
-              <li>Credited the moment they complete their first month&apos;s payment</li>
-              <li>Applied automatically toward your own next ₹99 bill</li>
-              <li>Never cash — always a bill credit, nothing to withdraw</li>
-            </ul>
-            <Link href="/signup" className={styles.btnPrimary} style={{ display: "inline-block" }}>
-              Get Your Referral Code
-            </Link>
-            <div className={styles.referralFine}>
-              Your referral code and credit balance live in your Wallet once you&apos;re in.
+          </div>
+
+          <div className={styles.recruitLadder}>
+            <div className={styles.rlTrack} />
+            {RECRUIT_LADDER.map((r) => (
+              <div key={r.n} className={styles.rlItem}>
+                <div className={styles.rlNum}>{r.n}</div>
+                <div className={styles.rlLbl}>{r.lbl}</div>
+                <div className={styles.rlAmt}>{r.amt}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.recruitStats}>
+            <div className={styles.rsItem}>
+              <div className={styles.rsNum}>₹20</div>
+              <div className={styles.rsLbl}>
+                Per Hunter Recruited
+                <br />
+                Credited instantly on signup
+              </div>
+            </div>
+            <div className={styles.rsItem}>
+              <div className={styles.rsNum}>₹1,000</div>
+              <div className={styles.rsLbl}>
+                Withdrawal Unlock Threshold
+                <br />
+                Full balance, straight to UPI
+              </div>
+            </div>
+            <div className={styles.rsItem}>
+              <div className={styles.rsNum}>∞</div>
+              <div className={styles.rsLbl}>
+                No Referral Cap
+                <br />
+                Recruit as many Hunters as you want
+              </div>
             </div>
           </div>
         </section>
