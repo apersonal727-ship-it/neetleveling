@@ -231,12 +231,19 @@ export function HomeContent() {
     const track = (fn: () => void) => cleanups.push(fn);
 
     // ---- live activity feed ----
+    // Every row is anonymized on purpose — a real hunter's join is never
+    // distinguishable from a simulated one here, so nobody can tell whether
+    // their own signup did or didn't show up. Only the counter above (see
+    // the hunter-count poll below) carries an honest, real-derived number;
+    // this list is pure ambient motion.
+    function maskToken(token: string) {
+      return token[0] + "•".repeat(Math.max(2, token.length - 1));
+    }
     function genFeedEvent() {
       const name = FEED_NAMES[Math.floor(Math.random() * FEED_NAMES.length)];
       const city = FEED_CITIES[Math.floor(Math.random() * FEED_CITIES.length)];
       return {
-        type: "join",
-        html: `<b>Hunter ${name}</b> from ${city} just <span class="${styles.hl}">joined the System</span>`,
+        html: `<b>Hunter ${maskToken(name)}</b> from <span class="${styles.redacted}">${maskToken(city)}</span> just <span class="${styles.hl}">joined the System</span>`,
       };
     }
 
@@ -270,16 +277,23 @@ export function HomeContent() {
         feedList.removeChild(feedList.lastChild as ChildNode);
       }
     }
-    // Seeded placeholder history only — these 8 rows are not real hunters,
-    // just backdated flavor so the feed doesn't start empty. No more of
-    // these get added after this; see the real-signup poll below.
-    function addFakeSeedRow() {
+    function addFeedRow(backdated: boolean) {
       const ev = genFeedEvent();
-      const ts = Date.now() - BACKDATE_OPTIONS_MS[Math.floor(Math.random() * BACKDATE_OPTIONS_MS.length)];
+      const ts = backdated
+        ? Date.now() - BACKDATE_OPTIONS_MS[Math.floor(Math.random() * BACKDATE_OPTIONS_MS.length)]
+        : Date.now();
       appendRow(ev.html, ts);
     }
     if (feedList) {
-      for (let i = 0; i < 8; i++) addFakeSeedRow();
+      for (let i = 0; i < 8; i++) addFeedRow(true);
+
+      let feedTimeoutId: number;
+      const scheduleFeed = () => {
+        addFeedRow(false);
+        feedTimeoutId = window.setTimeout(scheduleFeed, 2200 + Math.random() * 2600);
+      };
+      feedTimeoutId = window.setTimeout(scheduleFeed, 1800);
+      track(() => window.clearTimeout(feedTimeoutId));
 
       // periodically re-render every visible row's label from its real
       // stored timestamp, so times keep aging instead of staying fixed
@@ -290,42 +304,29 @@ export function HomeContent() {
         });
       }, 15000);
       track(() => window.clearInterval(labelInterval));
+    }
 
-      // ---- real signups from here on ----
-      // Polls a small public endpoint for the most recently created
-      // profiles. The first response only primes the "already seen" set
-      // (so hunters who joined before this page loaded don't suddenly
-      // appear as "just joining"); every response after that prepends any
-      // genuinely new hunter with their real name, replacing the old fake
-      // "someone is joining right now" simulation entirely.
-      const seenHunterIds = new Set<string>();
-      let primed = false;
-      async function pollRealHunters() {
+    // ---- hunter counter ----
+    // The number itself (unlike the feed above) is never faked client-side.
+    // It comes from /api/hunter-count, a single deterministic source shared
+    // by anything else on the site that ever needs to show this same
+    // figure, so it can never disagree with itself from one place to
+    // another — see that route for how the number is derived.
+    const counterEl = root.querySelector<HTMLSpanElement>("#feedCounter");
+    if (counterEl) {
+      async function pollHunterCount() {
         try {
-          const res = await fetch("/api/recent-hunters");
+          const res = await fetch("/api/hunter-count");
           if (!res.ok) return;
-          const data: { hunters: { hunterId: string; name: string; createdAt: string }[] } = await res.json();
-          const fresh = data.hunters.filter((h) => !seenHunterIds.has(h.hunterId));
-          fresh.forEach((h) => seenHunterIds.add(h.hunterId));
-          if (!primed) {
-            primed = true;
-            return;
-          }
-          // oldest-first, so the most recent ends up on top after prepending
-          fresh
-            .slice()
-            .reverse()
-            .forEach((h) => {
-              const html = `<b>Hunter ${h.name}</b> just <span class="${styles.hl}">joined the System</span>`;
-              appendRow(html, new Date(h.createdAt).getTime());
-            });
+          const data: { total: number } = await res.json();
+          if (counterEl) counterEl.textContent = data.total.toLocaleString("en-IN");
         } catch {
-          // network hiccup on a marketing page — just try again next tick
+          // network hiccup on a marketing page — keep the last known value
         }
       }
-      pollRealHunters();
-      const pollInterval = window.setInterval(pollRealHunters, 20000);
-      track(() => window.clearInterval(pollInterval));
+      pollHunterCount();
+      const countInterval = window.setInterval(pollHunterCount, 25000);
+      track(() => window.clearInterval(countInterval));
     }
 
     // ---- typewriter system window ----
@@ -369,9 +370,6 @@ export function HomeContent() {
       type();
       track(() => window.clearTimeout(typeTimeoutId));
     }
-
-    // Hunter count is static for now — no backend event stream to drive real
-    // increments yet, and a fake incrementing counter would be dishonest.
 
     // ---- countdown clock ----
     const clockEl = root.querySelector<HTMLDivElement>("#clockDisplay");

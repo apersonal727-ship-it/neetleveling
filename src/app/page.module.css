@@ -532,6 +532,10 @@
 .feedRow .ftext .hl {
   color: var(--cyan);
 }
+.feedRow .ftext .redacted {
+  letter-spacing: 1px;
+  opacity: 0.7;
+}
 .feedRow .ftime {
   color: var(--text-dim);
   opacity: 0.55;
