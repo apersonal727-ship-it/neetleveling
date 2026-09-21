@@ -192,9 +192,9 @@ const FAQS = [
     q: "Is the price going up when Hunter's World launches?",
     a: (
       <>
-        No. <b>₹99/month stays ₹99/month</b> — <span className={styles.cyan}>The Hunter&apos;s World</span> launches
-        Nov 1, 2026 as part of the same plan you&apos;re already on. No second bill, no price change, no extra
-        payment.
+        No. <b>₹99/month stays ₹99/month</b> — <span className={styles.cyan}>The Hunter&apos;s World</span> ships
+        as part of the same plan you&apos;re already on, whenever it&apos;s ready. No second bill, no price
+        change, no extra payment.
       </>
     ),
   },
@@ -203,7 +203,7 @@ const FAQS = [
     a: (
       <>
         The System&apos;s next chapter — Hunter Profiles, Follow &amp; Following, Hunter Chat, Global Rankings,
-        direct messaging, and a live activity feed. Currently in development, targeting Nov 1, 2026.
+        direct messaging, and a live activity feed. Currently in development.
       </>
     ),
   },
