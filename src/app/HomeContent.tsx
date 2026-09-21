@@ -325,7 +325,7 @@ export function HomeContent() {
         }
       }
       pollHunterCount();
-      const countInterval = window.setInterval(pollHunterCount, 25000);
+      const countInterval = window.setInterval(pollHunterCount, 6000);
       track(() => window.clearInterval(countInterval));
     }
 
