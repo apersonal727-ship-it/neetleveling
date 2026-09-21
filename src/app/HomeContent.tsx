@@ -259,30 +259,27 @@ export function HomeContent() {
     }
 
     const feedList = root.querySelector<HTMLDivElement>("#feedList");
-    function addFeedRow(initial: boolean) {
+    function appendRow(html: string, ts: number) {
       if (!feedList) return;
-      const ev = genFeedEvent();
       const row = document.createElement("div");
       row.className = `${styles.feedRow} ${styles.typeJoin}`;
-      const ts = initial
-        ? Date.now() - BACKDATE_OPTIONS_MS[Math.floor(Math.random() * BACKDATE_OPTIONS_MS.length)]
-        : Date.now();
       row.dataset.ts = String(ts);
-      row.innerHTML = `<span class="${styles.fdot}"></span><span class="${styles.ftext}">${ev.html}</span><span class="${styles.ftime}">${formatTimeLabel(ts)}</span>`;
+      row.innerHTML = `<span class="${styles.fdot}"></span><span class="${styles.ftext}">${html}</span><span class="${styles.ftime}">${formatTimeLabel(ts)}</span>`;
       feedList.prepend(row);
       while (feedList.children.length > 8) {
         feedList.removeChild(feedList.lastChild as ChildNode);
       }
     }
+    // Seeded placeholder history only — these 8 rows are not real hunters,
+    // just backdated flavor so the feed doesn't start empty. No more of
+    // these get added after this; see the real-signup poll below.
+    function addFakeSeedRow() {
+      const ev = genFeedEvent();
+      const ts = Date.now() - BACKDATE_OPTIONS_MS[Math.floor(Math.random() * BACKDATE_OPTIONS_MS.length)];
+      appendRow(ev.html, ts);
+    }
     if (feedList) {
-      for (let i = 0; i < 8; i++) addFeedRow(true);
-      let feedTimeoutId: number;
-      const scheduleFeed = () => {
-        addFeedRow(false);
-        feedTimeoutId = window.setTimeout(scheduleFeed, 2200 + Math.random() * 2600);
-      };
-      feedTimeoutId = window.setTimeout(scheduleFeed, 1800);
-      track(() => window.clearTimeout(feedTimeoutId));
+      for (let i = 0; i < 8; i++) addFakeSeedRow();
 
       // periodically re-render every visible row's label from its real
       // stored timestamp, so times keep aging instead of staying fixed
@@ -293,6 +290,42 @@ export function HomeContent() {
         });
       }, 15000);
       track(() => window.clearInterval(labelInterval));
+
+      // ---- real signups from here on ----
+      // Polls a small public endpoint for the most recently created
+      // profiles. The first response only primes the "already seen" set
+      // (so hunters who joined before this page loaded don't suddenly
+      // appear as "just joining"); every response after that prepends any
+      // genuinely new hunter with their real name, replacing the old fake
+      // "someone is joining right now" simulation entirely.
+      const seenHunterIds = new Set<string>();
+      let primed = false;
+      async function pollRealHunters() {
+        try {
+          const res = await fetch("/api/recent-hunters");
+          if (!res.ok) return;
+          const data: { hunters: { hunterId: string; name: string; createdAt: string }[] } = await res.json();
+          const fresh = data.hunters.filter((h) => !seenHunterIds.has(h.hunterId));
+          fresh.forEach((h) => seenHunterIds.add(h.hunterId));
+          if (!primed) {
+            primed = true;
+            return;
+          }
+          // oldest-first, so the most recent ends up on top after prepending
+          fresh
+            .slice()
+            .reverse()
+            .forEach((h) => {
+              const html = `<b>Hunter ${h.name}</b> just <span class="${styles.hl}">joined the System</span>`;
+              appendRow(html, new Date(h.createdAt).getTime());
+            });
+        } catch {
+          // network hiccup on a marketing page — just try again next tick
+        }
+      }
+      pollRealHunters();
+      const pollInterval = window.setInterval(pollRealHunters, 20000);
+      track(() => window.clearInterval(pollInterval));
     }
 
     // ---- typewriter system window ----
