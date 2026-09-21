@@ -203,7 +203,7 @@ const FAQS = [
     a: (
       <>
         The System&apos;s next chapter — Hunter Profiles, Follow &amp; Following, Hunter Chat, Global Rankings,
-        direct messaging, and a live activity feed. Currently in development.
+        direct messaging, and a live activity feed.
       </>
     ),
   },
