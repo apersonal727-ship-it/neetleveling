@@ -293,15 +293,18 @@ export function HomeContent() {
     // Each row stores a real timestamp; its label is recomputed from actual
     // elapsed time (see the interval below), so "Just now" is only ever true
     // for the first minute, then it ages naturally instead of staying stuck.
+    // Always relative ("Xm/Xh/Xd ago"), never a calendar date — a visitor
+    // next month should see "minutes ago", not a date that quietly proves
+    // the whole feed is fake, no matter how long a tab happens to sit idle.
     function formatTimeLabel(ts: number) {
       const diffMs = Date.now() - ts;
       const mins = Math.floor(diffMs / 60000);
       if (mins < 1) return "Just now";
       if (mins < 60) return `${mins}m ago`;
-      const d = new Date(ts);
-      const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-      const timeStr = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-      return `${dateStr} · ${timeStr}`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      return `${days}d ago`;
     }
 
     const feedList = root.querySelector<HTMLDivElement>("#feedList");
