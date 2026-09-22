@@ -32,9 +32,11 @@ const VANITY_BASE = 10_483;
 const VANITY_EPOCH = new Date("2026-09-22T14:22:25Z").getTime();
 
 // A repeating cycle of gaps (ms) between ticks, not a single fixed
-// interval — a perfectly even "every 4.000s" beat reads as an obvious
-// loop to anyone watching for a bit. Averages to ~3.9s/tick.
-const TICK_CYCLE_MS = [2200, 4800, 3100, 5600, 2700, 4200, 3600, 5100];
+// interval — a perfectly even beat reads as an obvious loop to anyone
+// watching for a bit. Averages ~2.9min/tick, i.e. ~500 new "hunters"/day —
+// ~25K after a month, ~100K after 6 months. Believable growth, not the
+// ~4s/tick pace this used to run at (which would hit ~670K in a month).
+const TICK_CYCLE_MS = [95_000, 210_000, 135_000, 245_000, 118_000, 183_000, 158_000, 248_000];
 const TICK_CYCLE_TOTAL_MS = TICK_CYCLE_MS.reduce((a, b) => a + b, 0);
 
 // How many ticks have fired since VANITY_EPOCH, as of `nowMs` — O(cycle
