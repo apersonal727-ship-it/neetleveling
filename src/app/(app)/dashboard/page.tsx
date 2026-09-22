@@ -112,7 +112,7 @@ export default async function DashboardPage({
               <span className={styles.secTitle}>Quest Log</span>
               {todaysQuests.length > 0 && (
                 <span className={styles.questDur}>
-                  {doneCount} / {todaysQuests.length} complete
+                  <b>{doneCount}</b> / {todaysQuests.length} complete
                 </span>
               )}
             </div>

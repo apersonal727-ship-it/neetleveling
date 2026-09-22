@@ -4,7 +4,6 @@ import { getLevelProgress } from "@/lib/rank";
 import { questDayEnd, questDayStart } from "@/lib/quest-day";
 import { getOpenMandatoryQuests } from "@/lib/open-quests";
 import { LOCKOUT_EXEMPT_EMAILS } from "@/lib/lockout";
-import { FlameIcon } from "@/components/icons/FlameIcon";
 import { BottomTabbar } from "@/components/app/BottomTabbar";
 import { SideNav } from "@/components/app/SideNav";
 import { DailyCountdown } from "@/components/app/DailyCountdown";
@@ -42,8 +41,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </span>
           <div className={styles.headerRight}>
             <div className={styles.userChip}>
+              <span className={styles.headerMark} />
               {profile.name}
-              <FlameIcon className={styles.flame} />
             </div>
           </div>
         </div>

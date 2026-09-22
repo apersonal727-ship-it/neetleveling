@@ -101,9 +101,9 @@
 .statusCard {
   position: relative;
   padding: 0;
-  background: linear-gradient(180deg, var(--panel-2), var(--panel));
-  border-color: var(--border-strong);
-  box-shadow: 0 0 50px -22px rgba(79, 216, 255, 0.32);
+  background: linear-gradient(180deg, rgba(79, 216, 255, 0.06), var(--panel) 55%);
+  border-color: var(--blue-dim);
+  box-shadow: 0 0 50px rgba(79, 216, 255, 0.1), inset 0 0 40px rgba(79, 216, 255, 0.03);
   overflow: hidden;
 }
 .corner {
@@ -224,8 +224,8 @@
 .bigXpFill {
   height: 100%;
   border-radius: 100px;
-  background: linear-gradient(90deg, var(--blue), var(--blue-2));
-  box-shadow: 0 0 12px rgba(143, 232, 255, 0.55);
+  background: linear-gradient(90deg, var(--violet), var(--blue));
+  box-shadow: 0 0 10px rgba(79, 216, 255, 0.5);
 }
 
 .chipRow {
@@ -246,16 +246,15 @@
   font-weight: 700;
   font-size: 26px;
   color: var(--ice);
-  text-shadow: 0 0 16px rgba(79, 216, 255, 0.35);
   line-height: 1;
 }
 .chipLbl {
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 9px;
+  font-size: 9.5px;
   color: var(--slate);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 /* ===== SYSTEM NETWORK ===== */
@@ -370,15 +369,14 @@
   align-items: center;
   gap: 7px;
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  letter-spacing: 0.1em;
   color: var(--violet);
   text-transform: uppercase;
-  margin-bottom: 6px;
 }
 .secEyebrow .dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--violet);
   box-shadow: 0 0 6px var(--violet);
@@ -387,13 +385,12 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: var(--sp-3);
+  margin: 6px 0 22px;
 }
 .secTitle {
   font-family: var(--font-rajdhani), sans-serif;
   font-weight: 700;
-  font-size: 19px;
-  letter-spacing: 0.01em;
+  font-size: 26px;
 }
 .secLabel {
   font-family: var(--font-jetbrains-mono), monospace;
@@ -437,9 +434,11 @@
 }
 .questDur {
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--slate);
-  letter-spacing: 0.04em;
+}
+.questDur b {
+  color: var(--blue);
 }
 .btn {
   font-family: var(--font-rajdhani), sans-serif;

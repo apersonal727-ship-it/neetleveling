@@ -51,9 +51,20 @@
   align-items: center;
   gap: 10px;
 }
-.flame {
-  width: 18px;
-  height: 18px;
+.headerMark {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--blue);
+  transform: rotate(45deg);
+  position: relative;
+  flex-shrink: 0;
+}
+.headerMark::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue);
 }
 .countdown {
   display: flex;
@@ -68,8 +79,8 @@
   align-items: center;
   gap: 6px;
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 11px;
-  color: var(--blue-2);
+  font-size: 12px;
+  color: var(--slate);
   letter-spacing: 0.03em;
 }
 .countdownTxt svg {
@@ -78,7 +89,7 @@
   flex-shrink: 0;
 }
 .countdownTxt b {
-  color: var(--ice);
+  color: var(--gold);
   font-weight: 600;
 }
 .countdownNote {

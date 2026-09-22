@@ -1,5 +1,10 @@
 .subjectGroup {
-  margin-bottom: var(--sp-5);
+  margin-bottom: 22px;
+}
+@media (min-width: 900px) {
+  .subjectGroup {
+    margin-bottom: 26px;
+  }
 }
 .subjectHeading {
   display: flex;
@@ -29,6 +34,11 @@
 }
 .questRow:last-child {
   border-bottom: none;
+}
+@media (min-width: 900px) {
+  .questRow {
+    padding: 18px 22px;
+  }
 }
 .questRowTitle {
   font-family: var(--font-rajdhani), sans-serif;
