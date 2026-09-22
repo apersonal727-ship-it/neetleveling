@@ -69,6 +69,37 @@ function msAtTick(k: number) {
   return ms;
 }
 
+// Deterministic per-tick "hunter" identity — the masked name/city for tick
+// #k is the exact same for every viewer, every device, every time it's
+// computed, because it's seeded from k itself rather than the browser's
+// own Math.random(). Two people looking at the feed at the same moment
+// (or the same past tick) see the literal identical row, not two
+// different random ones — the same property that already makes the
+// counter trustworthy, now applied to the feed content too.
+function mulberry32(seed: number) {
+  let a = seed;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function maskedTokenForRand(rand: () => number, minLen: number, maxLen: number) {
+  const letter = String.fromCharCode(65 + Math.floor(rand() * 26));
+  const len = minLen + Math.floor(rand() * (maxLen - minLen + 1));
+  return letter + "•".repeat(len);
+}
+function feedEventForTick(k: number) {
+  const rand = mulberry32(k);
+  const name = maskedTokenForRand(rand, 2, 6);
+  const city = maskedTokenForRand(rand, 2, 5);
+  return {
+    html: `<b>Hunter ${name}</b> from <span class="${styles.redacted}">${city}</span> just <span class="${styles.hl}">joined the System</span>`,
+  };
+}
+
 const QUEST_STEPS = [
   {
     num: "01 // QUEST",
@@ -273,23 +304,6 @@ export function HomeContent() {
     const track = (fn: () => void) => cleanups.push(fn);
 
     // ---- hunter counter + live activity feed ----
-    // A fully random name/city pool would still have finitely many
-    // combinations to eventually notice; instead every token is generated
-    // fresh — a random letter plus a random run of redaction dots — so
-    // there's no fixed underlying list to ever recognize a pattern in.
-    function randomMaskedToken(minLen: number, maxLen: number) {
-      const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      const len = minLen + Math.floor(Math.random() * (maxLen - minLen + 1));
-      return letter + "•".repeat(len);
-    }
-    function genFeedEvent() {
-      const name = randomMaskedToken(2, 6);
-      const city = randomMaskedToken(2, 5);
-      return {
-        html: `<b>Hunter ${name}</b> from <span class="${styles.redacted}">${city}</span> just <span class="${styles.hl}">joined the System</span>`,
-      };
-    }
-
     // Each row stores a real timestamp; its label is recomputed from actual
     // elapsed time (see the interval below), so "Just now" is only ever true
     // for the first minute, then it ages naturally instead of staying stuck.
@@ -337,14 +351,19 @@ export function HomeContent() {
     // most-recent last — appendRow always prepends (newest on top).
     const firstSeedTick = Math.max(1, lastTicks - 7);
     for (let k = firstSeedTick; k <= lastTicks; k++) {
-      const ts = VANITY_EPOCH + msAtTick(k);
-      appendRow(genFeedEvent().html, ts);
+      appendRow(feedEventForTick(k).html, VANITY_EPOCH + msAtTick(k));
     }
     const tickPoll = window.setInterval(() => {
       const nowTicks = ticksElapsed(Date.now());
       if (nowTicks > lastTicks) {
-        const newTicks = Math.min(nowTicks - lastTicks, 3); // never dump a huge backlog at once
-        for (let i = 0; i < newTicks; i++) appendRow(genFeedEvent().html, Date.now());
+        // never dump a huge backlog at once, but still use each tick's own
+        // real index — never Date.now() — so the row's identity and
+        // timestamp both match exactly what anyone else computing the same
+        // tick index would get.
+        const startK = Math.max(lastTicks + 1, nowTicks - 2);
+        for (let k = startK; k <= nowTicks; k++) {
+          appendRow(feedEventForTick(k).html, VANITY_EPOCH + msAtTick(k));
+        }
         lastTicks = nowTicks;
         renderCount(lastTicks);
       }
