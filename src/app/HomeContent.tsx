@@ -28,11 +28,25 @@ const FEED_CITIES = [
 ];
 
 // The homepage's "hunters have already joined" counter is entirely fake —
-// real signups are still ~0 pre-launch. It starts here and climbs by
-// exactly 1 every time a new row appears in the live feed below (see the
-// "hunter counter" / "live activity feed" effects), so the two can never
-// visibly drift out of sync with each other.
+// real signups are still ~0 pre-launch. It's a pure function of wall-clock
+// time (fixed starting point + a steady tick), computed independently by
+// every visitor's own browser with no server call at all — which is
+// exactly what makes it genuinely global: anyone, on any device, at any
+// future moment, computes the same number from the same formula, so it
+// never resets to VANITY_BASE on a reload or reads differently in a
+// second tab. It only ever moves forward.
+//
+// VANITY_EPOCH must never change once this is live — it's the fixed
+// anchor everything is measured from. Moving it would make the number
+// visibly jump (forward or back) for every visitor at once.
 const VANITY_BASE = 10_483;
+const VANITY_EPOCH = new Date("2026-09-22T14:22:25Z").getTime();
+const VANITY_MS_PER_INCREMENT = 4_000; // ~1 new "hunter" every 4s
+
+function currentVanityCount() {
+  const elapsed = Math.max(0, Math.floor((Date.now() - VANITY_EPOCH) / VANITY_MS_PER_INCREMENT));
+  return VANITY_BASE + elapsed;
+}
 
 const QUEST_STEPS = [
   {
@@ -238,29 +252,22 @@ export function HomeContent() {
     const track = (fn: () => void) => cleanups.push(fn);
 
     // ---- hunter counter ----
-    // Entirely fake, on purpose — real signups are still ~0 pre-launch, and
-    // this number exists purely to read as active/growing (FOMO). It's
-    // deliberately coupled 1:1 to the feed below: every time a new
-    // (non-backdated) row appears there, this bumps by exactly 1 at that
-    // same instant, so the two can never visibly drift apart the way they
-    // did when each ran on its own independent clock.
+    // Global and persistent (see currentVanityCount above) — re-renders
+    // every second purely by re-reading the clock, no local state to reset.
     const counterEl = root.querySelector<HTMLSpanElement>("#feedCounter");
-    let liveCount = VANITY_BASE;
     function renderCount() {
-      if (counterEl) counterEl.textContent = liveCount.toLocaleString("en-IN");
-    }
-    function bumpCounter() {
-      liveCount += 1;
-      renderCount();
+      if (counterEl) counterEl.textContent = currentVanityCount().toLocaleString("en-IN");
     }
     renderCount();
+    const countInterval = window.setInterval(renderCount, 1000);
+    track(() => window.clearInterval(countInterval));
 
     // ---- live activity feed ----
     // Every row is anonymized on purpose — a real hunter's join is never
     // distinguishable from a simulated one here, so nobody can tell whether
-    // their own signup did or didn't show up. The 8 backdated rows seeded
-    // below represent joins already folded into VANITY_BASE, so only rows
-    // added afterward (see scheduleFeed) bump the counter.
+    // their own signup did or didn't show up. Purely cosmetic motion below
+    // the counter — it doesn't need to be globally identical the way the
+    // counter above does, since no specific claim is tied to any one row.
     function maskToken(token: string) {
       return token[0] + "•".repeat(Math.max(2, token.length - 1));
     }
@@ -315,7 +322,6 @@ export function HomeContent() {
       let feedTimeoutId: number;
       const scheduleFeed = () => {
         addFeedRow(false);
-        bumpCounter();
         feedTimeoutId = window.setTimeout(scheduleFeed, 2200 + Math.random() * 2600);
       };
       feedTimeoutId = window.setTimeout(scheduleFeed, 1800);
