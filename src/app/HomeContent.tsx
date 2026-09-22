@@ -306,8 +306,13 @@ export function HomeContent() {
         feedList.removeChild(feedList.lastChild as ChildNode);
       }
     }
-    for (let i = 0; i < 8; i++) {
-      const ts = Date.now() - BACKDATE_OPTIONS_MS[Math.floor(Math.random() * BACKDATE_OPTIONS_MS.length)];
+    // Insert oldest first, most-recent last — appendRow always prepends
+    // (newest on top), so seeding in this order makes the 8 rows read in
+    // proper chronological order (top = most recent, bottom = oldest)
+    // instead of a random jumble of dates. Each of the 8 fixed offsets is
+    // used exactly once, so there are no duplicate timestamps either.
+    for (let i = BACKDATE_OPTIONS_MS.length - 1; i >= 0; i--) {
+      const ts = Date.now() - BACKDATE_OPTIONS_MS[i];
       appendRow(genFeedEvent().html, ts);
     }
 
