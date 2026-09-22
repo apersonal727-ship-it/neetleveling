@@ -15,37 +15,42 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
-const FEED_NAMES = [
-  "Aditya", "Priya", "Rohan", "Ananya", "Vikram", "Sneha", "Karthik", "Meera",
-  "Arjun", "Divya", "Rahul", "Pooja", "Siddharth", "Neha", "Yash", "Riya",
-  "Aman", "Kavya", "Rohit", "Sanya", "Ishaan", "Tanvi", "Devansh", "Simran",
-  "Aryan", "Nisha", "Harsh", "Priyanka", "Varun", "Anjali", "Kunal", "Shreya",
-];
-const FEED_CITIES = [
-  "Kota", "Patna", "Lucknow", "Indore", "Pune", "Guwahati", "Ranchi", "Bhopal",
-  "Nagpur", "Jaipur", "Kolkata", "Surat", "Delhi", "Chandigarh", "Bhubaneswar",
-  "Coimbatore", "Nashik", "Varanasi", "Amritsar", "Raipur",
-];
-
-// The homepage's "hunters have already joined" counter is entirely fake —
-// real signups are still ~0 pre-launch. It's a pure function of wall-clock
-// time (fixed starting point + a steady tick), computed independently by
-// every visitor's own browser with no server call at all — which is
-// exactly what makes it genuinely global: anyone, on any device, at any
-// future moment, computes the same number from the same formula, so it
-// never resets to VANITY_BASE on a reload or reads differently in a
-// second tab. It only ever moves forward.
+// The homepage's "hunters have already joined" counter and activity feed
+// are entirely fake — real signups are still ~0 pre-launch. Both are
+// driven off the exact same deterministic "tick" schedule below, computed
+// independently by every visitor's own browser with no server call at
+// all. That's what makes this genuinely global (anyone, any device, any
+// future moment computes the same tick count from the same formula — it
+// never resets to VANITY_BASE on a reload or disagrees across tabs) *and*
+// what keeps the counter and the feed perfectly in lockstep (a new feed
+// row and a counter bump only ever happen because the same tick fired).
 //
 // VANITY_EPOCH must never change once this is live — it's the fixed
 // anchor everything is measured from. Moving it would make the number
 // visibly jump (forward or back) for every visitor at once.
 const VANITY_BASE = 10_483;
 const VANITY_EPOCH = new Date("2026-09-22T14:22:25Z").getTime();
-const VANITY_MS_PER_INCREMENT = 4_000; // ~1 new "hunter" every 4s
 
-function currentVanityCount() {
-  const elapsed = Math.max(0, Math.floor((Date.now() - VANITY_EPOCH) / VANITY_MS_PER_INCREMENT));
-  return VANITY_BASE + elapsed;
+// A repeating cycle of gaps (ms) between ticks, not a single fixed
+// interval — a perfectly even "every 4.000s" beat reads as an obvious
+// loop to anyone watching for a bit. Averages to ~3.9s/tick.
+const TICK_CYCLE_MS = [2200, 4800, 3100, 5600, 2700, 4200, 3600, 5100];
+const TICK_CYCLE_TOTAL_MS = TICK_CYCLE_MS.reduce((a, b) => a + b, 0);
+
+// How many ticks have fired since VANITY_EPOCH, as of `nowMs` — O(cycle
+// length) regardless of how much time has elapsed, so this stays cheap
+// forever, not just right after launch.
+function ticksElapsed(nowMs: number) {
+  const elapsed = Math.max(0, nowMs - VANITY_EPOCH);
+  const fullCycles = Math.floor(elapsed / TICK_CYCLE_TOTAL_MS);
+  let remainder = elapsed % TICK_CYCLE_TOTAL_MS;
+  let ticksInCycle = 0;
+  for (const gap of TICK_CYCLE_MS) {
+    if (remainder < gap) break;
+    remainder -= gap;
+    ticksInCycle += 1;
+  }
+  return fullCycles * TICK_CYCLE_MS.length + ticksInCycle;
 }
 
 const QUEST_STEPS = [
@@ -251,31 +256,21 @@ export function HomeContent() {
     const timeouts: number[] = [];
     const track = (fn: () => void) => cleanups.push(fn);
 
-    // ---- hunter counter ----
-    // Global and persistent (see currentVanityCount above) — re-renders
-    // every second purely by re-reading the clock, no local state to reset.
-    const counterEl = root.querySelector<HTMLSpanElement>("#feedCounter");
-    function renderCount() {
-      if (counterEl) counterEl.textContent = currentVanityCount().toLocaleString("en-IN");
-    }
-    renderCount();
-    const countInterval = window.setInterval(renderCount, 1000);
-    track(() => window.clearInterval(countInterval));
-
-    // ---- live activity feed ----
-    // Every row is anonymized on purpose — a real hunter's join is never
-    // distinguishable from a simulated one here, so nobody can tell whether
-    // their own signup did or didn't show up. Purely cosmetic motion below
-    // the counter — it doesn't need to be globally identical the way the
-    // counter above does, since no specific claim is tied to any one row.
-    function maskToken(token: string) {
-      return token[0] + "•".repeat(Math.max(2, token.length - 1));
+    // ---- hunter counter + live activity feed ----
+    // A fully random name/city pool would still have finitely many
+    // combinations to eventually notice; instead every token is generated
+    // fresh — a random letter plus a random run of redaction dots — so
+    // there's no fixed underlying list to ever recognize a pattern in.
+    function randomMaskedToken(minLen: number, maxLen: number) {
+      const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      const len = minLen + Math.floor(Math.random() * (maxLen - minLen + 1));
+      return letter + "•".repeat(len);
     }
     function genFeedEvent() {
-      const name = FEED_NAMES[Math.floor(Math.random() * FEED_NAMES.length)];
-      const city = FEED_CITIES[Math.floor(Math.random() * FEED_CITIES.length)];
+      const name = randomMaskedToken(2, 6);
+      const city = randomMaskedToken(2, 5);
       return {
-        html: `<b>Hunter ${maskToken(name)}</b> from <span class="${styles.redacted}">${maskToken(city)}</span> just <span class="${styles.hl}">joined the System</span>`,
+        html: `<b>Hunter ${name}</b> from <span class="${styles.redacted}">${city}</span> just <span class="${styles.hl}">joined the System</span>`,
       };
     }
 
@@ -309,24 +304,32 @@ export function HomeContent() {
         feedList.removeChild(feedList.lastChild as ChildNode);
       }
     }
-    function addFeedRow(backdated: boolean) {
-      const ev = genFeedEvent();
-      const ts = backdated
-        ? Date.now() - BACKDATE_OPTIONS_MS[Math.floor(Math.random() * BACKDATE_OPTIONS_MS.length)]
-        : Date.now();
-      appendRow(ev.html, ts);
+    for (let i = 0; i < 8; i++) {
+      const ts = Date.now() - BACKDATE_OPTIONS_MS[Math.floor(Math.random() * BACKDATE_OPTIONS_MS.length)];
+      appendRow(genFeedEvent().html, ts);
     }
+
+    // The counter and the feed are driven by the exact same signal: every
+    // time the shared tick count (see ticksElapsed above) advances, both
+    // update in the same instant — no separate timers to drift apart.
+    const counterEl = root.querySelector<HTMLSpanElement>("#feedCounter");
+    function renderCount(ticks: number) {
+      if (counterEl) counterEl.textContent = (VANITY_BASE + ticks).toLocaleString("en-IN");
+    }
+    let lastTicks = ticksElapsed(Date.now());
+    renderCount(lastTicks);
+    const tickPoll = window.setInterval(() => {
+      const nowTicks = ticksElapsed(Date.now());
+      if (nowTicks > lastTicks) {
+        const newTicks = Math.min(nowTicks - lastTicks, 3); // never dump a huge backlog at once
+        for (let i = 0; i < newTicks; i++) appendRow(genFeedEvent().html, Date.now());
+        lastTicks = nowTicks;
+        renderCount(lastTicks);
+      }
+    }, 500);
+    track(() => window.clearInterval(tickPoll));
+
     if (feedList) {
-      for (let i = 0; i < 8; i++) addFeedRow(true);
-
-      let feedTimeoutId: number;
-      const scheduleFeed = () => {
-        addFeedRow(false);
-        feedTimeoutId = window.setTimeout(scheduleFeed, 2200 + Math.random() * 2600);
-      };
-      feedTimeoutId = window.setTimeout(scheduleFeed, 1800);
-      track(() => window.clearTimeout(feedTimeoutId));
-
       // periodically re-render every visible row's label from its real
       // stored timestamp, so times keep aging instead of staying fixed
       const labelInterval = window.setInterval(() => {
