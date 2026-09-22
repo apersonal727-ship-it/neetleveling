@@ -55,6 +55,20 @@ function ticksElapsed(nowMs: number) {
   return fullCycles * TICK_CYCLE_MS.length + ticksInCycle;
 }
 
+// Inverse of ticksElapsed: the real wall-clock moment (ms since epoch)
+// that the k-th tick (k >= 1) actually fired at. Used to seed the feed's
+// starter rows with genuine past ticks from this same formula, instead of
+// arbitrary backdates — so the "history" shown on load has the exact same
+// spacing (minutes apart) as the live pace, not a mismatched few-hours gap.
+function msAtTick(k: number) {
+  const n = TICK_CYCLE_MS.length;
+  const fullCycles = Math.floor((k - 1) / n);
+  const posInCycle = (k - 1) % n;
+  let ms = fullCycles * TICK_CYCLE_TOTAL_MS;
+  for (let i = 0; i <= posInCycle; i++) ms += TICK_CYCLE_MS[i];
+  return ms;
+}
+
 const QUEST_STEPS = [
   {
     num: "01 // QUEST",
@@ -279,10 +293,6 @@ export function HomeContent() {
     // Each row stores a real timestamp; its label is recomputed from actual
     // elapsed time (see the interval below), so "Just now" is only ever true
     // for the first minute, then it ages naturally instead of staying stuck.
-    const BACKDATE_OPTIONS_MS = [
-      2 * 3600_000, 5 * 3600_000, 9 * 3600_000, 15 * 3600_000,
-      22 * 3600_000, 30 * 3600_000, 38 * 3600_000, 46 * 3600_000,
-    ];
     function formatTimeLabel(ts: number) {
       const diffMs = Date.now() - ts;
       const mins = Math.floor(diffMs / 60000);
@@ -306,16 +316,6 @@ export function HomeContent() {
         feedList.removeChild(feedList.lastChild as ChildNode);
       }
     }
-    // Insert oldest first, most-recent last — appendRow always prepends
-    // (newest on top), so seeding in this order makes the 8 rows read in
-    // proper chronological order (top = most recent, bottom = oldest)
-    // instead of a random jumble of dates. Each of the 8 fixed offsets is
-    // used exactly once, so there are no duplicate timestamps either.
-    for (let i = BACKDATE_OPTIONS_MS.length - 1; i >= 0; i--) {
-      const ts = Date.now() - BACKDATE_OPTIONS_MS[i];
-      appendRow(genFeedEvent().html, ts);
-    }
-
     // The counter and the feed are driven by the exact same signal: every
     // time the shared tick count (see ticksElapsed above) advances, both
     // update in the same instant — no separate timers to drift apart.
@@ -325,6 +325,18 @@ export function HomeContent() {
     }
     let lastTicks = ticksElapsed(Date.now());
     renderCount(lastTicks);
+
+    // Seed the 8 starter rows from the last 8 *real* ticks of this same
+    // formula (via msAtTick, the inverse of ticksElapsed) instead of
+    // arbitrary backdates — so the "history" shown on load is genuinely
+    // minutes apart, matching the live pace exactly, not a mismatched
+    // few-hours gap left over from a since-changed pace. Oldest first,
+    // most-recent last — appendRow always prepends (newest on top).
+    const firstSeedTick = Math.max(1, lastTicks - 7);
+    for (let k = firstSeedTick; k <= lastTicks; k++) {
+      const ts = VANITY_EPOCH + msAtTick(k);
+      appendRow(genFeedEvent().html, ts);
+    }
     const tickPoll = window.setInterval(() => {
       const nowTicks = ticksElapsed(Date.now());
       if (nowTicks > lastTicks) {
