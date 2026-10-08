@@ -137,6 +137,11 @@ model QuestCompletion {
   quest       Quest    @relation(fields: [questId], references: [id])
   xpAwarded   Int
   completedAt DateTime @default(now())
+  // Minutes the hunter actually sat through — differs from Quest.durationMinutes
+  // for practice quests, whose timer ramps with the hunter's streak (see
+  // progressive-overload.ts). Null on completions from before this existed;
+  // readers fall back to the quest's stored duration.
+  durationMinutes Int?
 
   @@index([profileId, completedAt])
 }

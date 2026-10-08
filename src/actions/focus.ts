@@ -123,7 +123,7 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
       data: { status: "COMPLETED", completedAt: new Date() },
     }),
     prisma.questCompletion.create({
-      data: { profileId: profile.id, questId: session.quest.id, xpAwarded },
+      data: { profileId: profile.id, questId: session.quest.id, xpAwarded, durationMinutes },
     }),
     prisma.profile.update({
       where: { id: profile.id },

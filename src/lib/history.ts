@@ -40,7 +40,7 @@ export async function getSubjectHours(profileId: string) {
   const minutesBySubject: Record<string, number> = {};
   for (const c of completions) {
     minutesBySubject[c.quest.subject] =
-      (minutesBySubject[c.quest.subject] ?? 0) + c.quest.durationMinutes;
+      (minutesBySubject[c.quest.subject] ?? 0) + (c.durationMinutes ?? c.quest.durationMinutes);
   }
   // Personal quests store a free-text subject ("Physics"…) or none; only
   // the ones tagged with one of the three subjects add to its bar.
@@ -138,7 +138,7 @@ export async function getRecentActivity(profileId: string, limit = 12): Promise<
         kind: "quest",
         title: c.quest.title,
         subject: c.quest.subject,
-        durationMinutes: c.quest.durationMinutes,
+        durationMinutes: c.durationMinutes ?? c.quest.durationMinutes,
         xp: c.xpAwarded,
         at: c.completedAt,
       }),

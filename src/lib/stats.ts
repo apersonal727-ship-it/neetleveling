@@ -21,7 +21,7 @@ export async function getStatBars(profileId: string) {
   const minutesBySubject: Record<string, number> = {};
   for (const c of completions) {
     const subj = c.quest.subject;
-    minutesBySubject[subj] = (minutesBySubject[subj] ?? 0) + c.quest.durationMinutes;
+    minutesBySubject[subj] = (minutesBySubject[subj] ?? 0) + (c.durationMinutes ?? c.quest.durationMinutes);
   }
 
   const intHours =
@@ -69,9 +69,9 @@ export async function getHunterProgressStats(profileId: string) {
   for (const c of completions) {
     if (!CLASS_SUBJECTS.has(c.quest.subject)) continue;
     if (isPracticeQuest(c.quest.title)) {
-      practiceMinutes += c.quest.durationMinutes;
+      practiceMinutes += c.durationMinutes ?? c.quest.durationMinutes;
     } else {
-      classMinutes += c.quest.durationMinutes;
+      classMinutes += c.durationMinutes ?? c.quest.durationMinutes;
     }
   }
 
