@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getHistorySummary, getSubjectHours, getHeatmap, getRecentActivity } from "@/lib/history";
 import { questSubjectLabel } from "@/lib/todays-quest";
+import { questDayStart } from "@/lib/quest-day";
 import { HeatmapScroller } from "@/components/history/HeatmapScroller";
 import appStyles from "../app.module.css";
 import styles from "./history.module.css";
@@ -20,10 +21,8 @@ function fmtDuration(minutes: number) {
 }
 
 function fmtRelative(date: Date) {
-  const now = new Date();
-  const startOfToday = new Date(now);
-  startOfToday.setHours(0, 0, 0, 0);
-  const diffDays = Math.floor((startOfToday.getTime() - date.getTime()) / 86400000);
+  // Quest-day (5 AM IST) difference, matching the Dashboard's idea of "today".
+  const diffDays = Math.round((questDayStart().getTime() - questDayStart(date).getTime()) / 86400000);
   if (diffDays <= 0) return "TODAY";
   if (diffDays === 1) return "YESTERDAY";
   return `${diffDays} DAYS AGO`;
@@ -137,6 +136,7 @@ export default async function HistoryPage() {
                 <div className={styles.logMeta}>
                   {fmtRelative(entry.at)} · {fmtDuration(entry.durationMinutes)}
                   {entry.kind === "quest" && ` · ${questSubjectLabel(entry.subject)}`}
+                  {entry.kind === "personal" && ` · Personal${entry.subject ? ` · ${entry.subject}` : ""}`}
                   {entry.kind === "penalty" && !entry.resolved && " · UNRESOLVED"}
                 </div>
               </div>
