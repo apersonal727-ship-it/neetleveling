@@ -1,5 +1,6 @@
 "use client";
 
+import { StreakFire } from "@/components/app/StreakFire";
 import { useEffect, useRef, useState } from "react";
 import type { RankCode } from "@/lib/rank";
 import styles from "@/app/rank-up/rank-up.module.css";
@@ -293,7 +294,10 @@ export function RankUpCelebration({
 
         <div className={styles.statsRow}>
           <div className={styles.statPill}>
-            <div className={styles.num}>{streak}</div>
+            <div className={styles.num}>
+              <StreakFire lit={streak > 0} />
+              {streak}
+            </div>
             <div className={styles.lbl}>Day Streak</div>
           </div>
           <div className={styles.statPill}>

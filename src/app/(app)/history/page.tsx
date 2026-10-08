@@ -1,3 +1,4 @@
+import { StreakFire } from "@/components/app/StreakFire";
 import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getHistorySummary, getSubjectHours, getHeatmap, getRecentActivity } from "@/lib/history";
@@ -72,7 +73,10 @@ export default async function HistoryPage() {
       <section>
         <div className={styles.chipGrid}>
           <div className={styles.chip}>
-            <div className={`${styles.chipVal} ${styles.gold}`}>{summary.currentStreak}</div>
+            <div className={`${styles.chipVal} ${styles.gold}`}>
+              <StreakFire lit={summary.currentStreak > 0} />
+              {summary.currentStreak}
+            </div>
             <div className={styles.chipLbl}>Day Streak</div>
           </div>
           <div className={styles.chip}>

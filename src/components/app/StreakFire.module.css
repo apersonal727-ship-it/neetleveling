@@ -1,0 +1,46 @@
+.fire {
+  display: inline-block;
+  line-height: 1;
+  margin-right: 0.18em;
+  vertical-align: -0.06em;
+  transform-origin: 50% 88%;
+}
+.lit {
+  filter: drop-shadow(0 0 6px rgba(255, 140, 40, 0.55));
+  animation: flicker 1.7s ease-in-out infinite;
+}
+.out {
+  filter: grayscale(1) brightness(0.55);
+  opacity: 0.7;
+}
+
+/* Irregular on purpose — a metronomic pulse reads as a spinner, not fire. */
+@keyframes flicker {
+  0%,
+  100% {
+    transform: scale(1, 1) rotate(0deg);
+    filter: drop-shadow(0 0 5px rgba(255, 140, 40, 0.45)) brightness(1);
+  }
+  18% {
+    transform: scale(1.05, 1.12) rotate(-3deg);
+    filter: drop-shadow(0 0 9px rgba(255, 160, 50, 0.75)) brightness(1.15);
+  }
+  36% {
+    transform: scale(0.97, 1.02) rotate(2deg);
+    filter: drop-shadow(0 0 5px rgba(255, 140, 40, 0.5)) brightness(0.96);
+  }
+  58% {
+    transform: scale(1.04, 1.14) rotate(-2deg);
+    filter: drop-shadow(0 0 10px rgba(255, 170, 60, 0.8)) brightness(1.2);
+  }
+  78% {
+    transform: scale(0.98, 1.05) rotate(3deg);
+    filter: drop-shadow(0 0 6px rgba(255, 140, 40, 0.55)) brightness(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lit {
+    animation: none;
+  }
+}

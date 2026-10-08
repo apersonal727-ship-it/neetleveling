@@ -1,3 +1,4 @@
+import { StreakFire } from "@/components/app/StreakFire";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
@@ -49,7 +50,8 @@ export default async function DayClearPage() {
         </span>
 
         <div className={styles.flameWrap}>
-          🔥<span className={styles.streakNum}>{profile.streak}</span>
+          <StreakFire size="1em" />
+          <span className={styles.streakNum}>{profile.streak}</span>
         </div>
         <div className={styles.streakLbl}>Day Streak</div>
 

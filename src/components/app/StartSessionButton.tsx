@@ -1,5 +1,6 @@
 "use client";
 
+import { StreakFire } from "@/components/app/StreakFire";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { LockingInOverlay } from "./LockingInOverlay";
 import styles from "./StartSessionButton.module.css";
@@ -150,7 +151,10 @@ export function StartSessionButton({
                   <div className={styles.metaLbl}>XP Reward</div>
                 </div>
                 <div className={styles.metaItem}>
-                  <div className={styles.metaNum}>🔥 {streak}</div>
+                  <div className={styles.metaNum}>
+                    <StreakFire lit={streak > 0} />
+                    {streak}
+                  </div>
                   <div className={styles.metaLbl}>Streak On Line</div>
                 </div>
               </div>

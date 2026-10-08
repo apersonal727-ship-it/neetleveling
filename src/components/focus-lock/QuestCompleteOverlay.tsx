@@ -1,5 +1,6 @@
 "use client";
 
+import { StreakFire } from "@/components/app/StreakFire";
 import { useEffect, useRef, useState } from "react";
 import styles from "./QuestCompleteOverlay.module.css";
 
@@ -155,7 +156,10 @@ export function QuestCompleteOverlay({
                   )}
                   {!isPersonal && streak > 0 && (
                     <div className={styles.statPill}>
-                      <div className={styles.num}>🔥 {streak}</div>
+                      <div className={styles.num}>
+                        <StreakFire />
+                        {streak}
+                      </div>
                       <div className={styles.lbl}>Streak Held</div>
                     </div>
                   )}

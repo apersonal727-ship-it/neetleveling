@@ -1,3 +1,4 @@
+import { StreakFire } from "@/components/app/StreakFire";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
@@ -93,7 +94,10 @@ export default async function DashboardPage({
 
               <div className={styles.chipRow}>
                 <div className={styles.chip}>
-                  <div className={`${styles.chipVal} ${styles.gold}`}>{profile.streak}</div>
+                  <div className={`${styles.chipVal} ${styles.gold}`}>
+                      <StreakFire lit={profile.streak > 0} />
+                      {profile.streak}
+                    </div>
                   <div className={styles.chipLbl}>Day streak</div>
                 </div>
                 <div className={styles.chip}>

@@ -1,3 +1,4 @@
+import { StreakFire } from "@/components/app/StreakFire";
 import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel, RANKS, RANK_FLAVOR, cumulativeXpForLevel, type RankCode } from "@/lib/rank";
@@ -35,7 +36,7 @@ export default async function ProfilePage() {
     { icon: "🎥", num: hunterStats.classHours.toLocaleString("en-IN"), lbl: "Class Hours" },
     { icon: "🧠", num: hunterStats.questionHours.toLocaleString("en-IN"), lbl: "Question Hours" },
     { icon: "🎯", num: hunterStats.questionsSolved.toLocaleString("en-IN"), lbl: "Questions Solved" },
-    { icon: "🔥", num: profile.streak.toLocaleString("en-IN"), lbl: "Current Streak" },
+    { icon: <StreakFire lit={profile.streak > 0} size="1em" />, num: profile.streak.toLocaleString("en-IN"), lbl: "Current Streak" },
     { icon: "🏆", num: profile.bestStreak.toLocaleString("en-IN"), lbl: "Best Streak" },
     { icon: "✅", num: questsCompleted.toLocaleString("en-IN"), lbl: "Quests Completed" },
     { icon: "⚠️", num: penaltiesTriggered.toLocaleString("en-IN"), lbl: "Penalties Triggered" },

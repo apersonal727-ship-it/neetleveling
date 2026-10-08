@@ -1,3 +1,4 @@
+import { StreakFire } from "@/components/app/StreakFire";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
@@ -55,7 +56,10 @@ export default async function AwakenedPage() {
               <div className={styles.lbl}>Target Exam</div>
             </div>
             <div className={styles.targetPill}>
-              <div className={styles.num}>{profile.streak}</div>
+              <div className={styles.num}>
+                <StreakFire lit={profile.streak > 0} />
+                {profile.streak}
+              </div>
               <div className={styles.lbl}>Day Streak</div>
             </div>
             <div className={styles.targetPill}>
