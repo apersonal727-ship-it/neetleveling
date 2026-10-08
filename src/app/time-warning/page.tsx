@@ -8,6 +8,7 @@ import { questDayEnd } from "@/lib/quest-day";
 import { startQuestSession, startPersonalQuestSession } from "@/actions/focus";
 import { StartSessionButton } from "@/components/app/StartSessionButton";
 import { TimeWarningCountdown } from "@/components/app/TimeWarningCountdown";
+import { SupportLink } from "@/components/app/SupportLink";
 import styles from "./time-warning.module.css";
 
 export const metadata: Metadata = {
@@ -84,6 +85,7 @@ export default async function TimeWarningPage() {
             Clear Remaining Quests →
           </a>
           <div className={styles.dismissNote}>This warning stays until every quest today is cleared.</div>
+          <SupportLink />
         </main>
       </div>
     </>

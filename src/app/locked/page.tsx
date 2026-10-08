@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { startPunishmentSession } from "@/actions/focus";
 import { penaltyReps, penaltyDurationMinutes } from "@/lib/penalty";
 import { StartSessionButton } from "@/components/app/StartSessionButton";
+import { SupportLink } from "@/components/app/SupportLink";
 import styles from "./locked.module.css";
 
 export const metadata: Metadata = {
@@ -137,6 +138,7 @@ export default async function LockedPage() {
               unreachable until the punishment quest closes out.
             </span>
           </div>
+          <SupportLink />
         </main>
 
         <footer className={styles.footer}>

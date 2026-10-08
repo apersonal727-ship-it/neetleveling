@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { CancelSubscriptionLink } from "@/components/settings/CancelSubscriptionLink";
+import { SupportLink } from "@/components/app/SupportLink";
 import detailStyles from "../detail.module.css";
 import styles from "./billing.module.css";
 
@@ -110,6 +111,7 @@ export default async function BillingPage() {
         </section>
 
         <CancelSubscriptionLink disabled={profile.subscriptionStatus === "CANCELED"} />
+        <SupportLink />
       </main>
     </div>
   );

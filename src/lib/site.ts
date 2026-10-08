@@ -4,3 +4,8 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://neetleveli
   /\/$/,
   "",
 );
+
+// Optional public fallback contact, shown on the report page only if sending
+// fails. Unset by default so no address is published unless you choose one:
+// set NEXT_PUBLIC_SUPPORT_EMAIL in .env / Vercel to turn it on.
+export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? null;

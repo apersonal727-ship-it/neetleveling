@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { getLevelProgress } from "@/lib/rank";
@@ -55,10 +56,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             LVL <b>{progress.level}</b>
           </span>
           <div className={styles.headerRight}>
-            <div className={styles.userChip}>
-              <span className={styles.headerMark} />
-              {profile.name}
-            </div>
+            <Link href="/report-bug" className={styles.helpBtn} aria-label="Report an issue or contact us">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" />
+                <path d="M9.5 10.5h5M9.5 13.5h3" />
+              </svg>
+              <span>Help</span>
+            </Link>
           </div>
         </div>
         <DailyCountdown

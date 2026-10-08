@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentProfile } from "@/lib/current-profile";
+import { getSupportProfile } from "@/lib/support-profile";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
@@ -27,7 +27,7 @@ const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 export async function uploadReportScreenshot(
   file: File,
 ): Promise<{ error: string } | { url: string }> {
-  const profile = await getCurrentProfile();
+  const profile = await getSupportProfile();
 
   if (!file || file.size === 0) return { error: "No file provided." };
   if (file.size > MAX_SCREENSHOT_BYTES) return { error: "Screenshot must be under 5MB." };
@@ -50,7 +50,7 @@ export async function uploadReportScreenshot(
 }
 
 export async function submitBugReport(formData: FormData): Promise<FeedbackResult> {
-  const profile = await getCurrentProfile();
+  const profile = await getSupportProfile();
 
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -69,7 +69,7 @@ export async function submitBugReport(formData: FormData): Promise<FeedbackResul
 }
 
 export async function submitFeatureRequest(formData: FormData): Promise<FeedbackResult> {
-  const profile = await getCurrentProfile();
+  const profile = await getSupportProfile();
 
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();

@@ -5,6 +5,7 @@ import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { lapsedAt, streakGraceDeadline } from "@/lib/subscription";
 import { prisma } from "@/lib/prisma";
 import { GraceCountdown } from "@/components/subscription/GraceCountdown";
+import { SupportLink } from "@/components/app/SupportLink";
 import styles from "./subscription-expired.module.css";
 
 export const metadata: Metadata = {
@@ -122,6 +123,7 @@ export default async function SubscriptionExpiredPage() {
               won&apos;t resume until access does.
             </span>
           </div>
+          <SupportLink />
         </main>
       </div>
     </>

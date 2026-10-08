@@ -31,34 +31,34 @@
 .lvlTag b {
   color: var(--blue);
 }
-.userChip {
-  display: flex;
+.helpBtn {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--font-rajdhani), sans-serif;
-  font-weight: 700;
-  font-size: 17px;
-  letter-spacing: 0.03em;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid var(--blue-dim);
+  background: rgba(79, 216, 255, 0.05);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+.helpBtn svg {
+  width: 14px;
+  height: 14px;
+}
+.helpBtn:hover {
+  background: rgba(79, 216, 255, 0.12);
+  border-color: var(--blue);
 }
 .headerRight {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-.headerMark {
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--blue);
-  transform: rotate(45deg);
-  position: relative;
-  flex-shrink: 0;
-}
-.headerMark::after {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  background: var(--blue);
-  box-shadow: 0 0 8px var(--blue);
 }
 .countdown {
   display: flex;

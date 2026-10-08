@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { submitBugReport, submitFeatureRequest, uploadReportScreenshot } from "@/actions/feedback";
+import { SUPPORT_EMAIL } from "@/lib/site";
 import styles from "./ReportPage.module.css";
 
 export type ReportItem = {
@@ -18,6 +19,7 @@ export type ReportItem = {
 type Category = "Bug" | "Feature" | "Other";
 
 const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+const DRAFT_KEY = "nl-report-draft";
 
 // Each category gets its own wording — a feature request shouldn't read like
 // a bug report.
@@ -124,6 +126,7 @@ export function ReportPage({ initialReports }: { initialReports: ReportItem[] })
   const [titleErr, setTitleErr] = useState(false);
   const [descErr, setDescErr] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [shotFailed, setShotFailed] = useState(false);
   const [shot, setShot] = useState<{ file: File; previewUrl: string } | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -133,6 +136,30 @@ export function ReportPage({ initialReports }: { initialReports: ReportItem[] })
   const [newId, setNewId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // The typed message survives a refresh, an expired session, or a failed
+  // send — losing a long bug description is the worst way for this to fail.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as { category?: Category; title?: string; desc?: string };
+      // Reading localStorage once on load is the point of this effect (state
+      // can't be seeded from it during render without a server/client
+      // mismatch), so the set-state-in-effect rule doesn't apply here.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (d.category && d.category in COPY) setCategory(d.category);
+      if (typeof d.title === "string") setTitle(d.title);
+      if (typeof d.desc === "string") setDesc(d.desc);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (!title && !desc) localStorage.removeItem(DRAFT_KEY);
+      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ category, title, desc }));
+    } catch {}
+  }, [category, title, desc]);
 
   const copy = COPY[category];
 
@@ -165,56 +192,64 @@ export function ReportPage({ initialReports }: { initialReports: ReportItem[] })
     setTitleErr(!titleOk);
     setDescErr(!descOk);
     setFormError(null);
+    setShotFailed(false);
     if (!titleOk || !descOk) return;
 
     startTransition(async () => {
-      let screenshotUrl = "";
-      if (shot && category !== "Feature") {
-        setUploading(true);
-        const upload = await uploadReportScreenshot(shot.file);
-        setUploading(false);
-        if ("error" in upload) {
-          setFormError(upload.error);
+      try {
+        let screenshotUrl = "";
+        if (shot && category !== "Feature") {
+          setUploading(true);
+          const upload = await uploadReportScreenshot(shot.file).catch(() => ({ error: "upload failed" }));
+          setUploading(false);
+          // A screenshot is a bonus — if it can't be stored, the report
+          // itself must still go through.
+          if ("error" in upload) setShotFailed(true);
+          else screenshotUrl = upload.url;
+        }
+
+        const formData = new FormData();
+        formData.set("title", title.trim());
+        formData.set("description", desc.trim());
+        formData.set("screenshotUrl", screenshotUrl);
+
+        const result =
+          category === "Feature" ? await submitFeatureRequest(formData) : await submitBugReport(formData);
+        if ("error" in result) {
+          setFormError(result.error);
           return;
         }
-        screenshotUrl = upload.url;
-      }
 
-      const formData = new FormData();
-      formData.set("title", title.trim());
-      formData.set("description", desc.trim());
-      formData.set("screenshotUrl", screenshotUrl);
-
-      const result =
-        category === "Feature" ? await submitFeatureRequest(formData) : await submitBugReport(formData);
-      if ("error" in result) {
-        setFormError(result.error);
-        return;
+        const report = result.report;
+        if (report) {
+          setTicket(report.ticket);
+          setNewId(report.id);
+          setLocal((prev) => [
+            {
+              id: report.id,
+              ticket: report.ticket,
+              title: report.title,
+              dateLabel: new Date().toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                timeZone: "Asia/Kolkata",
+              }),
+              kind: report.kind,
+              statusLabel: "Open",
+              tone: "open",
+            },
+            ...prev,
+          ]);
+        }
+        try {
+          localStorage.removeItem(DRAFT_KEY);
+        } catch {}
+        setView("success");
+      } catch {
+        setUploading(false);
+        setFormError("Couldn't send that just now. Your message is saved — try again in a moment.");
       }
-
-      const report = result.report;
-      if (report) {
-        setTicket(report.ticket);
-        setNewId(report.id);
-        setLocal((prev) => [
-          {
-            id: report.id,
-            ticket: report.ticket,
-            title: report.title,
-            dateLabel: new Date().toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-              timeZone: "Asia/Kolkata",
-            }),
-            kind: report.kind,
-            statusLabel: "Open",
-            tone: "open",
-          },
-          ...prev,
-        ]);
-      }
-      setView("success");
     });
   }
 
@@ -224,6 +259,7 @@ export function ReportPage({ initialReports }: { initialReports: ReportItem[] })
     setTitleErr(false);
     setDescErr(false);
     setFormError(null);
+    setShotFailed(false);
     removeShot();
     setView("form");
   }
@@ -252,7 +288,21 @@ export function ReportPage({ initialReports }: { initialReports: ReportItem[] })
           <div className={styles.reportBox}>
             {view === "form" ? (
               <form onSubmit={submit} noValidate>
-                {formError && <div className={styles.formError}>{formError}</div>}
+                {formError && (
+                  <div className={styles.formError}>
+                    {formError}
+                    {SUPPORT_EMAIL && (
+                      <>
+                        {" "}
+                        Still stuck? Email{" "}
+                        <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: "var(--blue)" }}>
+                          {SUPPORT_EMAIL}
+                        </a>
+                        .
+                      </>
+                    )}
+                  </div>
+                )}
 
                 <div className={styles.field}>
                   <span className={styles.fieldLabel}>What Is This About?</span>
@@ -353,6 +403,12 @@ export function ReportPage({ initialReports }: { initialReports: ReportItem[] })
                   Ticket <b>{ticket}</b> logged.
                   <br />
                   {copy.successNote}
+                  {shotFailed && (
+                    <>
+                      <br />
+                      Your screenshot couldn&apos;t be attached, but the report is in.
+                    </>
+                  )}
                 </div>
                 <button type="button" className={styles.successDone} onClick={reset}>
                   Done

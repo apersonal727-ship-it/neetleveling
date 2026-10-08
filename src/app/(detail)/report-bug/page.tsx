@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getCurrentProfile } from "@/lib/current-profile";
+import { getSupportProfile } from "@/lib/support-profile";
 import { prisma } from "@/lib/prisma";
 import { ticketCode } from "@/lib/ticket";
 import { SideNav } from "@/components/app/SideNav";
@@ -36,7 +36,7 @@ function dateLabel(d: Date) {
 }
 
 export default async function ReportBugPage() {
-  const profile = await getCurrentProfile();
+  const profile = await getSupportProfile();
   const [bugReports, featureRequests] = await Promise.all([
     prisma.bugReport.findMany({ where: { profileId: profile.id }, orderBy: { createdAt: "desc" }, take: 30 }),
     prisma.featureRequest.findMany({ where: { profileId: profile.id }, orderBy: { createdAt: "desc" }, take: 30 }),

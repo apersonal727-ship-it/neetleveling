@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { MONTHLY_PRICE, finalizeSuccessfulPayment, markFailedPayment } from "@/lib/payment";
 import { fetchCashfreeOrder, CASHFREE_CHECKOUT_MODE } from "@/lib/cashfree";
 import { PaymentPanel } from "@/components/checkout/PaymentPanel";
+import { SupportLink } from "@/components/app/SupportLink";
 import styles from "../onboarding.module.css";
 
 function nextRenewalLabel() {
@@ -129,6 +130,7 @@ export default async function CheckoutPage({
               <PaymentPanel amountDue={amountDue} mode={CASHFREE_CHECKOUT_MODE} />
             </div>
           </div>
+          <SupportLink />
         </main>
       </div>
     </>
