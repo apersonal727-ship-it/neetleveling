@@ -3,12 +3,14 @@
 import { useMemo, useState, useTransition } from "react";
 import { updateBugReportStatus, updateFeatureRequestStatus } from "@/actions/feedback";
 import type { BugReportStatus, FeatureRequestStatus } from "@/generated/prisma/client";
+import { ticketCode } from "@/lib/ticket";
 import styles from "@/app/admin/admin.module.css";
 
 type BugReport = {
   id: string;
   title: string;
   description: string;
+  screenshotUrl: string | null;
   status: BugReportStatus;
   createdAt: string;
   hunterName: string;
@@ -120,7 +122,15 @@ export function FeedbackManager({
                   <div className={styles.breqTitle}>{b.title}</div>
                   <div className={styles.breqDesc}>{b.description}</div>
                   <div className={styles.breqMeta}>
-                    {b.hunterName} · {new Date(b.createdAt).toLocaleDateString("en-IN")}
+                    {ticketCode(b.id)} · {b.hunterName} · {new Date(b.createdAt).toLocaleDateString("en-IN")}
+                    {b.screenshotUrl && (
+                      <>
+                        {" · "}
+                        <a href={b.screenshotUrl} target="_blank" rel="noreferrer" style={{ color: "var(--blue)" }}>
+                          Screenshot
+                        </a>
+                      </>
+                    )}
                   </div>
                 </div>
                 <select
@@ -183,7 +193,7 @@ export function FeedbackManager({
                   <div className={styles.breqTitle}>{f.title}</div>
                   <div className={styles.breqDesc}>{f.description}</div>
                   <div className={styles.breqMeta}>
-                    {f.hunterName} · {new Date(f.createdAt).toLocaleDateString("en-IN")}
+                    {ticketCode(f.id)} · {f.hunterName} · {new Date(f.createdAt).toLocaleDateString("en-IN")}
                   </div>
                 </div>
                 <select

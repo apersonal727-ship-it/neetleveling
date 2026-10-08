@@ -37,6 +37,7 @@ export default async function AdminFeedbackPage() {
           id: b.id,
           title: b.title,
           description: b.description,
+          screenshotUrl: b.screenshotUrl,
           status: b.status,
           createdAt: b.createdAt.toISOString(),
           hunterName: b.profile.name,

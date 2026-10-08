@@ -5,9 +5,16 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { ticketCode } from "@/lib/ticket";
 import type { BugReportStatus, FeatureRequestStatus } from "@/generated/prisma/client";
 
-export type FeedbackResult = { error: string } | { success: true };
+export type SubmittedReport = {
+  id: string;
+  ticket: string;
+  title: string;
+  kind: "Bug" | "Feature";
+};
+export type FeedbackResult = { error: string } | { success: true; report?: SubmittedReport };
 export type ActionResult = { error: string } | { success: true };
 
 const SCREENSHOT_BUCKET = "report-screenshots";
@@ -49,15 +56,16 @@ export async function submitBugReport(formData: FormData): Promise<FeedbackResul
   const description = String(formData.get("description") ?? "").trim();
   const screenshotUrl = String(formData.get("screenshotUrl") ?? "").trim() || null;
 
-  if (!title) return { error: "Give the bug a short title." };
-  if (!description) return { error: "Describe what happened." };
+  if (title.length < 4) return { error: "Give it a short title so we know what it's about." };
+  if (description.length < 8) return { error: "A quick description helps us fix it faster." };
 
-  await prisma.bugReport.create({
+  const created = await prisma.bugReport.create({
     data: { profileId: profile.id, title, description, screenshotUrl },
   });
 
   revalidatePath("/report-bug");
-  return { success: true };
+  revalidatePath("/admin/feedback");
+  return { success: true, report: { id: created.id, ticket: ticketCode(created.id), title, kind: "Bug" } };
 }
 
 export async function submitFeatureRequest(formData: FormData): Promise<FeedbackResult> {
@@ -66,15 +74,17 @@ export async function submitFeatureRequest(formData: FormData): Promise<Feedback
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
 
-  if (!title) return { error: "Give your idea a short title." };
-  if (!description) return { error: "Describe what you'd want." };
+  if (title.length < 4) return { error: "Give your idea a short title." };
+  if (description.length < 8) return { error: "Tell us a bit more so we can understand the idea." };
 
-  await prisma.featureRequest.create({
+  const created = await prisma.featureRequest.create({
     data: { profileId: profile.id, title, description },
   });
 
+  revalidatePath("/report-bug");
   revalidatePath("/feature-requests");
-  return { success: true };
+  revalidatePath("/admin/feedback");
+  return { success: true, report: { id: created.id, ticket: ticketCode(created.id), title, kind: "Feature" } };
 }
 
 // ── Admin triage ───────────────────────────────────────────────
@@ -98,7 +108,10 @@ export async function updateBugReportStatus(
     });
   }
 
+  // The hunter sees this status on their own report list — a different
+  // route, so it needs its own refresh or it keeps showing the old status.
   revalidatePath("/admin/feedback");
+  revalidatePath("/report-bug");
   return { success: true };
 }
 
@@ -121,6 +134,9 @@ export async function updateFeatureRequestStatus(
     });
   }
 
+  // The hunter sees this status on their own report list — a different
+  // route, so it needs its own refresh or it keeps showing the old status.
   revalidatePath("/admin/feedback");
+  revalidatePath("/report-bug");
   return { success: true };
 }
