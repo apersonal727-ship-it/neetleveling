@@ -5,10 +5,13 @@ import styles from "@/app/(app)/quests/quests.module.css";
 export function QuestRow({
   quest,
   done,
+  streak,
 }: {
-  quest: { id: string; title: string; durationMinutes: number };
+  quest: { id: string; title: string; durationMinutes: number; xpOverride: number | null };
   done: boolean;
+  streak: number;
 }) {
+  const xpReward = quest.xpOverride ?? Math.round(quest.durationMinutes * 0.67);
   const row = (
     <div className={styles.questRow}>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -33,6 +36,10 @@ export function QuestRow({
     <StartSessionButton
       action={startQuestSession.bind(null, quest.id)}
       style={{ all: "unset", cursor: "pointer", display: "block", width: "100%" }}
+      questName={quest.title}
+      durationMinutes={quest.durationMinutes}
+      xpReward={xpReward}
+      streak={streak}
     >
       {row}
     </StartSessionButton>

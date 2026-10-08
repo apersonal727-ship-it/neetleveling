@@ -24,15 +24,4 @@ export const CATEGORIES = [
     color: "#3ddc84",
     icon: <path d="M12 21S4 14.5 4 8.8A4.8 4.8 0 0 1 12 5a4.8 4.8 0 0 1 8 3.8C20 14.5 12 21 12 21Z" />,
   },
-  {
-    subject: "DISCIPLINE" as const,
-    name: "Discipline",
-    color: "#8fe8ff",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v5l3.5 2" />
-      </>
-    ),
-  },
 ];

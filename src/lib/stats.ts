@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { isPracticeQuest } from "@/lib/progressive-overload";
-import { questDayStart, questDayEnd } from "@/lib/quest-day";
+import { getVanityHunterCount, getHuntersOnline } from "@/lib/vanity-stats";
 
 const HOUR_REFERENCE = 10; // matches the History page's 10-hour reference bar
 const CLASS_SUBJECTS = new Set(["PHYSICS", "CHEMISTRY", "BIOLOGY"]);
@@ -29,7 +29,6 @@ export async function getStatBars(profileId: string) {
       (minutesBySubject.CHEMISTRY ?? 0) +
       (minutesBySubject.BIOLOGY ?? 0)) /
     60;
-  const disHours = (minutesBySubject.DISCIPLINE ?? 0) / 60;
 
   const focusSessions = await prisma.questSession.aggregate({
     where: { profileId, kind: "QUEST", status: "COMPLETED" },
@@ -47,7 +46,6 @@ export async function getStatBars(profileId: string) {
 
   return [
     { key: "INT", name: "Physics · Chem · Bio hours", pct: hoursToPct(intHours) },
-    { key: "DIS", name: "Wake time · no-phone hours", pct: hoursToPct(disHours) },
     { key: "VIT", name: "Sleep · exercise · diet", pct: 0 },
     { key: "FOC", name: "Deep-work blocks", pct: hoursToPct(focHours) },
     { key: "PER", name: "Streak · consistency", pct: perPct },
@@ -84,18 +82,17 @@ export async function getHunterProgressStats(profileId: string) {
   };
 }
 
-// The two real numbers behind the dashboard's "System Network" panel — total
-// registered hunters and quests actually cleared across everyone today.
-// "Hunters Online" / "In Focus Mode" have no live presence tracking behind
-// them, so those stay client-side flavor ticks (matching the homepage's own
-// animated counters) rather than being faked here as real aggregates.
+// The dashboard's "Online / Total Hunters" line — neither number is real
+// (real signups are still ~0 pre-launch); both are the same deterministic
+// FOMO figures shown on the homepage (see @/lib/vanity-stats), pure
+// functions of wall-clock time computed identically for every viewer, so
+// two people can never catch a mismatch by comparing numbers. totalHunters
+// is the homepage's own running total; huntersOnline is a time-of-day-
+// shaped fraction of it. Computed server-side so the very first paint
+// already matches what the client-side live poll (NetworkPulseLine) keeps
+// it in sync with afterwards.
 export async function getSystemNetworkStats() {
-  const [totalHunters, clearedToday] = await Promise.all([
-    prisma.profile.count(),
-    prisma.questCompletion.count({
-      where: { completedAt: { gte: questDayStart(), lt: questDayEnd() } },
-    }),
-  ]);
-
-  return { totalHunters, clearedToday };
+  const now = Date.now();
+  const totalHunters = getVanityHunterCount(now);
+  return { totalHunters, huntersOnline: getHuntersOnline(totalHunters, now) };
 }

@@ -1,0 +1,370 @@
+.personalBox {
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  background: var(--panel);
+}
+.personalEmpty {
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--slate);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+.personalEmpty .ic {
+  font-size: 22px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+  color: var(--violet);
+}
+
+.pQuestItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px dashed var(--border);
+}
+.pQuestItem:last-child {
+  border-bottom: none;
+}
+
+/* Completion-rate ring */
+.ringWrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+}
+.ringSvg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.ringTrack {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 4;
+}
+.ringFill {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.ringFill.high {
+  stroke: var(--green);
+  filter: drop-shadow(0 0 4px rgba(61, 220, 132, 0.5));
+}
+.ringFill.low {
+  stroke: var(--red);
+  filter: drop-shadow(0 0 4px rgba(255, 77, 94, 0.5));
+}
+.ringPct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+}
+.ringPct.high {
+  color: var(--green);
+}
+.ringPct.low {
+  color: var(--red);
+}
+.ringFresh {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--slate);
+  opacity: 0.6;
+}
+
+.pInfo {
+  flex: 1;
+  min-width: 0;
+}
+.pInfo .qname {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+}
+.pInfo .qtime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--slate);
+}
+.pInfo .qtime .d {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--violet);
+}
+.pCompletion {
+  margin-top: 5px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  color: var(--slate);
+}
+.pCompletion.high {
+  color: var(--green);
+}
+.pCompletion.low {
+  color: var(--red);
+}
+.syncedNote {
+  margin-top: 6px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  color: var(--blue-dim);
+}
+
+.pActions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.pRemove {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  color: var(--slate);
+  cursor: pointer;
+  font-size: 14px;
+  background: none;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.pRemove:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.tagBadge {
+  display: inline-block;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  text-transform: uppercase;
+  border: 1px solid;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.tagBadge.mand {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.tagBadge.opt {
+  color: var(--violet);
+  border-color: var(--violet);
+}
+.tagBadge.daily {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+.tagBadge.once {
+  color: var(--slate);
+  border-color: var(--border);
+}
+
+/* Add-quest button — hidden entirely on desktop, where the form is always open */
+.addQuestBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px dashed var(--blue-dim);
+  background: rgba(79, 216, 255, 0.04);
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  letter-spacing: 0.03em;
+  color: var(--blue);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.addQuestBtn:hover {
+  background: rgba(79, 216, 255, 0.1);
+  box-shadow: 0 0 16px rgba(79, 216, 255, 0.2);
+}
+
+/* Add-quest form — closed by default on mobile (toggled via .show), forced
+   permanently open on desktop (see the 900px block at the bottom), where it
+   sits sticky in the page's right column instead of behind a button. */
+.addForm {
+  display: none;
+  margin-top: 14px;
+  border: 1px solid var(--violet);
+  background: var(--panel);
+  padding: 20px;
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+.addForm.show {
+  display: block;
+}
+.addFormTitle {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--violet);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.formRow {
+  margin-bottom: 14px;
+}
+.formRow label {
+  display: block;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--slate);
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+.formRow input,
+.formRow select {
+  width: 100%;
+  padding: 11px 13px;
+  background: var(--void);
+  border: 1px solid var(--border);
+  color: var(--ice);
+  font-family: var(--font-body), sans-serif;
+  font-size: 14px;
+}
+.formRow input:focus,
+.formRow select:focus {
+  outline: none;
+  border-color: var(--violet);
+}
+
+.toggleGroup {
+  display: flex;
+  gap: 8px;
+}
+.toggleBtn {
+  flex: 1;
+  padding: 10px 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+  background: var(--void);
+  color: var(--slate);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.toggleBtn.active.mand {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(245, 197, 66, 0.08);
+}
+.toggleBtn.active.opt {
+  border-color: var(--violet);
+  color: var(--violet);
+  background: rgba(139, 92, 246, 0.08);
+}
+.toggleBtn.active.daily {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(79, 216, 255, 0.08);
+}
+.toggleBtn.active.once {
+  border-color: var(--violet);
+  color: var(--violet);
+  background: rgba(139, 92, 246, 0.08);
+}
+.formHint {
+  margin-top: 8px;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+  line-height: 1.5;
+}
+.formHint.warn {
+  color: var(--gold);
+}
+
+.formBtns {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+.formSubmit {
+  flex: 1;
+  padding: 12px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--void);
+  background: var(--violet);
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.formSubmit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.formCancel {
+  padding: 12px 18px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--slate);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.formError {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--red-2);
+  margin-top: 10px;
+}
+
+@media (min-width: 900px) {
+  .pQuestItem {
+    padding: 18px 20px;
+  }
+  .addQuestBtn {
+    display: none !important;
+  }
+  .addForm {
+    display: block !important;
+    margin-top: 0;
+  }
+  .formCancel {
+    display: none;
+  }
+}

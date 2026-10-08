@@ -31,7 +31,12 @@ export async function addPersonalQuest(formData: FormData): Promise<PersonalQues
     },
   });
 
+  // Personal quests now render on both pages (Dashboard: view/launch,
+  // Quests: manage) — revalidatePath only invalidates the given leaf route
+  // and its own layout ancestors, never a sibling route, so both need an
+  // explicit call or one page can keep showing pre-add/delete data.
   revalidatePath("/quests");
+  revalidatePath("/dashboard");
   return { success: true };
 }
 
@@ -48,5 +53,6 @@ export async function deletePersonalQuest(personalQuestId: string): Promise<Pers
   ]);
 
   revalidatePath("/quests");
+  revalidatePath("/dashboard");
   return { success: true };
 }

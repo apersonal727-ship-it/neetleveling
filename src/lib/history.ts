@@ -43,7 +43,6 @@ export async function getSubjectHours(profileId: string) {
     { key: "PHYSICS", label: "Physics" },
     { key: "CHEMISTRY", label: "Chemistry" },
     { key: "BIOLOGY", label: "Biology" },
-    { key: "DISCIPLINE", label: "Discipline" },
   ];
 
   return subjects.map((s) => {

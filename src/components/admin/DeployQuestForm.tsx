@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { deployQuest } from "@/actions/admin";
 import styles from "@/app/admin/admin.module.css";
 
-const SUBJECTS = ["PHYSICS", "CHEMISTRY", "BIOLOGY", "DISCIPLINE", "SECRET"];
+const SUBJECTS = ["PHYSICS", "CHEMISTRY", "BIOLOGY"];
 const RANKS = ["E", "D", "C", "B", "A"];
 
 function parseDuration(str: string) {

@@ -26,6 +26,12 @@ model Profile {
   lastStreakDate DateTime?
   locked         Boolean   @default(false)
   penaltyStreak  Int       @default(0)
+  // Last time this hunter's dashboard actually rendered — gates the
+  // "New quest has arrived" toast to genuinely new information (an admin
+  // broadcast since this timestamp, or this being the first visit since the
+  // 5 AM IST reset) instead of firing on every refresh. See
+  // getDashboardToastMessage in @/lib/dashboard-toast.
+  lastDashboardSeenAt DateTime?
   walletCredit   Int       @default(0)
   referralCode   String    @unique
   referredByCode String?
@@ -79,8 +85,6 @@ enum QuestSubject {
   PHYSICS
   CHEMISTRY
   BIOLOGY
-  DISCIPLINE
-  SECRET
 }
 
 enum QuestAssignScope {

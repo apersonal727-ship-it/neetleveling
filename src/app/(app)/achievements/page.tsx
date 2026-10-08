@@ -25,12 +25,6 @@ const ICONS: Record<Badge["icon"], React.ReactNode> = {
       <path d="M8.6 10.5 15.4 6.5M8.6 13.5l6.8 4" />
     </>
   ),
-  sun: (
-    <>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v5l3.5 2" />
-    </>
-  ),
   warning: (
     <>
       <path d="M12 9v4M12 17h.01" />

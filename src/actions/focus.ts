@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
 import { maybeIncrementStreak } from "@/lib/streaks";
@@ -139,6 +140,11 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
 
   const openQuests = await getOpenMandatoryQuests(profile.id, afterProgress.level, updated.streak);
 
+  // The Dashboard shows this quest's done state and the combined progress
+  // count — without this, returning there after completion (router.push)
+  // could still render the pre-completion snapshot.
+  revalidatePath("/dashboard");
+
   return {
     success: true,
     xpAwarded,
@@ -212,6 +218,11 @@ export async function completePunishmentSession(sessionId: string): Promise<Comp
   });
 
   const rank = rankForLevel(getLevelProgress(profile.xp).level).code;
+
+  // /locked re-fetches its own data on every render regardless, but
+  // /dashboard needs an explicit nudge once the account actually unlocks.
+  revalidatePath("/dashboard");
+
   return {
     success: true,
     xpAwarded: 0,
@@ -264,14 +275,25 @@ export async function completePersonalQuestSession(sessionId: string): Promise<C
     }),
   ]);
 
-  const level = getLevelProgress(profile.xp).level;
+  // This may have been the last mandatory item of the day — a hunter who
+  // clears their system quests first and the personal one last would
+  // otherwise never get the streak credited.
+  await maybeIncrementStreak(profile.id);
+  const updated = await prisma.profile.findUniqueOrThrow({ where: { id: profile.id } });
+
+  const level = getLevelProgress(updated.xp).level;
   const rank = rankForLevel(level).code;
-  const openQuests = await getOpenMandatoryQuests(profile.id, level, profile.streak);
+  const openQuests = await getOpenMandatoryQuests(profile.id, level, updated.streak);
+
+  // Dashboard shows this quest's done state; Quest Management shows its
+  // completion-rate ring, which just changed too — both need a nudge.
+  revalidatePath("/dashboard");
+  revalidatePath("/quests");
 
   return {
     success: true,
     xpAwarded: 0,
-    streak: profile.streak,
+    streak: updated.streak,
     leveledUp: false,
     newLevel: level,
     rankedUp: false,

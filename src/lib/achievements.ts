@@ -6,7 +6,7 @@ export type Badge = {
   name: string;
   unlocked: boolean;
   progress?: string;
-  icon: "flame" | "shield" | "scroll" | "network" | "sun" | "warning";
+  icon: "flame" | "shield" | "scroll" | "network" | "warning";
 };
 
 export async function getBadges(profileId: string) {
@@ -14,9 +14,6 @@ export async function getBadges(profileId: string) {
   const level = getLevelProgress(profile.xp).level;
 
   const questsCompleted = await prisma.questCompletion.count({ where: { profileId } });
-  const disciplineCompletions = await prisma.questCompletion.count({
-    where: { profileId, quest: { subject: "DISCIPLINE" } },
-  });
   const referralCount = await prisma.profile.count({
     where: { referredByCode: profile.referralCode },
   });
@@ -83,13 +80,6 @@ export async function getBadges(profileId: string) {
       icon: "network",
       unlocked: referralCount >= 10,
       progress: `${referralCount}/10`,
-    },
-    {
-      key: "discipline-5",
-      name: "5 AM Club",
-      icon: "sun",
-      unlocked: disciplineCompletions >= 5,
-      progress: disciplineCompletions < 5 ? `${disciplineCompletions}/5` : undefined,
     },
     {
       key: "comeback",

@@ -99,7 +99,10 @@ export default async function LockedPage() {
                         action={startPunishmentSession.bind(null, lp.punishmentQuestId)}
                         className={`${styles.btn} ${styles.btnUnlock}`}
                         style={{ width: "100%" }}
-                        message="Once you begin, the timer can't be paused, abandoned, or backed out of until it ends."
+                        questName={`${reps} ${lp.punishmentQuest.title}`}
+                        durationMinutes={durationMinutes}
+                        xpReward={0}
+                        streak={profile.streak}
                       >
                         Start
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -142,7 +145,7 @@ export default async function LockedPage() {
               <rect x="3" y="3" width="18" height="18" rx="4" />
               <path d="M8 13l2.5 2.5L16 9" />
             </svg>
-            <span>STATUS</span>
+            <span>DASHBOARD</span>
             <svg className={styles.miniLock} viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3Z" />
             </svg>

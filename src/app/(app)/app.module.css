@@ -11,14 +11,8 @@
 }
 
 .header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: rgba(5, 7, 13, 0.85);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  padding: var(--sp-3) var(--gutter);
-  padding-top: max(var(--sp-3), env(safe-area-inset-top));
+  padding: 18px var(--gutter);
+  padding-top: max(18px, env(safe-area-inset-top));
 }
 .topRow {
   display: flex;
@@ -234,8 +228,7 @@
     padding-left: 96px;
   }
   .header {
-    padding-left: 48px;
-    padding-right: 48px;
+    padding: 48px 48px 22px;
   }
   .main {
     padding: 48px 48px calc(96px + env(safe-area-inset-bottom));

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "@/app/focus-lock/focus-lock.module.css";
+import { CATEGORIES } from "@/lib/quest-categories";
+import { QuestCompleteOverlay } from "./QuestCompleteOverlay";
 import {
   completeQuestSession,
   completePunishmentSession,
@@ -18,8 +20,6 @@ const SUBJECT_COLOR: Record<string, string> = {
   PHYSICS: "#8fe8ff",
   CHEMISTRY: "#ffb84f",
   BIOLOGY: "#3ddc84",
-  DISCIPLINE: "#8fe8ff",
-  SECRET: "#8b5cf6",
 };
 
 function fmt(totalSeconds: number) {
@@ -66,7 +66,6 @@ export function FocusLockView({
   const [completing, setCompleting] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
-  const [xpCounter, setXpCounter] = useState(0);
   const [returnHref, setReturnHref] = useState("/dashboard");
   const [questsLeftToday, setQuestsLeftToday] = useState<number | null>(null);
   const [punishmentsRemaining, setPunishmentsRemaining] = useState<number | null>(null);
@@ -80,6 +79,15 @@ export function FocusLockView({
     const iv = setInterval(tick, 1000);
     return () => clearInterval(iv);
   }, [durationSeconds, startedAtMs]);
+
+  // Ask once, up front, so a completion that lands while the hunter is away
+  // from the screen (studying off physical books, phone locked) can still
+  // surface a system notification instead of going silently uncredited
+  // until they next open the tab.
+  useEffect(() => {
+    if (typeof Notification === "undefined") return;
+    if (Notification.permission === "default") Notification.requestPermission();
+  }, []);
 
   useEffect(() => {
     if (remaining > 0 || completingRef.current || completed) return;
@@ -113,29 +121,23 @@ export function FocusLockView({
       setPunishmentsRemaining(result.punishmentsRemaining);
       setQuestsLeftToday(result.questsLeftToday);
       setCompleted(true);
+
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        new Notification(isPunishment ? "Protocol cleared" : "Focus Mode complete", {
+          body: isPunishment
+            ? `${title} done — check the app.`
+            : isPersonal
+              ? `${title} done.`
+              : `${title} done · +${xpAwarded} XP`,
+          icon: "/favicon.ico",
+        });
+      }
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate([200, 100, 200]);
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remaining, completed]);
-
-  useEffect(() => {
-    if (!completed || isPunishment || isPersonal) return;
-    const dur = 900;
-    const start = performance.now();
-    let raf = 0;
-    function step(now: number) {
-      const p = Math.min(1, (now - start) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setXpCounter(Math.floor(eased * xpAwarded));
-      if (p < 1) raf = requestAnimationFrame(step);
-    }
-    const t = setTimeout(() => {
-      raf = requestAnimationFrame(step);
-    }, 550);
-    return () => {
-      clearTimeout(t);
-      cancelAnimationFrame(raf);
-    };
-  }, [completed, isPunishment, xpAwarded]);
 
   useEffect(() => {
     function handler(e: BeforeUnloadEvent) {
@@ -178,18 +180,21 @@ export function FocusLockView({
     <>
       <div className="systemBackdrop" />
       <div className={styles.app}>
-        <header className={styles.header}>
-          <span className={styles.lockPill}>
-            <span className={styles.dot} /> Focus Lock Active
-          </span>
-        </header>
-
         <main className={styles.main}>
+          <span className={styles.lockPill}>
+            <span className={styles.dot} /> Focus Mode Active
+          </span>
+
           {subject ? (
             <span
               className={styles.subjBadge}
               style={{ "--sc": SUBJECT_COLOR[subject] ?? "var(--blue-2)" } as React.CSSProperties}
             >
+              {CATEGORIES.find((c) => c.subject === subject) && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  {CATEGORIES.find((c) => c.subject === subject)!.icon}
+                </svg>
+              )}
               {category}
             </span>
           ) : (
@@ -216,9 +221,7 @@ export function FocusLockView({
             </svg>
             <div className={styles.ringCenter}>
               <div className={styles.ringTime}>{fmt(remaining)}</div>
-              <div className={styles.ringLabel}>
-                {completing ? "Closing out…" : "Time remaining"}
-              </div>
+              <div className={styles.ringLabel}>{completing ? "Closing out…" : "Remaining"}</div>
             </div>
           </div>
 
@@ -233,94 +236,33 @@ export function FocusLockView({
           </p>
           </div>
 
-          <div className={styles.warnCard}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--red)" }}>
-              <path d="M12 9v4M12 17h.01" />
-              <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
-            </svg>
-            <p>&quot;No pausing, no early exit — the timer decides when you&apos;re free.&quot;</p>
-          </div>
-
           {!completed && (
-            <div>
-              <button
-                type="button"
-                className={`${styles.exitLockedBtn} ${shaking ? styles.shake : ""}`}
-                onClick={() => {
-                  setShaking(false);
-                  requestAnimationFrame(() => setShaking(true));
-                }}
-              >
-                🔒 Exit Locked
-              </button>
-              <div className={styles.exitNote}>Unlocks automatically when the timer hits zero.</div>
-            </div>
+            <button
+              type="button"
+              className={`${styles.exitLockedBtn} ${shaking ? styles.shake : ""}`}
+              onClick={() => {
+                setShaking(false);
+                requestAnimationFrame(() => setShaking(true));
+              }}
+            >
+              🔒 Exit Locked
+            </button>
           )}
+
+          <p className={styles.warnCard}>No pausing, no early exit — the timer decides when you&apos;re free.</p>
         </main>
       </div>
 
-      <div className={styles.completeOverlay} style={{ display: completed ? "flex" : "none" }}>
-        <div className={styles.cmpRings}>
-          <div className={styles.cmpRing} />
-          <div className={styles.cmpRing} />
-          <div className={styles.cmpRing} />
-          <div className={styles.cmpBadge}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M12 2 4 6v6c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-4Z" />
-              <path d="m9 12 2 2 4-4" />
-            </svg>
-          </div>
-        </div>
-        <span className={styles.cmpEyebrow}>
-          {isPunishment ? "Protocol cleared" : isPersonal ? "Personal quest closed out" : "Quest closed out"}
-        </span>
-        <h1>
-          {isPunishment
-            ? punishmentsRemaining === 0
-              ? "Access Regained."
-              : `${title} Cleared.`
-            : `${category} Complete`}
-        </h1>
-        <div className={styles.cmpMeta}>
-          {title.toUpperCase()} · {fmt(durationSeconds).replace(/^00:/, "")}
-        </div>
-        {isPunishment && punishmentsRemaining !== null && punishmentsRemaining > 0 && (
-          <div className={styles.cmpRemaining}>
-            {punishmentsRemaining} more protocol{punishmentsRemaining === 1 ? "" : "s"} to go
-          </div>
-        )}
-        {!isPunishment && !isPersonal && (
-          <div className={styles.xpCounterWrap}>
-            <div className={styles.xpCounter}>+{xpCounter}</div>
-            <div className={styles.xpCounterLbl}>XP credited</div>
-          </div>
-        )}
-        {!isPunishment && !isPersonal && streak > 0 && (
-          <div className={styles.streakLine}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M12 2c0 0-5 4.5-5 10a5 5 0 0 0 10 0c0-1.2-.4-2-1-2.8.1 1-.3 1.8-1 2.3.3-2.5-1-4-1.6-5.2C13.5 4.5 13.4 3 12 2Z" />
-            </svg>
-            Streak day {streak}
-          </div>
-        )}
-        {!isPunishment && questsLeftToday !== null && (
-          <div className={styles.cmpRemaining}>
-            {questsLeftToday === 0
-              ? "All quests cleared today"
-              : `${questsLeftToday} quest${questsLeftToday === 1 ? "" : "s"} left today`}
-          </div>
-        )}
-        <button
-          type="button"
-          className={styles.btnReturn}
-          onClick={() => router.push(returnHref)}
-        >
-          {isPunishment && (punishmentsRemaining ?? 0) > 0 ? "Continue Protocols" : "Return To Dashboard"}
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </button>
-      </div>
+      {completed && (
+        <QuestCompleteOverlay
+          kind={kind}
+          xpAwarded={xpAwarded}
+          streak={streak}
+          questsLeftToday={questsLeftToday}
+          punishmentsRemaining={punishmentsRemaining}
+          onContinue={() => router.push(returnHref)}
+        />
+      )}
     </>
   );
 }

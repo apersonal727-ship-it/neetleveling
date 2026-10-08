@@ -25,6 +25,23 @@ export function isPracticeQuest(title: string): boolean {
   return title.includes("Practice");
 }
 
+const FORECAST_SUBJECTS = ["PHYSICS", "CHEMISTRY", "BIOLOGY"] as const;
+
+// Previews tomorrow's practice-quest load assuming today's streak holds
+// (i.e. streak + 1) — an honest "if you keep it going" preview, not a
+// promise, since the real count only locks in once today's quests actually
+// clear and the streak increments tonight. Reuses progressiveQuestionCount
+// directly so this can never drift from the real ramp hunters actually see.
+export function tomorrowForecast(streak: number): Record<(typeof FORECAST_SUBJECTS)[number], { count: number; cap: number }> {
+  const nextStreak = Math.max(0, streak) + 1;
+  return Object.fromEntries(
+    FORECAST_SUBJECTS.map((subject) => [
+      subject,
+      { count: progressiveQuestionCount(nextStreak, subject), cap: capForSubject(subject) },
+    ]),
+  ) as Record<(typeof FORECAST_SUBJECTS)[number], { count: number; cap: number }>;
+}
+
 // 1 minute per question — duration rides the same ramp as the question count.
 export function practiceQuestDurationMinutes(streak: number, subject: string): number {
   return progressiveQuestionCount(streak, subject);

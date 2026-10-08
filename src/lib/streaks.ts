@@ -45,6 +45,20 @@ export async function maybeIncrementStreak(profileId: string) {
 
   if (completedCount < todaysQuests.length) return;
 
+  // Mandatory personal quests gate the day exactly like system quests do —
+  // every DAILY one, plus a ONCE one on the day it was created (its only due
+  // day). Same definition as getPersonalQuests' countsToday, so the streak,
+  // the day-clear screen, and the counters can't disagree.
+  const mandatoryToday = await prisma.personalQuest.findMany({
+    where: {
+      profileId,
+      mandatory: true,
+      OR: [{ frequency: "DAILY" }, { frequency: "ONCE", createdAt: { gte: today, lt: tomorrow } }],
+    },
+    select: { completions: { where: { completedAt: { gte: today, lt: tomorrow } }, select: { id: true } } },
+  });
+  if (mandatoryToday.some((q) => q.completions.length === 0)) return;
+
   const newStreak = profile.streak + 1;
   await prisma.profile.update({
     where: { id: profileId },

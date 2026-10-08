@@ -4,14 +4,18 @@ import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { getSystemNetworkStats } from "@/lib/stats";
 import { getTodaysQuests } from "@/lib/todays-quest";
+import { getPersonalQuests } from "@/lib/personal-quests";
+import { getDashboardToastMessage } from "@/lib/dashboard-toast";
 import { TodaysQuestList } from "@/components/app/TodaysQuestList";
-import { SystemNetworkPanel } from "@/components/app/SystemNetworkPanel";
+import { PersonalQuestsPanel } from "@/components/app/PersonalQuestsPanel";
+import { NetworkPulseLine } from "@/components/app/NetworkPulseLine";
 import { SystemToast } from "@/components/app/SystemToast";
 import appStyles from "../app.module.css";
 import styles from "./dashboard.module.css";
+import questsStyles from "../quests/quests.module.css";
 
 export const metadata: Metadata = {
-  title: "Status — NEETLeveling",
+  title: "Dashboard — NEETLeveling",
 };
 
 export default async function DashboardPage({
@@ -25,21 +29,29 @@ export default async function DashboardPage({
   const rank = rankForLevel(progress.level);
   const pct = progress.xpForLevel > 0 ? (progress.xpInLevel / progress.xpForLevel) * 100 : 100;
 
-  const [networkStats, todaysQuests] = await Promise.all([
+  const [networkStats, todaysQuests, personalQuests] = await Promise.all([
     getSystemNetworkStats(),
     getTodaysQuests(profile.id, progress.level),
+    getPersonalQuests(profile.id),
   ]);
 
-  const doneCount = todaysQuests.filter((q) => q.completions.length > 0).length;
+  const mandatoryDailyPersonal = personalQuests.filter((q) => q.countsToday);
+  const doneCount =
+    todaysQuests.filter((q) => q.completions.length > 0).length +
+    mandatoryDailyPersonal.filter((q) => q.done).length;
+  const totalCount = todaysQuests.length + mandatoryDailyPersonal.length;
+  const toastMessage = await getDashboardToastMessage(profile, todaysQuests.length > 0);
 
   return (
     <>
+      <NetworkPulseLine totalHunters={networkStats.totalHunters} huntersOnline={networkStats.huntersOnline} />
+
       {isNew === "true" ? (
         <div className={styles.welcomeBanner}>
           <span className={styles.welcomeDot} /> Hunter registered
         </div>
       ) : (
-        <SystemToast message="New quest has arrived." />
+        toastMessage && <SystemToast message={toastMessage} />
       )}
 
       <div className={styles.dashGrid}>
@@ -81,7 +93,7 @@ export default async function DashboardPage({
 
               <div className={styles.chipRow}>
                 <div className={styles.chip}>
-                  <div className={styles.chipVal}>{profile.streak}</div>
+                  <div className={`${styles.chipVal} ${styles.gold}`}>{profile.streak}</div>
                   <div className={styles.chipLbl}>Day streak</div>
                 </div>
                 <div className={styles.chip}>
@@ -95,11 +107,6 @@ export default async function DashboardPage({
               </div>
             </div>
           </section>
-
-          <SystemNetworkPanel
-            totalHunters={networkStats.totalHunters}
-            clearedToday={networkStats.clearedToday}
-          />
         </div>
 
         <div className={styles.rightCol}>
@@ -110,9 +117,9 @@ export default async function DashboardPage({
             </span>
             <div className={styles.secTitleRow}>
               <span className={styles.secTitle}>Quest Log</span>
-              {todaysQuests.length > 0 && (
+              {totalCount > 0 && (
                 <span className={styles.questDur}>
-                  <b>{doneCount}</b> / {todaysQuests.length} complete
+                  <b>{doneCount}</b> / {totalCount} complete
                 </span>
               )}
             </div>
@@ -130,8 +137,24 @@ export default async function DashboardPage({
                 </div>
               </div>
             ) : (
-              <TodaysQuestList quests={todaysQuests} streak={profile.streak} />
+              <TodaysQuestList
+                quests={todaysQuests}
+                streak={profile.streak}
+                subjects={["PHYSICS", "CHEMISTRY", "BIOLOGY"]}
+              />
             )}
+          </section>
+
+          <section style={{ marginTop: "var(--sp-7)" }}>
+            <span className={`${questsStyles.secTag} ${questsStyles.optional}`}>
+              <span className={questsStyles.dot} />
+              Personal Quests · Self-Added
+            </span>
+            <div className={questsStyles.secTitleRow}>
+              <h2>Your Own Grind</h2>
+              <span className={questsStyles.prog}>{personalQuests.length} added</span>
+            </div>
+            <PersonalQuestsPanel quests={personalQuests} streak={profile.streak} />
           </section>
         </div>
       </div>

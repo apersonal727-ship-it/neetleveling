@@ -64,6 +64,10 @@ export default async function TimeWarningPage() {
                       : startQuestSession.bind(null, q.id)
                   }
                   className={styles.startBtn}
+                  questName={q.title}
+                  durationMinutes={q.durationMinutes}
+                  xpReward={q.xpReward}
+                  streak={profile.streak}
                 >
                   ▶ Start
                 </StartSessionButton>

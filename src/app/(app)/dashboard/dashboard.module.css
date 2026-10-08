@@ -104,26 +104,24 @@
   background: linear-gradient(180deg, rgba(79, 216, 255, 0.06), var(--panel) 55%);
   border-color: var(--blue-dim);
   box-shadow: 0 0 50px rgba(79, 216, 255, 0.1), inset 0 0 40px rgba(79, 216, 255, 0.03);
-  overflow: hidden;
+  clip-path: polygon(0 18px, 18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
 }
 .corner {
   position: absolute;
   width: 14px;
   height: 14px;
-  border: 2px solid var(--blue-2);
+  border: 2px solid var(--blue);
   opacity: 0.7;
-  z-index: 1;
-  pointer-events: none;
 }
 .corner.tl {
-  top: 0;
-  left: 0;
+  top: -1px;
+  left: -1px;
   border-right: none;
   border-bottom: none;
 }
 .corner.br {
-  bottom: 0;
-  right: 0;
+  bottom: -1px;
+  right: -1px;
   border-left: none;
   border-top: none;
 }
@@ -248,6 +246,9 @@
   color: var(--ice);
   line-height: 1;
 }
+.chipVal.gold {
+  color: var(--gold);
+}
 .chipLbl {
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 9.5px;
@@ -257,110 +258,41 @@
   margin-top: 4px;
 }
 
-/* ===== SYSTEM NETWORK ===== */
-.pulsePanel {
-  border: 1px solid var(--border);
-  background: var(--panel-2);
-  margin-top: var(--sp-6);
-  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
-}
-.pulseHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 18px;
-  border-bottom: 1px solid var(--border);
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  color: var(--slate);
-  text-transform: uppercase;
-}
-.pulseLive {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--blue-2);
-}
-.pulseDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--blue-2);
-  box-shadow: 0 0 7px var(--blue-2);
-  animation: pulse 1.6s infinite;
-}
-.pulseGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-}
-@media (max-width: 520px) {
-  .pulseGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.pulseTile {
-  padding: 16px 10px;
-  text-align: center;
-  border-right: 1px dashed var(--border);
-}
-.pulseTile:last-child {
-  border-right: none;
-}
-@media (max-width: 520px) {
-  .pulseTile:nth-child(2) {
-    border-right: none;
-  }
-  .pulseTile:nth-child(3) {
-    border-top: 1px dashed var(--border);
-  }
-  .pulseTile:nth-child(4) {
-    border-top: 1px dashed var(--border);
-  }
-}
-.pulseNum {
+/* ===== NETWORK PULSE LINE ===== */
+.networkLine {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-family: var(--font-rajdhani), sans-serif;
-  font-weight: 700;
-  font-size: 21px;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0 var(--sp-6);
+  font-family: var(--font-body), sans-serif;
+  font-size: 13px;
+  color: var(--slate);
+  text-align: center;
 }
-.pdot {
+.networkDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  flex-shrink: 0;
-  animation: pulse 1.4s infinite;
-}
-.pulseOnline .pdot {
   background: var(--green);
   box-shadow: 0 0 7px var(--green);
+  animation: pulse 1.6s infinite;
+  flex-shrink: 0;
 }
-.pulseOnline .pulseNum {
+.networkVal {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+.networkVal.online {
   color: var(--green);
 }
-.pulseTotal .pulseNum {
+.networkVal.total {
   color: var(--blue-2);
 }
-.pulseDone .pulseNum {
-  color: var(--gold);
-}
-.pulseFocus .pdot {
-  background: var(--violet);
-  box-shadow: 0 0 7px var(--violet);
-}
-.pulseFocus .pulseNum {
-  color: var(--violet);
-}
-.pulseLbl {
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 9.5px;
-  color: var(--slate);
-  text-transform: uppercase;
-  margin-top: 5px;
-  letter-spacing: 0.02em;
+.networkSep {
+  color: var(--border-strong);
 }
 
 /* ===== SECTION HEADS ===== */

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Space_Grotesk } from "next/font/google";
+import { VANITY_BASE, VANITY_EPOCH, TICK_CYCLE_MS, TICK_CYCLE_TOTAL_MS, ticksElapsed, mulberry32 } from "@/lib/vanity-stats";
 import styles from "./page.module.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -17,43 +18,17 @@ function scrollToId(id: string) {
 
 // The homepage's "hunters have already joined" counter and activity feed
 // are entirely fake — real signups are still ~0 pre-launch. Both are
-// driven off the exact same deterministic "tick" schedule below, computed
-// independently by every visitor's own browser with no server call at
-// all. That's what makes this genuinely global (anyone, any device, any
-// future moment computes the same tick count from the same formula — it
-// never resets to VANITY_BASE on a reload or disagrees across tabs) *and*
-// what keeps the counter and the feed perfectly in lockstep (a new feed
-// row and a counter bump only ever happen because the same tick fired).
-//
-// VANITY_EPOCH must never change once this is live — it's the fixed
-// anchor everything is measured from. Moving it would make the number
-// visibly jump (forward or back) for every visitor at once.
-const VANITY_BASE = 10_483;
-const VANITY_EPOCH = new Date("2026-09-22T14:22:25Z").getTime();
-
-// A repeating cycle of gaps (ms) between ticks, not a single fixed
-// interval — a perfectly even beat reads as an obvious loop to anyone
-// watching for a bit. Averages ~2.9min/tick, i.e. ~500 new "hunters"/day —
-// ~25K after a month, ~100K after 6 months. Believable growth, not the
-// ~4s/tick pace this used to run at (which would hit ~670K in a month).
-const TICK_CYCLE_MS = [95_000, 210_000, 135_000, 245_000, 118_000, 183_000, 158_000, 248_000];
-const TICK_CYCLE_TOTAL_MS = TICK_CYCLE_MS.reduce((a, b) => a + b, 0);
-
-// How many ticks have fired since VANITY_EPOCH, as of `nowMs` — O(cycle
-// length) regardless of how much time has elapsed, so this stays cheap
-// forever, not just right after launch.
-function ticksElapsed(nowMs: number) {
-  const elapsed = Math.max(0, nowMs - VANITY_EPOCH);
-  const fullCycles = Math.floor(elapsed / TICK_CYCLE_TOTAL_MS);
-  let remainder = elapsed % TICK_CYCLE_TOTAL_MS;
-  let ticksInCycle = 0;
-  for (const gap of TICK_CYCLE_MS) {
-    if (remainder < gap) break;
-    remainder -= gap;
-    ticksInCycle += 1;
-  }
-  return fullCycles * TICK_CYCLE_MS.length + ticksInCycle;
-}
+// driven off the exact same deterministic "tick" schedule (see
+// @/lib/vanity-stats), computed independently by every visitor's own
+// browser with no server call at all. That's what makes this genuinely
+// global (anyone, any device, any future moment computes the same tick
+// count from the same formula — it never resets to VANITY_BASE on a
+// reload or disagrees across tabs) *and* what keeps the counter and the
+// feed perfectly in lockstep (a new feed row and a counter bump only ever
+// happen because the same tick fired). The dashboard's System Network
+// panel sources its "Total Hunters" from the exact same formula server-side
+// (see getSystemNetworkStats in @/lib/stats), so the number never disagrees
+// between the homepage and the logged-in app.
 
 // Inverse of ticksElapsed: the real wall-clock moment (ms since epoch)
 // that the k-th tick (k >= 1) actually fired at. Used to seed the feed's
@@ -76,16 +51,6 @@ function msAtTick(k: number) {
 // (or the same past tick) see the literal identical row, not two
 // different random ones — the same property that already makes the
 // counter trustworthy, now applied to the feed content too.
-function mulberry32(seed: number) {
-  let a = seed;
-  return function () {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 function maskedTokenForRand(rand: () => number, minLen: number, maxLen: number) {
   const letter = String.fromCharCode(65 + Math.floor(rand() * 26));
   const len = minLen + Math.floor(rand() * (maxLen - minLen + 1));

@@ -6,8 +6,6 @@ const SUBJECT_LABEL: Record<string, string> = {
   PHYSICS: "PHYSICS",
   CHEMISTRY: "CHEMISTRY",
   BIOLOGY: "BIOLOGY",
-  DISCIPLINE: "DISCIPLINE",
-  SECRET: "SECRET",
 };
 
 export function questSubjectLabel(subject: string) {

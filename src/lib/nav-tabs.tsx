@@ -1,7 +1,7 @@
 export const NAV_TABS = [
   {
     href: "/dashboard",
-    label: "STATUS",
+    label: "DASHBOARD",
     icon: (
       <>
         <rect x="3" y="3" width="18" height="18" rx="4" />

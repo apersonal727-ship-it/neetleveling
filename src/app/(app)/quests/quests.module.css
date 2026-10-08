@@ -1,3 +1,104 @@
+/* ===== Quest Management layout ===== */
+.questLayout {
+  display: block;
+}
+@media (min-width: 900px) {
+  .questLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: var(--sp-8);
+    align-items: start;
+  }
+  .questSide {
+    position: sticky;
+    top: 36px;
+  }
+}
+
+/* ===== Incoming — tomorrow's forecast ===== */
+.incomingBox {
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, rgba(79, 216, 255, 0.04), var(--panel) 60%);
+  padding: 22px 22px 20px;
+  margin-bottom: var(--sp-8);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+.incomingHead {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.incomingSub {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--slate);
+  margin-top: 5px;
+  line-height: 1.6;
+  max-width: 340px;
+}
+.barsRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin-top: 26px;
+  height: 74px;
+}
+.barCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  height: 100%;
+  justify-content: flex-end;
+}
+.barVal {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--bc, var(--blue));
+}
+.bar {
+  width: 100%;
+  max-width: 38px;
+  border-radius: 3px 3px 0 0;
+  transform-origin: bottom;
+  background: linear-gradient(180deg, var(--bc, var(--blue)), color-mix(in srgb, var(--bc, var(--blue)) 30%, transparent));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--bc, var(--blue)) 25%, transparent);
+  animation: barRise 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+}
+@keyframes barRise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.barLbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9.5px;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.barCap {
+  font-size: 8px;
+  color: var(--slate);
+  opacity: 0.7;
+}
+@media (min-width: 900px) {
+  .incomingBox {
+    padding: 26px 28px 24px;
+  }
+  .barsRow {
+    height: 96px;
+    gap: 26px;
+  }
+}
+
 .subjectGroup {
   margin-bottom: 22px;
 }
@@ -21,8 +122,8 @@
   height: 16px;
 }
 .subjectBox {
-  background: var(--panel-2);
-  border: 1px solid color-mix(in srgb, var(--c, var(--blue-2)) 25%, var(--border));
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--c, var(--blue-2)) 25%, transparent);
 }
 .questRow {
   display: flex;
@@ -32,7 +133,11 @@
   padding: 16px 18px;
   border-bottom: 1px dashed var(--border);
 }
-.questRow:last-child {
+/* Undone quests render their .questRow inside a <button> wrapper (StartSessionButton),
+   which breaks a plain `.questRow:last-child` check — it's always the wrapper's only
+   child. Cover both the wrapped and unwrapped (completed) cases explicitly. */
+.subjectBox > .questRow:last-child,
+.subjectBox > *:last-child .questRow {
   border-bottom: none;
 }
 @media (min-width: 900px) {
@@ -191,7 +296,7 @@
 
 .personalBox {
   border: 1px solid rgba(139, 92, 246, 0.25);
-  background: var(--panel-2);
+  background: var(--panel);
 }
 .personalEmpty {
   padding: 30px 20px;
@@ -460,44 +565,3 @@
   margin-top: 10px;
 }
 
-.wideCard {
-  padding: var(--sp-5);
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-}
-.wideIcon {
-  width: 46px;
-  height: 46px;
-  clip-path: polygon(0 9px, 9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(184, 146, 255, 0.1);
-  border: 1px solid rgba(184, 146, 255, 0.35);
-  color: var(--violet);
-}
-.wideIconPq {
-  background: rgba(79, 216, 255, 0.1);
-  border-color: var(--border-strong);
-  color: var(--blue-2);
-}
-.wideIcon svg {
-  width: 21px;
-  height: 21px;
-}
-.wideBody {
-  flex: 1;
-}
-.wideTitle {
-  font-family: var(--font-rajdhani), sans-serif;
-  font-weight: 700;
-  font-size: 15.5px;
-}
-.wideSub {
-  font-size: 12.5px;
-  color: var(--slate);
-  margin-top: 3px;
-  line-height: 1.5;
-}

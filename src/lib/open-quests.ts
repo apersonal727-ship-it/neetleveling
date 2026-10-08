@@ -6,6 +6,7 @@ export type OpenQuest = {
   id: string;
   title: string;
   durationMinutes: number;
+  xpReward: number;
   kind: "SYSTEM" | "PERSONAL";
 };
 
@@ -27,11 +28,18 @@ export async function getOpenMandatoryQuests(
   const openSystem: OpenQuest[] = systemQuests
     .filter((q) => q.completions.length === 0)
     .map((q) => applyPracticeOverrides(q, streak))
-    .map((q) => ({ id: q.id, title: q.title, durationMinutes: q.durationMinutes, kind: "SYSTEM" }));
+    .map((q) => ({
+      id: q.id,
+      title: q.title,
+      durationMinutes: q.durationMinutes,
+      xpReward: q.xpOverride ?? Math.round(q.durationMinutes * 0.67),
+      kind: "SYSTEM",
+    }));
 
+  // Personal quests never pay XP (see completePersonalQuestSession).
   const openPersonal: OpenQuest[] = personalQuests
-    .filter((q) => q.mandatory && q.frequency === "DAILY" && !q.done)
-    .map((q) => ({ id: q.id, title: q.title, durationMinutes: q.durationMinutes, kind: "PERSONAL" }));
+    .filter((q) => q.countsToday && !q.done)
+    .map((q) => ({ id: q.id, title: q.title, durationMinutes: q.durationMinutes, xpReward: 0, kind: "PERSONAL" }));
 
   return [...openSystem, ...openPersonal];
 }

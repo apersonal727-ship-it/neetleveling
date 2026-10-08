@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { addQuestTemplate, removeQuestTemplate, toggleQuestTemplateActive } from "@/actions/admin";
 import styles from "@/app/admin/admin.module.css";
 
-const SUBJECTS = ["PHYSICS", "CHEMISTRY", "BIOLOGY", "DISCIPLINE", "SECRET"];
+const SUBJECTS = ["PHYSICS", "CHEMISTRY", "BIOLOGY"];
 
 type Template = {
   id: string;

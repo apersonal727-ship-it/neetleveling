@@ -1,0 +1,70 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: var(--sp-5);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+
+.mark {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--blue);
+  transform: rotate(45deg);
+  position: relative;
+  flex-shrink: 0;
+}
+.mark::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+.title {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.subtitle {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10.5px;
+  color: var(--slate);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+.installBtn {
+  flex-shrink: 0;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  color: var(--bg, #060810);
+  background: var(--blue);
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.closeBtn {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate);
+  background: none;
+  border: none;
+  cursor: pointer;
+}

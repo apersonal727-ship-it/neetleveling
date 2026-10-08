@@ -1,0 +1,274 @@
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes lineIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes unlockIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.75) rotate(-6deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+@keyframes unlockGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 26px rgba(245, 197, 66, 0.45), 0 0 52px rgba(245, 197, 66, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 38px rgba(245, 197, 66, 0.7), 0 0 72px rgba(245, 197, 66, 0.26);
+  }
+}
+@keyframes statusIn {
+  from {
+    opacity: 0;
+    letter-spacing: 0.3em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.05em;
+  }
+}
+@keyframes statIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(70vh) rotate(420deg);
+    opacity: 0;
+  }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: var(--void);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  overflow: hidden;
+}
+.overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(rgba(245, 197, 66, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 197, 66, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events: none;
+}
+.overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse 60% 45% at 50% 40%, rgba(245, 197, 66, 0.09), transparent 65%);
+  pointer-events: none;
+}
+
+.confettiLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confettiPiece {
+  position: absolute;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  animation: confettiFall linear forwards;
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.panel {
+  border: 1px solid var(--gold-dim);
+  background: linear-gradient(180deg, rgba(245, 197, 66, 0.06), var(--panel) 45%);
+  clip-path: polygon(0 14px, 14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  opacity: 0;
+  animation: panelIn 0.6s cubic-bezier(0.22, 0.8, 0.3, 1) forwards;
+}
+.titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--slate);
+  text-transform: uppercase;
+}
+.live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+}
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
+  animation: pulse 1.2s infinite;
+}
+.body {
+  padding: 24px 22px 28px;
+}
+
+.logLine {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11.5px;
+  color: var(--slate);
+  line-height: 2.1;
+  text-align: left;
+  opacity: 0;
+}
+.logLine.show {
+  animation: lineIn 0.4s cubic-bezier(0.22, 0.8, 0.3, 1) forwards;
+}
+.logLine b {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.unlockVisual {
+  margin: 26px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.unlockIcon {
+  width: 76px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  font-size: 32px;
+  opacity: 0;
+}
+.unlockIcon.show {
+  animation: unlockIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards, unlockGlow 2.4s ease-in-out 0.7s infinite;
+}
+.unlockStatus {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--gold);
+  opacity: 0;
+}
+.unlockStatus.show {
+  animation: statusIn 0.6s ease forwards;
+}
+
+.statRow {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+  opacity: 0;
+}
+.statRow.show {
+  animation: statIn 0.5s ease forwards;
+}
+.statPill {
+  padding: 11px 16px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+.statPill .num {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--gold);
+}
+.statPill .lbl {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 8px;
+  color: var(--slate);
+  text-transform: uppercase;
+  margin-top: 3px;
+  letter-spacing: 0.03em;
+}
+
+.continueBtn {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 14px 34px;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--void);
+  background: var(--gold);
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 0 0 22px rgba(245, 197, 66, 0.4);
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+  opacity: 0;
+}
+.continueBtn.show {
+  animation: statIn 0.5s ease forwards;
+}
