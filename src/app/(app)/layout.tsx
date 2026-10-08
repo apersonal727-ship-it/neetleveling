@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { prisma } from "@/lib/prisma";
+import { hasNeverPaid } from "@/lib/subscription";
 import { getLevelProgress } from "@/lib/rank";
 import { questDayEnd, questDayStart } from "@/lib/quest-day";
 import { getOpenMandatoryQuests } from "@/lib/open-quests";
@@ -16,6 +17,9 @@ const TIME_WARNING_WINDOW_MS = 60 * 60 * 1000;
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
+
+  // No free tier: an account that never paid goes to checkout, not the app.
+  if (hasNeverPaid(profile)) redirect("/checkout");
 
   // A Focus Mode session left running (tab closed mid-session, etc.) must
   // keep blocking the rest of the app exactly like being locked does below

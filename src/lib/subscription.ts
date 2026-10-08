@@ -17,6 +17,13 @@ export function lapsedAt(profile: Profile): Date | null {
   return isLapsed ? profile.subscriptionRenewsAt : null;
 }
 
+// A hunter who has never completed a payment is still PENDING. There is no
+// free tier: they get checkout and the support page, nothing else. (Lapsed
+// subscriptions are a different state — see lapsedAt.)
+export function hasNeverPaid(profile: Pick<Profile, "subscriptionStatus">): boolean {
+  return profile.subscriptionStatus === "PENDING";
+}
+
 export function streakGraceDeadline(profile: Profile): Date | null {
   const lapse = lapsedAt(profile);
   if (!lapse) return null;

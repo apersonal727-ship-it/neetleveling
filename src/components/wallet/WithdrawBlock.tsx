@@ -87,8 +87,12 @@ export function WithdrawBlock({
     <>
       <div className={styles.withdrawBlock}>
         <div className={styles.withdrawRow}>
-          <span>Withdraw Unlocked</span>
-          <b>₹{balance.toLocaleString("en-IN")} Available</b>
+          <span>{unlocked ? "Withdraw Unlocked" : "Withdraw Locked"}</span>
+          <b>
+            {unlocked
+              ? `₹${balance.toLocaleString("en-IN")} Available`
+              : `₹${balance.toLocaleString("en-IN")} / ₹${WITHDRAWAL_MIN_BALANCE.toLocaleString("en-IN")}`}
+          </b>
         </div>
         <div className={styles.withdrawTrack}>
           <div className={styles.withdrawFill} style={{ width: `${pct}%` }} />

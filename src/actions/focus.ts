@@ -9,9 +9,11 @@ import { penaltyDurationMinutes } from "@/lib/penalty";
 import { isPracticeQuest, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
 import { getOpenMandatoryQuests } from "@/lib/open-quests";
+import { hasNeverPaid } from "@/lib/subscription";
 
 export async function startQuestSession(questId: string) {
   const profile = await getCurrentProfile();
+  if (hasNeverPaid(profile)) redirect("/checkout");
 
   const existing = await prisma.questSession.findFirst({
     where: { profileId: profile.id, questId, status: "ACTIVE" },
@@ -53,6 +55,7 @@ export async function startPunishmentSession(punishmentQuestId: string) {
 
 export async function startPersonalQuestSession(personalQuestId: string) {
   const profile = await getCurrentProfile();
+  if (hasNeverPaid(profile)) redirect("/checkout");
 
   const existing = await prisma.questSession.findFirst({
     where: { profileId: profile.id, kind: "PERSONAL", personalQuestId, status: "ACTIVE" },
