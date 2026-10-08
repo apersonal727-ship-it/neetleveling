@@ -1,7 +1,5 @@
 "use client";
 
-import { useTransition } from "react";
-import { deletePersonalQuest } from "@/actions/personal-quests";
 import { startPersonalQuestSession } from "@/actions/focus";
 import { StartSessionButton } from "@/components/app/StartSessionButton";
 import styles from "@/app/(app)/quests/quests.module.css";
@@ -21,15 +19,6 @@ type PersonalQuest = {
 // lives exclusively on the Quest Management page now, so this never
 // duplicates that form — one place to manage, one place to execute.
 export function PersonalQuestsPanel({ quests, streak }: { quests: PersonalQuest[]; streak: number }) {
-  const [isPending, startTransition] = useTransition();
-
-  function handleDelete(id: string) {
-    if (!confirm("Remove this personal quest?")) return;
-    startTransition(() => {
-      deletePersonalQuest(id);
-    });
-  }
-
   return (
     <div className={styles.personalBox}>
       {quests.length === 0 ? (
@@ -74,9 +63,6 @@ export function PersonalQuestsPanel({ quests, streak }: { quests: PersonalQuest[
                     ▶ Start
                   </StartSessionButton>
                 )}
-                <button type="button" className={styles.pRemove} onClick={() => handleDelete(q.id)} disabled={isPending}>
-                  ✕
-                </button>
               </div>
             </div>
           );
