@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { getLevelProgress, rankForLevel } from "@/lib/rank";
+import { getLevelProgress } from "@/lib/rank";
+import { getTodaysQuests } from "@/lib/todays-quest";
 import { questDayStart } from "@/lib/quest-day";
 
 function isSameDay(a: Date | null, b: Date) {
@@ -19,31 +20,14 @@ export async function maybeIncrementStreak(profileId: string) {
   const profile = await prisma.profile.findUniqueOrThrow({ where: { id: profileId } });
   if (isSameDay(profile.lastStreakDate, today)) return;
 
-  const rank = rankForLevel(getLevelProgress(profile.xp).level).code;
-
-  const todaysQuests = await prisma.quest.findMany({
-    where: {
-      OR: [
-        { assignScope: "ALL" },
-        { assignScope: "RANK", assignRank: rank },
-        { assignScope: "SPECIFIC_HUNTER", assignedToId: profileId },
-      ],
-      createdAt: { gte: today, lt: tomorrow },
-    },
-    select: { id: true },
-  });
+  // Same list the Dashboard and Quests counters render (getTodaysQuests,
+  // which honors scheduledFor). Querying quests by createdAt alone here let
+  // an admin-scheduled-for-tomorrow quest block today's streak while being
+  // invisible on every screen.
+  const todaysQuests = await getTodaysQuests(profileId, getLevelProgress(profile.xp).level);
 
   if (todaysQuests.length === 0) return;
-
-  const completedCount = await prisma.questCompletion.count({
-    where: {
-      profileId,
-      questId: { in: todaysQuests.map((q) => q.id) },
-      completedAt: { gte: today, lt: tomorrow },
-    },
-  });
-
-  if (completedCount < todaysQuests.length) return;
+  if (todaysQuests.some((q) => q.completions.length === 0)) return;
 
   // Mandatory personal quests gate the day exactly like system quests do —
   // every DAILY one, plus a ONCE one on the day it was created (its only due

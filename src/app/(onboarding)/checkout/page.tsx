@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
+import { getLevelProgress } from "@/lib/rank";
 import { prisma } from "@/lib/prisma";
 import { MONTHLY_PRICE, finalizeSuccessfulPayment, markFailedPayment } from "@/lib/payment";
 import { fetchCashfreeOrder, CASHFREE_CHECKOUT_MODE } from "@/lib/cashfree";
@@ -49,6 +50,12 @@ export default async function CheckoutPage({
     (!profile.subscriptionRenewsAt || profile.subscriptionRenewsAt.getTime() >= Date.now());
   if (subscriptionActive) redirect("/dashboard");
 
+  // A brand-new hunter is still PENDING (never subscribed). Anyone else
+  // landing here — expired or cancelled — is renewing, and shouldn't be told
+  // this is the step between them and Level 1.
+  const isRenewal = profile.subscriptionStatus !== "PENDING";
+  const progress = getLevelProgress(profile.xp);
+
   const creditToApply = Math.min(profile.walletCredit, MONTHLY_PRICE);
   const amountDue = MONTHLY_PRICE - creditToApply;
 
@@ -57,19 +64,29 @@ export default async function CheckoutPage({
       <div className="systemBackdrop" />
       <div className={styles.app}>
         <header className={styles.header}>
-          <div className={styles.stepTrack}>
-            <div className={styles.stepFill} style={{ width: "100%" }} />
-          </div>
-          <span className={styles.stepLabel}>Step 4 of 4 · Unlock Access</span>
+          {isRenewal ? (
+            <span className={styles.stepLabel}>Reactivate Access</span>
+          ) : (
+            <>
+              <div className={styles.stepTrack}>
+                <div className={styles.stepFill} style={{ width: "100%" }} />
+              </div>
+              <span className={styles.stepLabel}>Step 4 of 4 · Unlock Access</span>
+            </>
+          )}
         </header>
 
         <main className={styles.main}>
           <div className={styles.panel}>
             <span className={styles.panelEyebrow}>
-              <span className={styles.dot} /> Activate The System
+              <span className={styles.dot} /> {isRenewal ? "Reactivate The System" : "Activate The System"}
             </span>
             <h1 className={styles.panelTitle}>One plan. Fully premium.</h1>
-            <p className={styles.panelSub}>This is the only step between you and Level 1.</p>
+            <p className={styles.panelSub}>
+              {isRenewal
+                ? `Your ${progress.level > 0 ? `Rank ${progress.rank} · Level ${progress.level} ` : ""}progress is saved exactly as you left it — pick up right where you stopped.`
+                : "This is the only step between you and Level 1."}
+            </p>
 
             <div className={`${styles.card} ${styles.summaryCard}`} style={{ marginTop: "24px" }}>
               <div className={styles.summaryTop}>
