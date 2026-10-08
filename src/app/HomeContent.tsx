@@ -1318,7 +1318,7 @@ export function HomeContent() {
               Get Paid.
             </h2>
             <p>
-              Every Hunter you recruit puts ₹20 in your wallet — credited the moment they sign up. No free tier
+              Every Hunter you recruit puts ₹20 in your wallet — credited the moment they subscribe. No free tier
               to abuse, no waiting period.
             </p>
           </div>

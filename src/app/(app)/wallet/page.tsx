@@ -140,7 +140,7 @@ export default async function WalletPage() {
           </div>
           <div className={styles.refTile}>
             <div className={styles.refNum}>{referral.notYetJoined}</div>
-            <div className={styles.refLbl}>Not Yet Joined</div>
+            <div className={styles.refLbl}>Awaiting Payment</div>
           </div>
         </div>
       </section>
