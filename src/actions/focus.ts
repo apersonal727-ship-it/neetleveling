@@ -8,7 +8,7 @@ import { maybeIncrementStreak } from "@/lib/streaks";
 import { penaltyDurationMinutes } from "@/lib/penalty";
 import { isPracticeQuest, practiceQuestDurationMinutes } from "@/lib/progressive-overload";
 import { getLevelProgress, rankForLevel } from "@/lib/rank";
-import { getOpenMandatoryQuests } from "@/lib/open-quests";
+import { getOpenMandatoryQuests, justClearedDay } from "@/lib/open-quests";
 import { hasNeverPaid } from "@/lib/subscription";
 
 export async function startQuestSession(questId: string) {
@@ -82,6 +82,7 @@ export type CompleteResult =
       newLevel: number;
       rankedUp: boolean;
       fromRank: string;
+      toRank?: string;
       dayCleared: boolean;
       questsLeftToday: number;
       // Only meaningful for a PUNISHMENT completion — null for QUEST/PERSONAL.
@@ -119,6 +120,8 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
     session.quest.xpOverride ?? Math.round(session.quest.durationMinutes * 0.67);
 
   const beforeProgress = getLevelProgress(profile.xp);
+  // What was still required before this finish — Day Clear only fires on the transition.
+  const openBefore = await getOpenMandatoryQuests(profile.id, beforeProgress.level, profile.streak);
 
   await prisma.$transaction([
     prisma.questSession.update({
@@ -156,7 +159,8 @@ export async function completeQuestSession(sessionId: string): Promise<CompleteR
     newLevel: afterProgress.level,
     rankedUp: toRank !== fromRank,
     fromRank,
-    dayCleared: openQuests.length === 0,
+    toRank,
+    dayCleared: justClearedDay(openBefore.length, openQuests.length),
     questsLeftToday: openQuests.length,
     punishmentsRemaining: null,
   };
@@ -268,6 +272,9 @@ export async function completePersonalQuestSession(sessionId: string): Promise<C
     return { error: "The timer hasn't finished yet." };
   }
 
+  const levelBefore = getLevelProgress(profile.xp).level;
+  const openBefore = await getOpenMandatoryQuests(profile.id, levelBefore, profile.streak);
+
   await prisma.$transaction([
     prisma.questSession.update({
       where: { id: session.id },
@@ -301,7 +308,7 @@ export async function completePersonalQuestSession(sessionId: string): Promise<C
     newLevel: level,
     rankedUp: false,
     fromRank: rank,
-    dayCleared: openQuests.length === 0,
+    dayCleared: justClearedDay(openBefore.length, openQuests.length),
     questsLeftToday: openQuests.length,
     punishmentsRemaining: null,
   };

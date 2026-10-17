@@ -3,6 +3,9 @@
 import { StreakFire } from "@/components/app/StreakFire";
 import { useEffect, useRef, useState } from "react";
 import type { RankCode } from "@/lib/rank";
+import type { Dest } from "@/lib/rank-up-pass";
+import { ContinueButton } from "@/components/celebration/ContinueButton";
+import type { StepOpener } from "@/components/celebration/useContinue";
 import styles from "@/app/rank-up/rank-up.module.css";
 
 // Per-rank colour theme for the Rank Up celebration. The Profile page's badge
@@ -122,6 +125,9 @@ export function RankUpCelebration({
   questsCleared,
   totalXp,
   isFirstRankUp,
+  rest = [],
+  dest = "profile",
+  opener,
 }: {
   rank: Exclude<RankCode, "E">;
   fromRank: string;
@@ -133,6 +139,9 @@ export function RankUpCelebration({
   questsCleared: number;
   totalXp: number;
   isFirstRankUp: boolean;
+  rest?: string[];
+  dest?: Dest;
+  opener?: StepOpener;
 }) {
   const particleLayerRef = useRef<HTMLDivElement>(null);
   const [effectsMounted, setEffectsMounted] = useState(false);
@@ -334,9 +343,9 @@ export function RankUpCelebration({
           </div>
         </div>
 
-        <a href="/profile" className={styles.continueBtn}>
+        <ContinueButton rest={rest} dest={dest} opener={opener} className={styles.continueBtn}>
           Continue →
-        </a>
+        </ContinueButton>
       </div>
     </div>
   );

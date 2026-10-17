@@ -1,6 +1,6 @@
 import { StreakFire } from "@/components/app/StreakFire";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress } from "@/lib/rank";
 import { prisma } from "@/lib/prisma";
@@ -8,14 +8,21 @@ import { getTodaysQuests } from "@/lib/todays-quest";
 import { getPersonalQuests } from "@/lib/personal-quests";
 import { getOpenMandatoryQuests } from "@/lib/open-quests";
 import { questDayStart, questDayEnd } from "@/lib/quest-day";
+import { parseData, verifyPass } from "@/lib/rank-up-pass";
+import { StripPassToken } from "@/components/rank-up/StripPassToken";
+import { ContinueButton } from "@/components/celebration/ContinueButton";
 import styles from "./day-clear.module.css";
 
 export const metadata: Metadata = {
   title: "Day Cleared — NEETLeveling",
 };
 
-export default async function DayClearPage() {
+export default async function DayClearPage({ searchParams }: { searchParams: Promise<{ t?: string }> }) {
+  const { t } = await searchParams;
   const profile = await getCurrentProfile();
+  // Only reachable with a pass issued right after the day was really cleared.
+  const data = parseData(verifyPass(t, profile.id, "day"));
+  if (!data) notFound();
   const progress = getLevelProgress(profile.xp);
 
   const openQuests = await getOpenMandatoryQuests(profile.id, progress.level, profile.streak);
@@ -43,6 +50,7 @@ export default async function DayClearPage() {
 
   return (
     <>
+      <StripPassToken />
       <div className={styles.bgGrid} />
       <div className={styles.app}>
         <span className={styles.tag}>
@@ -87,9 +95,9 @@ export default async function DayClearPage() {
           </div>
         </div>
 
-        <a href="/dashboard" className={styles.continueBtn}>
+        <ContinueButton rest={data.r} dest={data.d} className={styles.continueBtn}>
           Continue →
-        </a>
+        </ContinueButton>
       </div>
     </>
   );

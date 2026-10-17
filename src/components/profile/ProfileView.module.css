@@ -778,8 +778,15 @@
     transform 0.2s ease;
   clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
-.tCard:hover {
+.tCard.clickable {
+  cursor: pointer;
+}
+.tCard.clickable:hover {
   transform: translateX(3px);
+}
+.tCard.clickable:focus-visible {
+  outline: 1px solid var(--blue);
+  outline-offset: 2px;
 }
 .tTitle {
   font-family: var(--font-rajdhani), sans-serif;

@@ -43,3 +43,11 @@ export async function getOpenMandatoryQuests(
 
   return [...openSystem, ...openPersonal];
 }
+
+// The "Day Cleared" moment: the last required quest of the day just got done.
+// It's a *transition* (something was open before this completion, nothing is
+// open after), not a state — otherwise every extra quest finished after the day
+// was already cleared would show the celebration again.
+export function justClearedDay(openBefore: number, openAfter: number): boolean {
+  return openBefore > 0 && openAfter === 0;
+}

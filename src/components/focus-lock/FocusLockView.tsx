@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import styles from "@/app/focus-lock/focus-lock.module.css";
 import { CATEGORIES } from "@/lib/quest-categories";
 import { QuestCompleteOverlay } from "./QuestCompleteOverlay";
+import { openStep } from "@/actions/rank-up";
 import {
   completeQuestSession,
   completePunishmentSession,
@@ -67,6 +68,8 @@ export function FocusLockView({
   const [completed, setCompleted] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [returnHref, setReturnHref] = useState("/dashboard");
+  // Celebrations still to show after Continue, in order: Day Clear, Level Up, Rank Up.
+  const [steps, setSteps] = useState<string[]>([]);
   const [questsLeftToday, setQuestsLeftToday] = useState<number | null>(null);
   const [punishmentsRemaining, setPunishmentsRemaining] = useState<number | null>(null);
   const completingRef = useRef(false);
@@ -111,12 +114,12 @@ export function FocusLockView({
         // dashboard (the account is still locked; that would just bounce
         // straight back to /locked).
         setReturnHref("/locked");
-      } else if (result.rankedUp) {
-        setReturnHref(`/rank-up?from=${result.fromRank}`);
-      } else if (result.leveledUp) {
-        setReturnHref(`/level-up?xp=${xpAwarded}`);
-      } else if (result.dayCleared) {
-        setReturnHref("/day-clear");
+      } else {
+        const chain: string[] = [];
+        if (result.dayCleared) chain.push("day");
+        if (result.leveledUp) chain.push("level");
+        if (result.rankedUp && result.toRank) chain.push(`rank:${result.toRank}`);
+        setSteps(chain);
       }
       setPunishmentsRemaining(result.punishmentsRemaining);
       setQuestsLeftToday(result.questsLeftToday);
@@ -260,7 +263,18 @@ export function FocusLockView({
           streak={streak}
           questsLeftToday={questsLeftToday}
           punishmentsRemaining={punishmentsRemaining}
-          onContinue={() => router.push(returnHref)}
+          onContinue={async () => {
+            // The celebration screens open only with a server-issued pass.
+            if (steps.length > 0) {
+              const dest = steps.some((x) => x !== "day") ? "profile" : "dashboard";
+              const pass = await openStep(steps, dest);
+              if ("href" in pass) {
+                router.push(pass.href);
+                return;
+              }
+            }
+            router.push(returnHref);
+          }}
         />
       )}
     </>

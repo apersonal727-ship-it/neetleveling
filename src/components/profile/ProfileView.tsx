@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { openRankUp } from "@/actions/rank-up";
 import { StreakFire } from "@/components/app/StreakFire";
 import { ShareCardButton } from "@/components/profile/ShareCardButton";
 import { RANK_THEME } from "@/components/rank-up/RankUpCelebration";
@@ -19,7 +21,7 @@ export type ProfileViewData = {
   info: { location: string | null; coaching: string | null; attemptStatus: string | null; since: string };
   stats: { key: string; icon: "xp" | "class" | "question" | "solved" | "streak" | "best" | "quests" | "penalty"; value: number; label: string; lit?: boolean }[];
   journey: { pct: number; clearedRanks: number; totalRanks: number; levelsToNext: number; nextRankCode: string | null };
-  timeline: { code: string; title: string; sub: string; state: "achieved" | "current" | "locked" }[];
+  timeline: { code: string; title: string; sub: string; state: "achieved" | "current" | "locked"; clickable: boolean }[];
   fillPct: number;
   share: {
     name: string;
@@ -58,7 +60,16 @@ const E_THEME = {
 
 const WRAP = 172;
 
-export function ProfileView({ data }: { data: ProfileViewData }) {
+export function ProfileView({
+  data,
+  openRank = openRankUp,
+}: {
+  data: ProfileViewData;
+  // Defaults to the real server action; only the QA preview swaps it.
+  openRank?: (code: string) => Promise<{ href: string } | { error: string }>;
+}) {
+  const router = useRouter();
+  const [opening, startOpening] = useTransition();
   const root = useRef<HTMLDivElement>(null);
   const ringRef = useRef<SVGCircleElement>(null);
   const [xpW, setXpW] = useState(0);
@@ -155,6 +166,16 @@ export function ProfileView({ data }: { data: ProfileViewData }) {
 
     return () => observers.forEach((o) => o.disconnect());
   }, [data.journey.pct]);
+
+  // Unlocked ranks (D and above) reopen their Rank Up screen; the server issues
+  // a one-time pass and refuses ranks the hunter hasn't reached.
+  function visitRank(code: string) {
+    if (opening) return;
+    startOpening(async () => {
+      const res = await openRank(code);
+      if ("href" in res) router.push(res.href);
+    });
+  }
 
   const { info, journey } = data;
   const rank = data.rankCode;
@@ -399,7 +420,23 @@ export function ProfileView({ data }: { data: ProfileViewData }) {
                 {r.code}
                 {r.state === "locked" && <span className={styles.tLock}>🔒</span>}
               </div>
-              <div className={styles.tCard}>
+              <div
+                className={`${styles.tCard} ${r.clickable ? styles.clickable : ""}`}
+                {...(r.clickable
+                  ? {
+                      role: "button",
+                      tabIndex: 0,
+                      "aria-label": `Open the ${r.code}-Rank screen`,
+                      onClick: () => visitRank(r.code),
+                      onKeyDown: (e: React.KeyboardEvent) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          visitRank(r.code);
+                        }
+                      },
+                    }
+                  : {})}
+              >
                 <div className={styles.tTitle}>{r.title}</div>
                 <div className={styles.tSub}>{r.sub}</div>
                 <div className={styles.tStatus}>

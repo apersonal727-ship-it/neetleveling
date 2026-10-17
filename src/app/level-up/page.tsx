@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/current-profile";
 import { getLevelProgress, rankForLevel, cumulativeXpForLevel } from "@/lib/rank";
+import { parseData, verifyPass } from "@/lib/rank-up-pass";
+import { StripPassToken } from "@/components/rank-up/StripPassToken";
+import { ContinueButton } from "@/components/celebration/ContinueButton";
 import styles from "./level-up.module.css";
 
 export const metadata: Metadata = {
@@ -10,19 +14,23 @@ export const metadata: Metadata = {
 export default async function LevelUpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ xp?: string }>;
+  searchParams: Promise<{ t?: string }>;
 }) {
-  const { xp } = await searchParams;
+  const { t } = await searchParams;
   const profile = await getCurrentProfile();
+  // Only reachable with a pass issued right after a real level-up (see openLevelUp).
+  const data = parseData(verifyPass(t, profile.id, "level"));
+  if (!data) notFound();
   const progress = getLevelProgress(profile.xp);
   const rank = rankForLevel(progress.level);
 
-  const xpGained = Number(xp) || 0;
+  const xpGained = data.x ?? 0;
   const nextLevelAt = cumulativeXpForLevel(progress.level + 1);
   const toGo = Math.max(0, progress.xpForLevel - progress.xpInLevel);
 
   return (
     <>
+      <StripPassToken />
       <div className="systemBackdrop" />
     <div className={styles.app}>
       <div className={styles.termPanel}>
@@ -71,9 +79,9 @@ export default async function LevelUpPage({
             </div>
           </div>
 
-          <a href="/dashboard" className={styles.promptBtn}>
+          <ContinueButton rest={data.r} dest={data.d} className={styles.promptBtn}>
             &gt; continue
-          </a>
+          </ContinueButton>
         </div>
       </div>
     </div>

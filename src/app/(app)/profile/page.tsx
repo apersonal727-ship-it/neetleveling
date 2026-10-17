@@ -66,6 +66,8 @@ export default async function ProfilePage() {
       title: r.title,
       sub: r.code === "E" ? "Everyone starts here." : (RANK_FLAVOR[r.code as RankCode] ?? ""),
       state: r.code === rank.code ? "current" : r.minLevel <= progress.level ? "achieved" : "locked",
+      // Only ranks the hunter has reached (and that have a Rank Up screen) are clickable.
+      clickable: r.code !== "E" && r.minLevel <= progress.level,
     })),
     fillPct: (rankIndex / RANKS.length) * 100,
     share: {
