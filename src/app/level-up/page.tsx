@@ -22,6 +22,8 @@ export default async function LevelUpPage({
   const toGo = Math.max(0, progress.xpForLevel - progress.xpInLevel);
 
   return (
+    <>
+      <div className="systemBackdrop" />
     <div className={styles.app}>
       <div className={styles.termPanel}>
         <div className={styles.termTitlebar}>
@@ -75,5 +77,6 @@ export default async function LevelUpPage({
         </div>
       </div>
     </div>
+    </>
   );
 }
