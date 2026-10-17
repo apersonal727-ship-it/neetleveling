@@ -539,9 +539,9 @@
   font-size: 11px;
   color: var(--rc-bright, var(--rc));
   padding: 11px 16px;
-  border: 1px solid var(--rc);
+  border: 1px dashed var(--rc);
   display: inline-block;
-  background: var(--rc-shadow1);
+  background: var(--tag-bg);
   opacity: 0;
   animation: textRise 0.6s ease 1.4s forwards;
 }

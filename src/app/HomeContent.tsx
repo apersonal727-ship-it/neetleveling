@@ -1348,7 +1348,7 @@ export function HomeContent() {
               <div className={styles.rsLbl}>
                 Per Hunter Recruited
                 <br />
-                Credited instantly on signup
+                Credited when they subscribe
               </div>
             </div>
             <div className={styles.rsItem}>
