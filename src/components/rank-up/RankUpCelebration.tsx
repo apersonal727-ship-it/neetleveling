@@ -5,11 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import type { RankCode } from "@/lib/rank";
 import styles from "@/app/rank-up/rank-up.module.css";
 
-// One-off celebration theming, distinct from — and never applied to — the
-// ordinary rank badge color used everywhere else (dashboard, profile always
-// stay a steady cyan/blue regardless of rank, matching the mockups). This
-// map exists solely for this one screen's fireworks.
-const THEME: Record<
+// Per-rank colour theme for the Rank Up celebration. The Profile page's badge
+// reuses it (see ProfileView) so a hunter's rank looks the same on both screens;
+// the Dashboard still uses the steady cyan/blue badge.
+export const RANK_THEME: Record<
   Exclude<RankCode, "E">,
   {
     rc: string;
@@ -137,7 +136,7 @@ export function RankUpCelebration({
 }) {
   const particleLayerRef = useRef<HTMLDivElement>(null);
   const [effectsMounted, setEffectsMounted] = useState(false);
-  const theme = THEME[rank];
+  const theme = RANK_THEME[rank];
   const size = BADGE_SIZE[rank];
   const isMax = rank === "S";
 
@@ -226,8 +225,33 @@ export function RankUpCelebration({
         <div className={styles.badgeWrap} style={{ width: size.wrap, height: size.wrap }}>
           {rank === "D" && (
             <>
-              <span className={styles.growthRing} />
-              <span className={`${styles.growthRing} ${styles.r2 ?? ""}`} style={{ animationDelay: "0.65s" }} />
+              {Array.from({ length: 9 }).map((_, i) => (
+                <span
+                  key={i}
+                  className={styles.riseChevron}
+                  style={{
+                    left: `${14 + ((i * 37) % 72)}%`,
+                    animationDelay: `${0.5 + i * 0.28}s`,
+                    animationDuration: `${2.2 + (i % 3) * 0.4}s`,
+                  }}
+                />
+              ))}
+              {/* Outer ring: 8 chevrons on a circle, same layout as Rank B's sparks, lifting in turn. */}
+              {Array.from({ length: 8 }).map((_, i) => {
+                const angle = (i / 8) * 2 * Math.PI - Math.PI / 2;
+                const r = size.wrap / 2 - 4;
+                return (
+                  <span
+                    key={`o${i}`}
+                    className={styles.ringChevron}
+                    style={{
+                      left: size.wrap / 2 + r * Math.cos(angle),
+                      top: size.wrap / 2 + r * Math.sin(angle),
+                      animationDelay: `${0.6 + i * 0.2}s`,
+                    }}
+                  />
+                );
+              })}
             </>
           )}
           {rank === "C" && (

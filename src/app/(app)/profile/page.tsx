@@ -1,12 +1,9 @@
-import { StreakFire } from "@/components/app/StreakFire";
 import type { Metadata } from "next";
 import { getCurrentProfile } from "@/lib/current-profile";
-import { getLevelProgress, rankForLevel, RANKS, RANK_FLAVOR, cumulativeXpForLevel, type RankCode } from "@/lib/rank";
+import { getLevelProgress, rankForLevel, RANKS, RANK_FLAVOR, type RankCode } from "@/lib/rank";
 import { getHunterProgressStats } from "@/lib/stats";
 import { prisma } from "@/lib/prisma";
-import { ShareCardButton } from "@/components/profile/ShareCardButton";
-import appStyles from "../app.module.css";
-import styles from "./profile.module.css";
+import { ProfileView, type ProfileViewData } from "@/components/profile/ProfileView";
 
 export const metadata: Metadata = {
   title: "Profile — NEETLeveling",
@@ -26,176 +23,63 @@ export default async function ProfilePage() {
 
   const rankIndex = RANKS.findIndex((r) => r.code === rank.code);
   const nextRank = RANKS[rankIndex + 1];
-  const journeyPct = Math.round((rankIndex / (RANKS.length - 1)) * 100);
-  const levelsToNext = nextRank ? Math.max(0, nextRank.minLevel - progress.level) : 0;
-  const ringCircumference = 2 * Math.PI * 32;
-  const ringOffset = ringCircumference * (1 - journeyPct / 100);
 
-  const statTiles = [
-    { icon: "⚡", num: profile.xp.toLocaleString("en-IN"), lbl: "Total XP" },
-    { icon: "🎥", num: hunterStats.classHours.toLocaleString("en-IN"), lbl: "Class Hours" },
-    { icon: "🧠", num: hunterStats.questionHours.toLocaleString("en-IN"), lbl: "Question Hours" },
-    { icon: "🎯", num: hunterStats.questionsSolved.toLocaleString("en-IN"), lbl: "Questions Solved" },
-    { icon: <StreakFire lit={profile.streak > 0} size="1em" />, num: profile.streak.toLocaleString("en-IN"), lbl: "Current Streak" },
-    { icon: "🏆", num: profile.bestStreak.toLocaleString("en-IN"), lbl: "Best Streak" },
-    { icon: "✅", num: questsCompleted.toLocaleString("en-IN"), lbl: "Quests Completed" },
-    { icon: "⚠️", num: penaltiesTriggered.toLocaleString("en-IN"), lbl: "Penalties Triggered" },
-  ];
+  const data: ProfileViewData = {
+    name: profile.name,
+    rankCode: rank.code,
+    rankTitle: rank.title,
+    targetExamYear: profile.targetExamYear,
+    level: progress.level,
+    xpInLevel: progress.xpInLevel,
+    xpForLevel: progress.xpForLevel,
+    xpPct: pct,
+    info: {
+      location: profile.location,
+      coaching: profile.coaching,
+      attemptStatus: profile.attemptStatus,
+      since: profile.createdAt.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "Asia/Kolkata",
+      }),
+    },
+    stats: [
+      { key: "xp", icon: "xp", value: profile.xp, label: "Total XP" },
+      { key: "class", icon: "class", value: hunterStats.classHours, label: "Class Hours" },
+      { key: "question", icon: "question", value: hunterStats.questionHours, label: "Question Hours" },
+      { key: "solved", icon: "solved", value: hunterStats.questionsSolved, label: "Questions Solved" },
+      { key: "streak", icon: "streak", value: profile.streak, label: "Current Streak", lit: profile.streak > 0 },
+      { key: "best", icon: "best", value: profile.bestStreak, label: "Best Streak" },
+      { key: "quests", icon: "quests", value: questsCompleted, label: "Quests Completed" },
+      { key: "penalty", icon: "penalty", value: penaltiesTriggered, label: "Penalties Triggered" },
+    ],
+    journey: {
+      pct: Math.round((rankIndex / (RANKS.length - 1)) * 100),
+      clearedRanks: rankIndex,
+      totalRanks: RANKS.length,
+      levelsToNext: nextRank ? Math.max(0, nextRank.minLevel - progress.level) : 0,
+      nextRankCode: nextRank?.code ?? null,
+    },
+    timeline: RANKS.map((r) => ({
+      code: r.code,
+      title: r.title,
+      sub: r.code === "E" ? "Everyone starts here." : (RANK_FLAVOR[r.code as RankCode] ?? ""),
+      state: r.code === rank.code ? "current" : r.minLevel <= progress.level ? "achieved" : "locked",
+    })),
+    fillPct: (rankIndex / RANKS.length) * 100,
+    share: {
+      name: profile.name,
+      rankCode: rank.code,
+      rankTitle: rank.title,
+      level: progress.level,
+      xp: profile.xp,
+      streak: profile.streak,
+      questsCompleted,
+      questionsSolved: hunterStats.questionsSolved,
+      targetExamYear: profile.targetExamYear,
+    },
+  };
 
-  return (
-    <>
-      <div className={styles.shareRow}>
-        <ShareCardButton
-          name={profile.name}
-          rankCode={rank.code}
-          rankTitle={rank.title}
-          level={progress.level}
-          xp={profile.xp}
-          streak={profile.streak}
-          questsCompleted={questsCompleted}
-          questionsSolved={hunterStats.questionsSolved}
-          targetExamYear={profile.targetExamYear}
-        />
-      </div>
-
-      <section className={`${appStyles.card} ${styles.hero}`}>
-        <div className={styles.auraWrap} style={{ "--rc": rank.color } as React.CSSProperties}>
-          <div className={styles.auraRing} />
-          <div className={`${styles.auraRing} ${styles.r2}`} />
-          <div className={styles.profileBadge}>{rank.code}</div>
-        </div>
-        <div className={styles.profileName}>{profile.name}</div>
-        <div className={styles.profileTitle}>◆ {rank.title} ◆</div>
-        {profile.targetExamYear && <div className={styles.profileTarget}>Target: {profile.targetExamYear}</div>}
-        <div className={styles.profileLevel}>⚡ LV {progress.level}</div>
-
-        <div className={styles.xpBlock}>
-          <div className={styles.xpRow}>
-            <span>XP to next level</span>
-            <b>
-              {progress.xpInLevel.toLocaleString("en-IN")} /{" "}
-              {progress.xpForLevel > 0 ? progress.xpForLevel.toLocaleString("en-IN") : "—"}
-            </b>
-          </div>
-          <div className={styles.xpTrack}>
-            <div className={styles.xpFill} style={{ width: `${pct}%` }} />
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <span className={styles.secTag} style={{ color: "var(--violet)" }}>
-          <span className={styles.dot} />
-          Hunter Info
-        </span>
-        <div className={`${appStyles.card} ${styles.infoBox}`}>
-          <div className={styles.infoRow}>
-            <div className={styles.infoK}>
-              <span className={styles.infoIc}>📍</span>Location
-            </div>
-            <div className={styles.infoV}>{profile.location ?? "—"}</div>
-          </div>
-          <div className={styles.infoRow}>
-            <div className={styles.infoK}>
-              <span className={styles.infoIc}>🏫</span>Coaching / Batch
-            </div>
-            <div className={styles.infoV}>{profile.coaching ?? "—"}</div>
-          </div>
-          <div className={styles.infoRow}>
-            <div className={styles.infoK}>
-              <span className={styles.infoIc}>📘</span>Attempt Status
-            </div>
-            {profile.attemptStatus ? (
-              <div className={`${styles.infoV} ${styles.tag}`}>{profile.attemptStatus}</div>
-            ) : (
-              <div className={styles.infoV}>—</div>
-            )}
-          </div>
-          <div className={styles.infoRow}>
-            <div className={styles.infoK}>
-              <span className={styles.infoIc}>🗓</span>Hunter Since
-            </div>
-            <div className={styles.infoV}>
-              {profile.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <span className={styles.secTag} style={{ color: "var(--blue-2)" }}>
-          <span className={styles.dot} />
-          Hunter Stats
-        </span>
-        <div className={styles.statsGrid}>
-          {statTiles.map((t) => (
-            <div key={t.lbl} className={styles.statTile}>
-              <span className={styles.statIcon}>{t.icon}</span>
-              <div>
-                <div className={styles.statNum}>{t.num}</div>
-                <div className={styles.statLbl}>{t.lbl}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {nextRank && (
-        <section>
-          <div className={`${appStyles.card} ${styles.journeyCard}`}>
-            <div className={styles.journeyRingWrap}>
-              <svg className={styles.journeyRingSvg} viewBox="0 0 76 76">
-                <circle className={styles.journeyTrack} cx="38" cy="38" r="32" />
-                <circle
-                  className={styles.journeyProgress}
-                  cx="38"
-                  cy="38"
-                  r="32"
-                  strokeDasharray={ringCircumference}
-                  strokeDashoffset={ringOffset}
-                />
-              </svg>
-              <div className={styles.journeyPct}>{journeyPct}%</div>
-            </div>
-            <div>
-              <div className={styles.journeyTitle}>Journey to S-Rank</div>
-              <div className={styles.journeySub}>
-                {rankIndex} of {RANKS.length - 1} ranks cleared. <b>{levelsToNext} levels</b> to
-                unlock {nextRank.code}-Rank next.
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      <section>
-        <span className={styles.secTag} style={{ color: "var(--violet)" }}>
-          <span className={styles.dot} />
-          Your Progression
-        </span>
-        <div className={styles.timeline}>
-          {RANKS.map((r) => {
-            const state = r.code === rank.code ? "current" : r.minLevel <= progress.level ? "achieved" : "locked";
-            return (
-              <div key={r.code} className={`${styles.tRow} ${styles[state] ?? ""}`}>
-                <div className={styles.tNode}>
-                  {r.code}
-                  {state === "locked" && <span className={styles.tLockIcon}>🔒</span>}
-                </div>
-                <div className={styles.tCard}>
-                  <div className={styles.tTitle}>{r.title}</div>
-                  <div className={styles.tSub}>
-                    {r.code === "E" ? "Everyone starts here." : RANK_FLAVOR[r.code as RankCode]}
-                  </div>
-                  <div className={styles.tStatus}>
-                    {state === "current" ? "You Are Here" : state === "achieved" ? "Cleared" : "Locked"}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-    </>
-  );
+  return <ProfileView data={data} />;
 }
