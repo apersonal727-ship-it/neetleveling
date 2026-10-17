@@ -126,12 +126,12 @@
   margin-top: var(--sp-6);
   background: rgba(79, 216, 255, 0.05);
   border: 1px solid var(--border);
-  border-radius: 10px;
   padding: var(--sp-4);
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 11.5px;
   color: var(--slate);
   line-height: 1.6;
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 .note svg {
   width: 14px;

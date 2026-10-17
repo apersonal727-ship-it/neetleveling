@@ -122,8 +122,9 @@
   height: 16px;
 }
 .subjectBox {
-  background: var(--panel);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c, var(--blue)) 8%, transparent), var(--panel) 60%);
   border: 1px solid color-mix(in srgb, var(--c, var(--blue-2)) 25%, transparent);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .questRow {
   display: flex;
@@ -252,7 +253,7 @@
 .waitingState {
   text-align: center;
   padding: var(--sp-8) var(--sp-6);
-  background: var(--panel-2);
+  background: var(--card-bg);
   border: 1px solid var(--border);
   clip-path: polygon(0 14px, 14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
 }
@@ -296,7 +297,8 @@
 
 .personalBox {
   border: 1px solid rgba(139, 92, 246, 0.25);
-  background: var(--panel);
+  background: var(--card-bg);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .personalEmpty {
   padding: 30px 20px;
@@ -433,7 +435,7 @@
 .addForm {
   margin-top: 14px;
   border: 1px solid var(--violet);
-  background: var(--panel-2);
+  background: var(--card-bg);
   padding: 20px;
   clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }

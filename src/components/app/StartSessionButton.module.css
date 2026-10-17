@@ -40,7 +40,7 @@
   max-width: 400px;
   padding: 0;
   border: 1px solid var(--blue-dim);
-  background: var(--panel);
+  background: var(--card-bg);
   box-shadow: 0 0 60px rgba(79, 216, 255, 0.15);
   clip-path: polygon(0 16px, 16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
   animation: modalIn 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);
@@ -121,6 +121,7 @@
   text-align: left;
   border: 1px dashed var(--red);
   background: rgba(255, 77, 94, 0.05);
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 .warnRow {
   display: flex;

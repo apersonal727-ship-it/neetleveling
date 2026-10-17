@@ -111,9 +111,9 @@
   font-size: 12.5px;
   background: rgba(79, 216, 255, 0.06);
   border: 1px solid var(--border-strong);
-  border-radius: 10px;
   padding: var(--sp-3) var(--sp-4);
   color: var(--blue-2);
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 .safeStrip svg {
   width: 15px;
@@ -129,6 +129,7 @@
   padding: var(--sp-4);
   border: 1px dashed var(--gold);
   background: rgba(245, 197, 66, 0.05);
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 .streakWarn .ic {
   font-size: 20px;
@@ -146,7 +147,8 @@
 
 .statusBox {
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: var(--card-bg);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .statusRow {
   display: flex;
@@ -190,7 +192,7 @@
   display: block;
 }
 .card {
-  background: var(--panel);
+  background: var(--card-bg);
   border: 1px solid var(--border);
   clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }

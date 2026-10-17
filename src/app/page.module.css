@@ -864,7 +864,7 @@
 .ascendTip {
   position: absolute;
   transform: translate(-50%, -100%);
-  background: var(--panel);
+  background: var(--card-bg);
   border: 1px solid var(--cyan-dim);
   padding: 8px 12px;
   font-family: var(--font-jetbrains-mono), monospace;
@@ -1190,7 +1190,7 @@
 .escTip {
   position: absolute;
   transform: translate(-50%, -100%);
-  background: var(--panel);
+  background: var(--card-bg);
   border: 1px solid var(--danger);
   padding: 7px 11px;
   font-family: var(--font-jetbrains-mono), monospace;

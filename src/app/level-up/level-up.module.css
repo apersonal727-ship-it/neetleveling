@@ -14,7 +14,7 @@
 .termPanel {
   width: 100%;
   border: 1px solid var(--border-strong);
-  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  background: linear-gradient(180deg, rgba(79, 216, 255, 0.06), var(--panel) 55%);
   box-shadow: 0 0 60px -18px rgba(79, 216, 255, 0.35);
   clip-path: polygon(0 16px, 16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
 }

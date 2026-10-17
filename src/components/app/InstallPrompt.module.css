@@ -4,7 +4,7 @@
   gap: 12px;
   padding: 12px 14px;
   margin-bottom: var(--sp-5);
-  background: var(--panel);
+  background: var(--card-bg);
   border: 1px solid var(--border-strong);
   clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }

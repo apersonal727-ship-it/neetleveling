@@ -10,6 +10,8 @@
   --void: #060810;
   --panel: #0a0e1c;
   --panel-2: #111b32;
+  /* Standard in-app card surface: the Hunter Status card's cyan tint over --panel. */
+  --card-bg: linear-gradient(180deg, rgba(79, 216, 255, 0.05), var(--panel) 60%);
   --border: rgba(79, 216, 255, 0.16);
   --border-strong: rgba(79, 216, 255, 0.4);
   --blue: #4fd8ff;

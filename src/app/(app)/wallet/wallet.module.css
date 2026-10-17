@@ -194,6 +194,7 @@
   color: var(--gold);
   border: 1px solid rgba(245, 197, 66, 0.35);
   background: rgba(245, 197, 66, 0.06);
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 
 /* Withdraw modal */
@@ -349,6 +350,7 @@
   color: var(--gold);
   line-height: 1.6;
   text-align: left;
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 
 .successBadge {
@@ -406,7 +408,7 @@
 }
 .rqBox {
   border: 1px solid rgba(245, 197, 66, 0.3);
-  background: var(--panel);
+  background: var(--card-bg);
   clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .rqRow {
@@ -635,7 +637,7 @@
 
 .recruitBox {
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: var(--card-bg);
   clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .recruitRow {
@@ -701,7 +703,7 @@
   text-align: center;
   padding: 36px 22px;
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: var(--card-bg);
   clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .recruitEmptyIcon {
@@ -725,7 +727,7 @@
 
 .wdBox {
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: var(--card-bg);
   clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .wdRow {

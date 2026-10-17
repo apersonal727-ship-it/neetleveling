@@ -1,6 +1,7 @@
 .personalBox {
   border: 1px solid rgba(139, 92, 246, 0.25);
-  background: var(--panel);
+  background: var(--card-bg);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .personalEmpty {
   padding: 30px 20px;
@@ -218,7 +219,7 @@
   display: none;
   margin-top: 14px;
   border: 1px solid var(--violet);
-  background: var(--panel);
+  background: var(--card-bg);
   padding: 20px;
   clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }

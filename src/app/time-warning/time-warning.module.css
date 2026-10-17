@@ -116,7 +116,7 @@
 
 .questBox {
   border: 1px solid var(--amber-border);
-  background: var(--panel-2);
+  background: var(--card-bg);
   text-align: left;
   margin-bottom: var(--sp-6);
   clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
@@ -169,6 +169,7 @@
   background: rgba(255, 77, 94, 0.04);
   margin-bottom: var(--sp-6);
   text-align: left;
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 .consequenceNote b {
   color: var(--red-2);

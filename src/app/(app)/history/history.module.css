@@ -83,7 +83,7 @@
   text-align: center;
   padding: 50px 24px;
   border: 1px solid var(--border);
-  background: var(--panel-2);
+  background: var(--card-bg);
   clip-path: polygon(0 14px, 14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
 }
 .histEmptyIcon {

@@ -206,7 +206,7 @@
 
 .card,
 .panelBox {
-  background: var(--panel);
+  background: var(--card-bg);
   border: 1px solid var(--border);
   clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
@@ -266,7 +266,8 @@
 
 .hunterTable {
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: var(--card-bg);
+  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
 }
 .tableHead {
   display: grid;
@@ -678,10 +679,10 @@
   color: #ffc9ce;
   background: rgba(255, 77, 94, 0.08);
   border: 1px solid rgba(255, 77, 94, 0.35);
-  border-radius: 10px;
   padding: 10px 14px;
   font-size: 12.5px;
   margin-bottom: var(--sp-4);
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
 }
 
 @media (max-width: 900px) {
